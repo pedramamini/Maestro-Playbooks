@@ -1,8 +1,9 @@
 # Test Candidate Evaluation - Prioritize What to Test
 
 ## Context
+- **Playbook:** Testing
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -12,15 +13,15 @@ Evaluate each test gap from the discovery phase and assign importance and testab
 
 ## Instructions
 
-1. **Read the gaps list** from `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_GAPS.md`
+1. **Read the gaps list** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`
 2. **Rate each gap** for importance and testability
 3. **Assign status** based on ratings
 4. **Estimate coverage gain** for each test
-5. **Output prioritized plan** to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+5. **Output prioritized plan** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps**: Read `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_GAPS.md`, rate each gap by IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and TESTABILITY (EASY/MEDIUM/HARD/VERY HARD). Mark EASY+HIGH or better as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Evaluate gaps**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`, rate each gap by IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and TESTABILITY (EASY/MEDIUM/HARD/VERY HARD). Mark EASY+HIGH or better as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -59,7 +60,7 @@ Tests marked `WON'T DO` if:
 
 ## Output Format
 
-Create/update `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md` with:
+Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with:
 
 ```markdown
 # Test Implementation Plan - Loop {{LOOP_NUMBER}}

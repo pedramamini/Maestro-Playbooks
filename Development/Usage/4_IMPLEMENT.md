@@ -1,8 +1,9 @@
 # Usage Documentation Implementation - Update README
 
 ## Context
+- **Playbook:** Usage
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -14,7 +15,7 @@ Implement ONE documentation fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PL
 
 1. **Read the plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
 2. **Find a `PENDING` item** with CRITICAL/HIGH importance and EASY/MEDIUM effort
-3. **Implement the fix** in `{{PROJECT_PATH}}/README.md`
+3. **Implement the fix** in `{{AGENT_PATH}}/README.md`
 4. **Update status** to `IMPLEMENTED` in the plan file
 5. **Log the change** to `{{AUTORUN_FOLDER}}/USAGE_LOG_{{AGENT_NAME}}_{{DATE}}.md`
 
@@ -74,7 +75,7 @@ After implementing, append to `{{AUTORUN_FOLDER}}/USAGE_LOG_{{AGENT_NAME}}_{{DAT
 ## [YYYY-MM-DD HH:MM] - [Brief Description]
 
 **Agent:** {{AGENT_NAME}}
-**Project:** {{PROJECT_PATH}}
+**Project:** {{AGENT_PATH}}
 **Loop:** {{LOOP_NUMBER}}
 **Doc ID:** DOC-XXX
 **Gap ID:** GAP-XXX
@@ -131,7 +132,7 @@ If there are no items with status exactly `PENDING` in the plan file, append to 
 ## [YYYY-MM-DD HH:MM] - Loop {{LOOP_NUMBER}} Complete
 
 **Agent:** {{AGENT_NAME}}
-**Project:** {{PROJECT_PATH}}
+**Project:** {{AGENT_PATH}}
 **Loop:** {{LOOP_NUMBER}}
 **Status:** No PENDING fixes available
 

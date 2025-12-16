@@ -1,8 +1,9 @@
 # Documentation Gap Evaluation - Prioritize What to Document
 
 ## Context
+- **Playbook:** Documentation
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 

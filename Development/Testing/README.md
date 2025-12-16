@@ -23,14 +23,12 @@ This playbook creates an automated pipeline that:
 
 ## Generated Files
 
-Each loop iteration creates working documents in the `working/` subfolder:
+Each loop iteration creates working documents:
 
-- `working/LOOP_1_COVERAGE_REPORT.md` - Current coverage metrics and analysis
-- `working/LOOP_1_GAPS.md` - Specific untested code paths found
-- `working/LOOP_1_PLAN.md` - Evaluated candidates with ratings
-- `working/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md` - Cumulative log of all tests added
-
-**Note:** The `working/` subfolder keeps generated files separate from the playbook documents themselves.
+- `LOOP_N_COVERAGE_REPORT.md` - Current coverage metrics and analysis
+- `LOOP_N_GAPS.md` - Specific untested code paths found
+- `LOOP_N_PLAN.md` - Evaluated candidates with ratings
+- `TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md` - Cumulative log of all tests added
 
 ## Coverage Target: 80%
 
@@ -139,7 +137,7 @@ Candidates in `LOOP_N_PLAN.md` have these statuses:
 These variables are automatically substituted:
 
 - `{{AGENT_NAME}}` - Name of your Maestro agent
-- `{{PROJECT_PATH}}` - Root path of the project
+- `{{AGENT_PATH}}` - Root path of the project
 - `{{AUTORUN_FOLDER}}` - Path to this Auto Run folder
 - `{{LOOP_NUMBER}}` - Current loop iteration (1, 2, 3...)
 - `{{DATE}}` - Today's date (YYYY-MM-DD)

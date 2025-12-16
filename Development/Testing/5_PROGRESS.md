@@ -1,8 +1,9 @@
 # Test Coverage Gate - 80% Target
 
 ## Context
+- **Playbook:** Testing
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -14,12 +15,12 @@ This document is the **coverage gate** for the testing pipeline. It checks wheth
 
 1. **Run coverage analysis** to get current metrics
 2. **Check if line coverage is 80% or higher**
-3. **If coverage < 80% AND there are PENDING items** with EASY/MEDIUM testability and HIGH/CRITICAL importance in `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`: Reset all tasks in documents 1-4 to continue the loop
+3. **If coverage < 80% AND there are PENDING items** with EASY/MEDIUM testability and HIGH/CRITICAL importance in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`: Reset all tasks in documents 1-4 to continue the loop
 4. **If coverage >= 80% OR no such PENDING items**: Do NOT reset - pipeline exits
 
 ## Coverage Check
 
-- [ ] **Check coverage and decide**: Run coverage analysis. If line coverage is below 80% AND there are still `PENDING` items with EASY/MEDIUM testability and HIGH/CRITICAL importance in `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`, then reset documents 1-4 to continue the loop. If coverage >= 80% OR no auto-testable items remain, do NOT reset anything - allow the pipeline to exit.
+- [ ] **Check coverage and decide**: Run coverage analysis. If line coverage is below 80% AND there are still `PENDING` items with EASY/MEDIUM testability and HIGH/CRITICAL importance in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, then reset documents 1-4 to continue the loop. If coverage >= 80% OR no auto-testable items remain, do NOT reset anything - allow the pipeline to exit.
 
 ## Reset Tasks (Only if coverage < 80% AND auto-testable PENDING items exist)
 

@@ -143,7 +143,7 @@ Gaps in `LOOP_N_PLAN.md` have these statuses:
 These variables are automatically substituted:
 
 - `{{AGENT_NAME}}` - Name of your Maestro agent
-- `{{PROJECT_PATH}}` - Root path of the project
+- `{{AGENT_PATH}}` - Root path of the project
 - `{{AUTORUN_FOLDER}}` - Path to this Auto Run folder
 - `{{LOOP_NUMBER}}` - Current loop iteration (1, 2, 3...)
 - `{{DATE}}` - Today's date (YYYY-MM-DD)

@@ -1,8 +1,9 @@
 # Test Coverage Analysis - Baseline Measurement
 
 ## Context
+- **Playbook:** Testing
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -16,11 +17,11 @@ Measure current test coverage and identify the testing landscape. This document 
 2. **Run coverage analysis** - Execute test suite with coverage enabled
 3. **Document current metrics** - Line, branch, and function coverage
 4. **Identify testing patterns** - How existing tests are organized
-5. **Output a coverage report** to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`
+5. **Output a coverage report** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`
 
 ## Analysis Checklist
 
-- [ ] **Measure coverage**: Identify the project's test framework and run the test suite with coverage enabled. Document line coverage percentage and identify lowest-covered modules. Output results to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`.
+- [ ] **Measure coverage**: Identify the project's test framework and run the test suite with coverage enabled. Document line coverage percentage and identify lowest-covered modules. Output results to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`.
 
 ## How to Find Coverage Commands
 
@@ -40,7 +41,7 @@ Measure current test coverage and identify the testing landscape. This document 
 
 ## Output Format
 
-Create/update `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md` with:
+Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md` with:
 
 ```markdown
 # Coverage Report - Loop {{LOOP_NUMBER}}

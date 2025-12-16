@@ -1,8 +1,9 @@
 # Test Implementation - Write the Tests
 
 ## Context
+- **Playbook:** Testing
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -12,16 +13,16 @@ Implement tests for `PENDING` candidates from the evaluation phase. Write high-q
 
 ## Instructions
 
-1. **Read the plan** from `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+1. **Read the plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
 2. **Find all `PENDING` items** (not `IMPLEMENTED`, `WON'T DO`, or `PENDING - MANUAL REVIEW`)
 3. **Write tests** for each PENDING item
 4. **Run the tests** to verify they pass
 5. **Update statuses** to `IMPLEMENTED` in the plan file
-6. **Log changes** to `{{AUTORUN_FOLDER}}/working/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`
+6. **Log changes** to `{{AUTORUN_FOLDER}}/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`
 
 ## Implementation Checklist
 
-- [ ] **Write tests**: Read `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`, implement tests for ONE `PENDING` item with EASY/MEDIUM testability and HIGH/CRITICAL importance. Follow project test conventions. Run tests to verify they pass. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/working/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE test per task execution.
+- [ ] **Write tests**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, implement tests for ONE `PENDING` item with EASY/MEDIUM testability and HIGH/CRITICAL importance. Follow project test conventions. Run tests to verify they pass. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE test per task execution.
 
 ## Test Writing Guidelines
 
@@ -98,7 +99,7 @@ Test: "should throw on invalid input"
 
 ## Update Plan Status
 
-After implementing each test, update `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_PLAN.md`:
+After implementing each test, update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`:
 
 ```markdown
 ### TEST-001: [Function Name]
@@ -111,7 +112,7 @@ After implementing each test, update `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUM
 
 ## Log Format
 
-Append to `{{AUTORUN_FOLDER}}/working/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
+Append to `{{AUTORUN_FOLDER}}/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
 
 ```markdown
 ## Loop {{LOOP_NUMBER}} - [Timestamp]

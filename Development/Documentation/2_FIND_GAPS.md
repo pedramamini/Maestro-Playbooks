@@ -1,8 +1,9 @@
 # Documentation Gap Discovery - Find Undocumented Code
 
 ## Context
+- **Playbook:** Documentation
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 

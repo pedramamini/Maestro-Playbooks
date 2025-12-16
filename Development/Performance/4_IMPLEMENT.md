@@ -1,8 +1,9 @@
 # Performance Fix Implementation
 
 ## Context
+- **Playbook:** Performance
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -43,7 +44,7 @@ Append to `{{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md` using this fo
 ## [YYYY-MM-DD HH:MM] - [Brief Title]
 
 **Agent:** {{AGENT_NAME}}
-**Project:** {{PROJECT_NAME}}
+**Project:** {{AGENT_NAME}}
 **Loop:** {{LOOP_NUMBER}}
 **File:** `path/to/file.ext`
 **Line(s):** [line numbers affected]
@@ -96,7 +97,7 @@ If there are no items with status exactly `PENDING` in the plan file, append to 
 ## [YYYY-MM-DD HH:MM] - Loop {{LOOP_NUMBER}} Complete
 
 **Agent:** {{AGENT_NAME}}
-**Project:** {{PROJECT_NAME}}
+**Project:** {{AGENT_NAME}}
 **Loop:** {{LOOP_NUMBER}}
 **Status:** No PENDING fixes available
 

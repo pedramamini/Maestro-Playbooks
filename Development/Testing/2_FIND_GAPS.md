@@ -1,8 +1,9 @@
 # Test Gap Discovery - Find Untested Code
 
 ## Context
+- **Playbook:** Testing
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
@@ -12,15 +13,15 @@ Using the coverage report from the analysis phase, identify specific untested fu
 
 ## Instructions
 
-1. **Read the coverage report** from `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`
+1. **Read the coverage report** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`
 2. **Examine low-coverage files** to find specific untested functions
 3. **Identify untested branches** - conditionals, error handlers, edge cases
 4. **Categorize gaps** by type (unit, integration, edge case)
-5. **Output findings** to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_GAPS.md`
+5. **Output findings** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`
 
 ## Gap Finding Checklist
 
-- [ ] **Find untested code**: Read the coverage report, examine low-coverage files, identify specific functions and branches without test coverage. List each gap with file path, function name, and why it matters. Output to `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
+- [ ] **Find untested code**: Read the coverage report, examine low-coverage files, identify specific functions and branches without test coverage. List each gap with file path, function name, and why it matters. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
 
 ## What to Look For
 
@@ -51,7 +52,7 @@ Using the coverage report from the analysis phase, identify specific untested fu
 
 ## Output Format
 
-Create/update `{{AUTORUN_FOLDER}}/working/LOOP_{{LOOP_NUMBER}}_GAPS.md` with:
+Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md` with:
 
 ```markdown
 # Test Gaps - Loop {{LOOP_NUMBER}}

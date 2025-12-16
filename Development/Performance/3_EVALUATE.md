@@ -1,8 +1,9 @@
 # Performance Candidate Evaluation
 
 ## Context
+- **Playbook:** Performance
 - **Agent:** {{AGENT_NAME}}
-- **Project:** {{PROJECT_PATH}}
+- **Project:** {{AGENT_PATH}}
 - **Auto Run Folder:** {{AUTORUN_FOLDER}}
 - **Loop:** {{LOOP_NUMBER}}
 
