@@ -20,7 +20,7 @@ Discover specific entities to research within the target market. Use web search 
 
 ## Discovery Checklist
 
-- [ ] **Discover entities**: Read the market analysis to understand priority categories. Pick ONE category that needs more entities discovered. Use web search to find 3-5 specific entities in that category. Append findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` with basic info and discovery source.
+- [ ] **Discover entities (or mark all covered)**: Read the market analysis from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md` to understand priority categories. Read existing entities from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` (if it exists). If ALL priority entity categories already have 3+ entities discovered, append a section `## ALL_CATEGORIES_COVERED` to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` and mark this task complete. Otherwise, pick ONE category that needs more entities discovered. Use web search to find 3-5 specific entities in that category. Append findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` with basic info and discovery source.
 
 ## Search Strategies by Entity Type
 
@@ -108,3 +108,18 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`:
 - **Include discovery source** - Enables verification and deeper research
 - **Check for duplicates** - Don't re-discover entities already in the list
 - **Diversify within category** - Mix of leaders, challengers, and emerging players
+
+## How to Know You're Done
+
+This task is complete when ONE of the following is true:
+
+**Option A - Discovered entities:**
+1. You've picked ONE category that needed more entities discovered
+2. You've used web search to find 3-5 specific entities in that category
+3. You've appended findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`
+
+**Option B - All categories covered:**
+1. ALL priority entity categories in the market analysis already have 3+ entities discovered
+2. You've appended `## ALL_CATEGORIES_COVERED` to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`
+
+The `ALL_CATEGORIES_COVERED` marker signals to downstream documents that discovery is complete.
