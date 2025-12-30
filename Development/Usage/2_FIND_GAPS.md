@@ -20,7 +20,23 @@ Compare the feature inventory against the README to identify specific documentat
 
 ## Gap Discovery Checklist
 
-- [ ] **Find documentation gaps**: Read LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md, compare features in code vs README. Identify: (1) features in code but missing from README, (2) features in README but removed from code, (3) features documented inaccurately. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
+- [ ] **Find documentation gaps (or skip if no discrepancies)**: Read LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md and compare features in code vs README. If the feature inventory shows NO discrepancies (code and README are fully aligned), mark this task complete without creating LOOP_{{LOOP_NUMBER}}_GAPS.md. Otherwise, identify: (1) features in code but missing from README, (2) features in README but removed from code, (3) features documented inaccurately. Output findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
+
+## How to Know You're Done
+
+This task is complete when ONE of the following is true:
+
+**Option A - Found gaps:**
+1. You've compared features in code vs README
+2. You've identified one or more discrepancies
+3. You've documented all gaps in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`
+
+**Option B - No discrepancies found:**
+1. The feature inventory shows code and README are fully aligned
+2. There are no missing, stale, inaccurate, or incomplete documentation items
+3. Mark this task complete without creating a gaps file
+
+This graceful handling of empty states prevents the pipeline from stalling when the README is already complete.
 
 ## Gap Types
 
