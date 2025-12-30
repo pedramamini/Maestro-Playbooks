@@ -20,7 +20,7 @@ Evaluate each documentation gap from the discovery phase and assign importance a
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps**: Read LOOP_{{LOOP_NUMBER}}_GAPS.md, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps with HIGH/CRITICAL importance and EASY/MEDIUM effort as PENDING for auto-fix. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Evaluate gaps (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps with HIGH/CRITICAL importance and EASY/MEDIUM effort as PENDING for auto-fix. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -144,3 +144,20 @@ Recommended sequence based on importance and dependencies:
 - **Group related fixes** - Features that should be documented together
 - **Draft actual content** - Include proposed README text where possible
 - **Note dependencies** - Some fixes may depend on others
+
+## How to Know You're Done
+
+This task is complete when ONE of the following is true:
+
+**Option A - Evaluated gaps:**
+1. You've read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`
+2. You've evaluated gaps with importance and effort ratings
+3. You've output the prioritized plan to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+4. Each gap has a status (PENDING, PENDING - NEEDS REVIEW, or WON'T DO)
+
+**Option B - No gaps to evaluate:**
+1. `LOOP_{{LOOP_NUMBER}}_GAPS.md` contains no gaps, OR
+2. All gaps have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`
+3. Mark this task complete without making changes
+
+This graceful handling of empty states prevents the pipeline from stalling when no documentation gaps are found.
