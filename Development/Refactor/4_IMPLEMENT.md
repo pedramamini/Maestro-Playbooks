@@ -9,27 +9,33 @@
 
 ## Objective
 
-Implement refactoring candidates that are **LOW risk** AND **HIGH or VERY HIGH benefit** marked as `PENDING`. Update statuses and log all changes made.
+Implement ONE refactoring candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` that has status `PENDING` and meets criteria (LOW risk + HIGH/VERY HIGH benefit). Log all changes to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`.
 
 ## Instructions
 
-1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** to get evaluated candidates
-2. **For each `PENDING` candidate with LOW risk AND HIGH/VERY HIGH benefit:**
-   - Implement the refactoring as described
-   - Verify the change doesn't break anything obvious
-   - Update status to `IMPLEMENTED`
-3. **Skip candidates that are:**
-   - `WON'T DO` - Not worth implementing
-   - `PENDING - MANUAL REVIEW` - Needs human verification
-   - `IMPLEMENTED` - Already done
-   - MEDIUM or HIGH risk - Too risky for auto-implementation
-   - LOW or MEDIUM benefit - Not enough payoff for auto-implementation
-4. **Log all changes** to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`
-5. **Update the plan** with new statuses
+1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** to find evaluated refactoring candidates
+2. **Filter for actionable items**: Only consider candidates where:
+   - **Status = `PENDING`** (exactly - not `PENDING - MANUAL REVIEW` or `WON'T DO`)
+   - **Risk = LOW** (not MEDIUM or HIGH)
+   - **Benefit = HIGH or VERY HIGH** (not LOW or MEDIUM)
+3. **Select ONE candidate** that meets all criteria (prioritize VERY HIGH benefit over HIGH)
+4. **Implement the refactoring**: Make the code changes as specified
+5. **Verify the change**: Ensure the code still works (syntax check, no obvious errors)
+6. **Log the change** to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`
+7. **Update status** in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` to `IMPLEMENTED`
+
+## Task
+
+- [ ] **Implement one PENDING refactor (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` that also have LOW risk AND HIGH/VERY HIGH benefit, mark this task complete without changes. Otherwise, find ONE item that meets all criteria, implement the refactoring, log to {{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Implementation Checklist
 
-- [ ] **Implement LOW risk + HIGH benefit PENDING refactors**: Go through each PENDING candidate with LOW risk AND HIGH/VERY HIGH benefit rating, implement the refactoring, and update its status to IMPLEMENTED. Log all changes made.
+Before implementing, verify:
+- [ ] The status is exactly `PENDING` (not `PENDING - MANUAL REVIEW`)
+- [ ] Risk is LOW (not MEDIUM or HIGH)
+- [ ] Benefit is HIGH or VERY HIGH (not LOW or MEDIUM)
+- [ ] The refactor is clearly specified with before/after code or description
+- [ ] No other changes are required (no dependencies)
 
 ## Implementation Guidelines
 
@@ -121,8 +127,50 @@ Before implementing each refactor:
 
 ## Guidelines
 
-- **One at a time**: Implement refactors individually, not in batches
-- **Verify each**: Check for obvious issues after each change
-- **Log everything**: Document what was done and why
+- **Only `PENDING` items**: Do NOT implement `PENDING - MANUAL REVIEW` or `WON'T DO` items
+- **One refactor per run**: Implement exactly ONE refactor, then stop. This keeps changes small and reviewable.
+- **Follow the plan**: Implement exactly what was proposed in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, don't improvise
+- **Update both files**: Log to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md` AND update status in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+- **Be conservative**: If anything is unclear about the refactor, skip it and note why in the log file
 - **Preserve behavior**: Refactoring must not change functionality
-- **Update plan**: Mark items as IMPLEMENTED after completion
+
+## How to Know You're Done
+
+This task is complete when ONE of the following is true:
+
+**Option A - Implemented a refactor:**
+1. You've implemented exactly ONE refactor from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+2. You've appended the change details to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`
+3. You've updated the item status in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` to `IMPLEMENTED`
+
+**Option B - No PENDING refactors available:**
+1. `LOOP_{{LOOP_NUMBER}}_PLAN.md` doesn't exist, OR
+2. It contains no items with status exactly `PENDING` that meet criteria (LOW risk + HIGH/VERY HIGH benefit)
+3. Mark this task complete without making changes
+
+This graceful handling allows the pipeline to continue when a loop iteration produces no actionable refactors.
+
+## When No Refactors Are Available
+
+If there are no items with status exactly `PENDING` (meeting criteria) in the plan file, append to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
+
+```markdown
+---
+
+## [YYYY-MM-DD HH:MM] - Loop {{LOOP_NUMBER}} Complete
+
+**Agent:** {{AGENT_NAME}}
+**Project:** {{AGENT_NAME}}
+**Loop:** {{LOOP_NUMBER}}
+**Status:** No PENDING refactors available (or no qualifying candidates)
+
+**Summary:**
+- Items IMPLEMENTED: [count]
+- Items WON'T DO: [count]
+- Items PENDING - MANUAL REVIEW: [count]
+- Items PENDING but not qualifying (wrong risk/benefit): [count]
+
+**Recommendation:** [Either "All automatable refactors implemented" or "Remaining items need manual review or have higher risk"]
+```
+
+This signals to the pipeline that this loop iteration is complete.
