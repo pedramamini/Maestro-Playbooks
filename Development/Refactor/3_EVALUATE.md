@@ -14,13 +14,15 @@ Evaluate each refactoring candidate with **risk and benefit ratings** to determi
 ## Instructions
 
 1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`** to get the list of candidates
-2. **Evaluate each candidate** for risk and benefit
-3. **Assign a status** based on the evaluation matrix
-4. **Output evaluated plan** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+2. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** (if it exists) to see which candidates have already been evaluated
+3. **Select ONE unevaluated candidate** (one that doesn't appear in the plan yet)
+4. **Evaluate it** for risk and benefit
+5. **Assign a status** based on the evaluation matrix
+6. **Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`**
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate candidates**: Assess each candidate for risk (how likely to break things) and benefit (how much it improves the code). Assign appropriate statuses.
+- [ ] **Evaluate one candidate (or skip if empty)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. If it contains no findings OR all findings have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, pick one unevaluated candidate, assess risk/benefit, and append to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Risk Assessment Criteria
 
@@ -63,7 +65,7 @@ Evaluate each refactoring candidate with **risk and benefit ratings** to determi
 
 ## Output Format
 
-Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with the following structure:
+Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` using this structure (create file with header if it doesn't exist):
 
 ```markdown
 # Refactoring Plan - Loop {{LOOP_NUMBER}}
@@ -109,8 +111,26 @@ Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with the followi
 
 ## Guidelines
 
+- **One candidate per run**: Only evaluate ONE candidate, then stop. This allows incremental progress.
 - **Be conservative with risk**: When in doubt, rate risk higher
 - **Consider dependencies**: Check what imports/uses the code
 - **Think about tests**: Untested code = higher risk
 - **Document rationale**: Future you will thank present you
 - **Include approach**: Describe HOW to do the refactor, not just WHAT
+
+## How to Know You're Done
+
+This task is complete when ONE of the following is true:
+
+**Option A - Evaluated a candidate:**
+1. You've evaluated exactly ONE candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`
+2. You've appended a complete evaluation to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
+3. The evaluation includes both risk and benefit ratings
+4. The status is set according to the matrix above
+
+**Option B - No candidates to evaluate:**
+1. `LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` contains no findings, OR
+2. All findings have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`
+3. Mark this task complete without making changes
+
+This graceful handling of empty states prevents the pipeline from stalling when a tactic yields no candidates.
