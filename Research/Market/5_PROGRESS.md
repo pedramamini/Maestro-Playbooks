@@ -21,7 +21,7 @@ This document is the **progress gate** for the market research pipeline. It chec
 
 ## Progress Check
 
-- [ ] **Check progress and decide**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` and count PENDING vs RESEARCHED entities. Check if minimum coverage targets are met (from market analysis). If PENDING entities with CRITICAL/HIGH importance remain, reset documents 1-4 to continue. If coverage is sufficient or only LOW importance items remain, do NOT reset - allow pipeline to exit.
+- [ ] **Check progress and decide**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` and `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are PENDING entities with CRITICAL or HIGH importance, OR (2) ENTITIES.md does NOT contain `## ALL_CATEGORIES_COVERED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no PENDING CRITICAL/HIGH entities AND all categories are covered.
 
 ## Reset Tasks (Only if more research needed)
 
@@ -32,7 +32,7 @@ If the progress check determines we need to continue, reset all tasks in the fol
 - [ ] **Reset 3_EVALUATE.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/3_EVALUATE.md`
 - [ ] **Reset 4_RESEARCH.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/4_RESEARCH.md`
 
-**IMPORTANT**: Only reset documents 1-4 if there are PENDING entities with CRITICAL or HIGH importance. If all high-priority entities are RESEARCHED, leave these reset tasks unchecked to allow the pipeline to exit.
+**IMPORTANT**: Only reset documents 1-4 if there is work remaining (PENDING CRITICAL/HIGH entities OR unexplored categories). If all categories are covered AND all CRITICAL/HIGH entities are RESEARCHED, leave these reset tasks unchecked to allow the pipeline to exit.
 
 ## Decision Logic
 
@@ -40,13 +40,20 @@ If the progress check determines we need to continue, reset all tasks in the fol
 IF LOOP_{{LOOP_NUMBER}}_PLAN.md doesn't exist:
     → Do NOT reset anything (PIPELINE JUST STARTED - LET IT RUN)
 
-ELSE IF no PENDING entities with CRITICAL or HIGH importance:
-    → Do NOT reset anything (COVERAGE SUFFICIENT - EXIT)
-    → Finalize the vault (update INDEX.md, create summary)
+ELSE IF PENDING entities with CRITICAL or HIGH importance exist:
+    → Reset documents 1-4 (CONTINUE TO RESEARCH PENDING ENTITIES)
+
+ELSE IF LOOP_{{LOOP_NUMBER}}_ENTITIES.md does NOT contain "ALL_CATEGORIES_COVERED":
+    → Reset documents 1-4 (CONTINUE TO DISCOVER MORE ENTITIES)
 
 ELSE:
-    → Reset documents 1-4 (CONTINUE RESEARCHING)
+    → Do NOT reset anything (ALL CATEGORIES COVERED AND NO PENDING CRITICAL/HIGH - EXIT)
+    → Finalize the vault (update INDEX.md, create summary)
 ```
+
+**Key insight:** The loop should continue if EITHER:
+1. There are PENDING entities with CRITICAL/HIGH importance to research, OR
+2. There are still entity categories to discover (no `ALL_CATEGORIES_COVERED` marker)
 
 ## How This Works
 
@@ -56,16 +63,18 @@ This document controls loop continuation through resets:
 
 ### Exit Conditions (Do NOT Reset)
 
-1. **Coverage Met**: All entity categories have minimum coverage
-2. **High Priority Done**: All CRITICAL and HIGH importance entities researched
+Exit when ALL of these are true:
+1. **Categories covered**: `LOOP_{{LOOP_NUMBER}}_ENTITIES.md` contains `## ALL_CATEGORIES_COVERED`
+2. **No PENDING CRITICAL/HIGH**: All CRITICAL and HIGH importance entities are RESEARCHED or SKIP
+
+Also exit if:
 3. **Max Loops**: Hit the loop limit in Batch Runner
-4. **Diminishing Returns**: Only LOW importance or VERY HARD entities remain
 
 ### Continue Conditions (Reset Documents 1-4)
 
-1. There are PENDING entities with CRITICAL or HIGH importance
-2. Entity categories are below minimum coverage targets
-3. We haven't hit max loops
+Continue if EITHER is true:
+1. There are PENDING entities with CRITICAL or HIGH importance in LOOP_{{LOOP_NUMBER}}_PLAN.md
+2. `LOOP_{{LOOP_NUMBER}}_ENTITIES.md` does NOT contain `## ALL_CATEGORIES_COVERED` (more categories to discover)
 
 ## Current Status
 
