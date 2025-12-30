@@ -152,7 +152,7 @@ Edit `1_ANALYZE.md` to add domain-specific investigation patterns.
 
 ### Creating New Playbooks
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide to creating and submitting playbooks to the marketplace.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the full guide to creating and submitting playbooks to the exchange.
 
 Quick overview:
 1. Create a folder in `Category/Subcategory/` format
@@ -170,7 +170,7 @@ Quick overview:
 
 ## Contributing
 
-This repository powers the Maestro in-app Playbook Marketplace. We welcome community contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on creating and submitting new playbooks.
+This repository powers the Maestro in-app Playbook Exchange. We welcome community contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on creating and submitting new playbooks.
 
 ## License
 

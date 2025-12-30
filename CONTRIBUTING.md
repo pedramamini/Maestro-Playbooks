@@ -1,6 +1,6 @@
 # Contributing Playbooks
 
-This repository powers the **Maestro in-app Playbook Marketplace**. We welcome community contributions of new playbooks that automate useful workflows.
+This repository powers the **Maestro in-app Playbook Exchange**. We welcome community contributions of new playbooks that automate useful workflows.
 
 ## Quick Start
 
@@ -16,7 +16,7 @@ Each playbook lives in a folder following the `Category/Subcategory` pattern:
 ```
 Category/
 └── YourPlaybook/
-    ├── README.md           # Required: Description shown in marketplace
+    ├── README.md           # Required: Description shown in exchange
     ├── 1_ANALYZE.md        # Survey and identify targets
     ├── 2_FIND_*.md         # Find specific issues/gaps/entities
     ├── 3_EVALUATE.md       # Rate candidates by priority
@@ -37,7 +37,7 @@ If your playbook needs one-time setup (folder structure, agents, etc.), add:
 
 ### README.md
 
-Your README is displayed in the marketplace preview. Include:
+Your README is displayed in the exchange preview. Include:
 
 - **Title and description** - What does this playbook do?
 - **Requirements** - Does it need a custom prompt? Special tools?
@@ -117,7 +117,7 @@ Add your playbook entry to the `playbooks` array in `manifest.json`:
 | Field | Required | Description |
 |-------|----------|-------------|
 | `id` | Yes | Unique slug: `category-subcategory` (lowercase, hyphenated) |
-| `title` | Yes | Display name in marketplace |
+| `title` | Yes | Display name in exchange |
 | `description` | Yes | 1-2 sentence description for search/display |
 | `category` | Yes | Top-level category (matches folder name) |
 | `subcategory` | No | Nested category (matches subfolder name) |
