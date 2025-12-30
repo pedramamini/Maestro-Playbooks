@@ -25,7 +25,7 @@ Implement ONE performance fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN
 
 ## Task
 
-- [ ] **Implement one PENDING fix**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md, find an item with status exactly `PENDING`, implement the fix, log to {{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
+- [ ] **Implement one PENDING fix (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, find an item with status exactly `PENDING`, implement the fix, log to {{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Implementation Checklist
 
@@ -82,10 +82,19 @@ Append to `{{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md` using this fo
 
 ## How to Know You're Done
 
-This task is complete when:
-1. You've implemented exactly ONE fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` (or logged why none were available)
+This task is complete when ONE of the following is true:
+
+**Option A - Implemented a fix:**
+1. You've implemented exactly ONE fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
 2. You've appended the change details to `{{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md`
 3. You've updated the item status in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` to `IMPLEMENTED`
+
+**Option B - No PENDING fixes available:**
+1. `LOOP_{{LOOP_NUMBER}}_PLAN.md` doesn't exist, OR
+2. It contains no items with status exactly `PENDING`
+3. Mark this task complete without making changes
+
+This graceful handling allows the pipeline to continue when a loop iteration produces no actionable fixes.
 
 ## When No Fixes Are Available
 

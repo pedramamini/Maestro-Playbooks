@@ -21,7 +21,7 @@ Execute ONE tactic from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md` t
 
 ## Task
 
-- [ ] **Execute one tactic**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md, pick an unexecuted tactic, search the codebase for matching issues, and append findings to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. Mark the tactic as executed.
+- [ ] **Execute one tactic (or mark exhausted)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md and check for unexecuted tactics. If ALL tactics are already marked `[EXECUTED]`, append a section `## ALL_TACTICS_EXHAUSTED` to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md and mark this task complete. Otherwise, pick one unexecuted tactic, search the codebase for matching issues, append findings to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md, and mark the tactic as `[EXECUTED]` in the game plan.
 
 ## Output Format
 
@@ -57,9 +57,15 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` using this for
 
 ## How to Know You're Done
 
-This task is complete when:
+This task is complete when ONE of the following is true:
+
+**Option A - Executed a tactic:**
 1. You've executed exactly ONE tactic from the game plan
 2. You've appended all findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`
-3. You've marked the tactic as executed in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md`
+3. You've marked the tactic as `[EXECUTED]` in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md`
 
-If all tactics in the game plan are already marked as `[EXECUTED]`, create a summary note in the candidates file indicating all tactics have been exhausted.
+**Option B - All tactics exhausted:**
+1. All tactics in the game plan are already marked as `[EXECUTED]`
+2. You've appended `## ALL_TACTICS_EXHAUSTED` to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`
+
+The `ALL_TACTICS_EXHAUSTED` marker signals to downstream documents that discovery is complete.

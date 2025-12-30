@@ -25,7 +25,7 @@ Evaluate candidates from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`
 
 ## Task
 
-- [ ] **Evaluate one candidate**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md, pick an unevaluated finding, investigate the fix, assess complexity/gain, and append to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
+- [ ] **Evaluate one candidate (or skip if empty)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. If it contains no findings OR all findings have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, pick one unevaluated finding, investigate the fix, assess complexity/gain, and append to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Rating Criteria
 
@@ -105,10 +105,17 @@ After evaluation, set the status based on the ratings:
 
 ## How to Know You're Done
 
-This task is complete when:
+This task is complete when ONE of the following is true:
+
+**Option A - Evaluated a candidate:**
 1. You've evaluated exactly ONE candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`
 2. You've appended a complete evaluation to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
 3. The evaluation includes both complexity and gain ratings
 4. The status is set according to the table above
 
-If all candidates have already been evaluated, add a note to the plan file indicating all candidates have been processed.
+**Option B - No candidates to evaluate:**
+1. `LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` contains no findings, OR
+2. All findings have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`
+3. Mark this task complete without making changes
+
+This graceful handling of empty states prevents the pipeline from stalling when a tactic yields no candidates.

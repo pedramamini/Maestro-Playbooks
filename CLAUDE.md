@@ -130,4 +130,61 @@ When editing playbooks:
 
 4. **Incremental progress**: Playbooks should make small, verifiable changes per loop iteration rather than large batch changes.
 
+### Common Pitfalls to Avoid
+
+These patterns cause subtle bugs that are hard to diagnose:
+
+#### 1. Early Exit on Empty States
+
+**Problem:** If a discovery step finds nothing, downstream steps have nothing to process, and the progress gate may exit prematurely—even when more discovery work remains.
+
+**Solution:** Track exhaustion explicitly. Use markers like `## ALL_TACTICS_EXHAUSTED` to signal when discovery is truly complete. The progress gate should check BOTH:
+- Are there pending items to process?
+- Is discovery complete?
+
+Only exit when both conditions indicate no work remains.
+
+#### 2. Wasteful Re-Analysis
+
+**Problem:** When loops reset documents 1-4, document 1 re-runs its full analysis even though artifacts from the previous iteration still exist.
+
+**Solution:** Add skip logic to discovery tasks:
+```markdown
+- [ ] **Survey codebase (if needed)**: First check if `GAME_PLAN.md`
+      already exists with content. If yes, skip this task. If no,
+      perform the survey...
+```
+
+#### 3. Missing Graceful Empty-State Handling
+
+**Problem:** Tasks assume their input files exist and have content. When a previous step produced nothing, the task fails or behaves unexpectedly.
+
+**Solution:** Every task should handle the "nothing to do" case explicitly:
+```markdown
+- [ ] **Evaluate one candidate (or skip if empty)**: Read CANDIDATES.md.
+      If it contains no findings OR all findings are already evaluated,
+      mark this task complete without changes. Otherwise...
+```
+
+#### 4. Progress Gate Checks Only One Condition
+
+**Problem:** The progress gate checks for PENDING items but ignores whether discovery is complete. If a tactic finds nothing, there are no PENDING items, so the loop exits—leaving other tactics unexecuted.
+
+**Solution:** The progress gate should continue if EITHER:
+- There are PENDING items to implement, OR
+- Discovery is not yet exhausted (more tactics/searches to run)
+
+```
+CONTINUE if: PENDING items exist OR discovery not exhausted
+EXIT if: No PENDING items AND discovery is exhausted
+```
+
+#### 5. Ambiguous Loop State in Filenames
+
+**Problem:** Using `LOOP_{{LOOP_NUMBER}}_*.md` creates new files each loop iteration. If the design intent is to accumulate state across loops, this orphans previous work. If the intent is fresh-analysis-each-loop, this is fine but wasteful.
+
+**Recommendation:** Be explicit about the design choice:
+- **Accumulate across loops**: Use static names like `PERF_PLAN.md`
+- **Fresh each loop**: Use `LOOP_{{LOOP_NUMBER}}_*.md` but ensure document 1 always creates new content
+
 See README.md for available playbooks and usage instructions.
