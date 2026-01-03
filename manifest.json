@@ -1,6 +1,29 @@
 {
-  "lastUpdated": "2025-12-26",
+  "lastUpdated": "2025-01-02",
   "playbooks": [
+    {
+      "id": "setup-claude-cognitive-infrastructure",
+      "title": "Claude Cognitive Infrastructure Setup",
+      "description": "Deploys complete Claude Cognitive Infrastructure to any agent directory with hooks, security validation, automatic history capture, and skills framework. Fully autonomous - no user prompting required.",
+      "category": "Setup",
+      "subcategory": "Claude-Cognitive-Infrastructure",
+      "author": "Stephan Chenette",
+      "authorLink": null,
+      "tags": ["setup", "infrastructure", "claude-code", "agents", "hooks", "security", "memory", "skills", "history", "automation"],
+      "lastUpdated": "2025-01-02",
+      "path": "Setup/Claude-Cognitive-Infrastructure",
+      "documents": [
+        { "filename": "0_INITIALIZE", "resetOnCompletion": false },
+        { "filename": "1_ANALYZE", "resetOnCompletion": false },
+        { "filename": "2_PLAN_STRUCTURE", "resetOnCompletion": false },
+        { "filename": "3_EVALUATE", "resetOnCompletion": false },
+        { "filename": "4_IMPLEMENT", "resetOnCompletion": false },
+        { "filename": "5_VERIFY", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": 1,
+      "prompt": null
+    },
     {
       "id": "development-security",
       "title": "Security Audit",

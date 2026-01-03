@@ -1,0 +1,44 @@
+# User Preferences - {{AGENT_NAME}}
+
+Preferences for how the agent should work and communicate.
+
+## Communication Style
+
+*Preferences for tone, detail level, and format.*
+
+### Tone
+<!-- Formal/casual, warm/direct -->
+
+### Format Preferences
+<!-- Bullet points, prose, structured sections -->
+
+### Proactivity Level
+<!-- How often to surface information, acceptable nudge frequency -->
+
+## Working Style
+
+*Task management and organization preferences.*
+
+### Decision Making
+<!-- Fast vs deliberate, tradeoffs that matter -->
+
+### Task Management
+<!-- How to track progress, when to check in -->
+
+## Output Formats
+
+*Documentation and deliverable preferences.*
+
+## Special Instructions
+
+*Standing instructions specific to {{AGENT_NAME}} role.*
+
+### Do
+<!-- Things to always do -->
+
+### Don't
+<!-- Things to avoid -->
+
+---
+
+**Last Updated:** {{DATE}}

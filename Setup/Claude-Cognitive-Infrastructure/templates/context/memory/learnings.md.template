@@ -1,0 +1,29 @@
+# Learnings - {{AGENT_NAME}}
+
+This file contains facts and insights. It is populated automatically by the history capture system and can also be edited manually.
+
+## Automatically Captured
+
+*Learnings are captured automatically during sessions and stored in `.claude/context/history/learnings/`.*
+
+*This section can be used to surface the most important learnings for quick reference.*
+
+## Manual Notes
+
+*Add manual notes, facts, and learnings below.*
+
+### Domain Knowledge
+
+*Knowledge specific to {{AGENT_NAME}} responsibilities.*
+
+### User Context
+
+*Information about users and stakeholders.*
+
+### Important Patterns
+
+*Patterns and insights discovered through interactions.*
+
+---
+
+**Last Updated:** {{DATE}}
