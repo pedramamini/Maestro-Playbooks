@@ -178,29 +178,6 @@
       "loopEnabled": false,
       "maxLoops": 1,
       "prompt": null
-    },
-    {
-      "id": "setup-knowledge-pack-brian-tracy",
-      "title": "Knowledge Pack: Brian Tracy Teachings",
-      "description": "Gives any Claude Cognitive Infrastructure agent expertise in Brian Tracy's personal development, sales, and business philosophy. Ingests teaching materials and enables RAG-powered advice grounded in his principles.",
-      "category": "Setup",
-      "subcategory": "Knowledge-Packs",
-      "author": "Stephan Chenette",
-      "authorLink": null,
-      "tags": ["knowledge-pack", "rag", "personal-development", "sales", "productivity", "brian-tracy", "goals", "time-management"],
-      "lastUpdated": "2025-01-03",
-      "path": "Setup/Knowledge-Packs/Brian-Tracy-Teachings",
-      "documents": [
-        { "filename": "0_INITIALIZE", "resetOnCompletion": false },
-        { "filename": "1_ANALYZE", "resetOnCompletion": false },
-        { "filename": "2_PLAN_STRUCTURE", "resetOnCompletion": false },
-        { "filename": "3_EVALUATE", "resetOnCompletion": false },
-        { "filename": "4_IMPLEMENT", "resetOnCompletion": false },
-        { "filename": "5_VERIFY", "resetOnCompletion": false }
-      ],
-      "loopEnabled": false,
-      "maxLoops": 1,
-      "prompt": null
     }
   ]
 }
