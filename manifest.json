@@ -155,6 +155,52 @@
       "loopEnabled": true,
       "maxLoops": 30,
       "prompt": "# Market Research Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Research Configuration\n\n### Target Market\n<!-- CONFIGURE: Replace the example below with your target market -->\n**MARKET_TOPIC:** `Electric Vehicle Charging Infrastructure`\n\n<!-- Examples of market topics:\n- \"AI-Powered Developer Tools\"\n- \"Plant-Based Meat Alternatives\"\n- \"Enterprise Kubernetes Platforms\"\n- \"Direct-to-Consumer Hearing Aids\"\n- \"Carbon Capture Technologies\"\n-->\n\n### Output Location\n<!-- CONFIGURE: Replace with your desired output folder path -->\n**OUTPUT_FOLDER:** `{{AUTORUN_FOLDER}}/vault`\n\n<!-- This is where all research markdown files will be created -->\n\n---\n\n## Agent Instructions\n\nYou are a market research agent building a comprehensive knowledge vault about the configured market topic. Your goal is to create an interconnected set of markdown documents that provide deep insight into the market landscape.\n\n### Your Capabilities\n- **Web Search**: Use web search extensively to gather current market information\n- **Structured Research**: Follow templates to ensure consistent, comparable entity profiles\n- **Knowledge Linking**: Create `[[wiki-style]]` links between related entities\n- **Incremental Building**: Each loop iteration adds one well-researched entity to the vault\n\n### Entity Types to Research\nDepending on the market, research these entity categories:\n- **Companies**: Key players, startups, incumbents in the space\n- **Products/Services**: Notable offerings in the market\n- **People**: Founders, executives, thought leaders, analysts\n- **Technologies**: Core technologies, platforms, standards\n- **Trends**: Market trends, growth drivers, disruptions\n- **Investors**: VCs, corporate investors active in the space\n- **Regulations**: Relevant laws, standards, compliance requirements\n- **Events**: Conferences, trade shows, industry gatherings\n\n### Output Standards\n- All files in markdown format\n- Use `[[Entity Name]]` syntax for inter-page links\n- Include sources with URLs for all factual claims\n- Create an INDEX.md as the central launch page\n- Organize files in subfolders by entity type\n\n### Research Quality\n- Prioritize recent information (last 2 years)\n- Cross-reference multiple sources\n- Note when information is uncertain or conflicting\n- Include both qualitative insights and quantitative data where available\n\n---\n\n## Specialized Agents\n\nAfter initialization (`0_INITIALIZE.md`), the vault will contain specialized agents in the `Agents/` folder (also accessible via `.claude/agents`):\n\n| Agent | Purpose |\n|-------|--------|\n| `company-researcher` | Research and create company profiles |\n| `product-researcher` | Research and create product/service profiles |\n| `person-researcher` | Research and create key people profiles |\n| `technology-researcher` | Research and create technology profiles |\n| `trend-researcher` | Research and analyze market trends |\n\n### Using Agents\n\nYou can spawn these agents using the Task tool to research specific entities:\n\n```\nTask: \"Research Acme Corp for the knowledge vault\"\nAgent: company-researcher\n```\n\nEach agent will:\n1. Use web search to gather information\n2. Create a structured markdown profile\n3. Add `[[wiki-links]]` to related entities\n4. Update INDEX.md with the new entry\n\n---\n\n## Slash Commands\n\nAfter initialization, the vault will contain commands in the `Commands/` folder (also accessible via `.claude/commands`):\n\n| Command | Purpose |\n|---------|--------|\n| `/research` | Research a specific entity and add to vault |\n\n---\n\n## Working Style\n\n- **Keep going until done** - Complete research tasks without unnecessary pauses\n- **Use agents for entity research** - Spawn specialized agents for each entity type\n- **Maintain connections** - Always add `[[wiki-links]]` between related entities\n- **Update INDEX.md** - Keep the launch page current with all researched entities\n"
+    },
+    {
+      "id": "setup-cognitive-infrastructure",
+      "title": "Claude Cognitive Infrastructure",
+      "description": "Deploys the complete Claude Cognitive Infrastructure to any agent directory, enabling persistent memory, modular skills, context management, and event-driven hooks.",
+      "category": "Setup",
+      "subcategory": "Claude-Cognitive-Infrastructure",
+      "author": "Stephan Chenette",
+      "authorLink": "https://github.com/stephanchenette",
+      "tags": ["infrastructure", "memory", "skills", "context", "hooks", "agent-setup"],
+      "lastUpdated": "2026-01-04",
+      "path": "Setup/Claude-Cognitive-Infrastructure",
+      "documents": [
+        { "filename": "0_INITIALIZE", "resetOnCompletion": false },
+        { "filename": "1_ANALYZE", "resetOnCompletion": false },
+        { "filename": "2_PLAN_STRUCTURE", "resetOnCompletion": false },
+        { "filename": "3_EVALUATE", "resetOnCompletion": false },
+        { "filename": "4_IMPLEMENT", "resetOnCompletion": false },
+        { "filename": "5_VERIFY", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": 1,
+      "prompt": null
+    },
+    {
+      "id": "setup-knowledge-pack-codebase-expert",
+      "title": "Codebase Expert Knowledge Pack",
+      "description": "Installs the Codebase Expert knowledge pack, enabling RAG-powered code understanding with semantic search across the codebase.",
+      "category": "Setup",
+      "subcategory": "Knowledge-Packs",
+      "author": "Stephan Chenette",
+      "authorLink": "https://github.com/stephanchenette",
+      "tags": ["knowledge-pack", "codebase", "rag", "semantic-search", "code-understanding"],
+      "lastUpdated": "2026-01-04",
+      "path": "Setup/Knowledge-Packs/Codebase-Expert",
+      "documents": [
+        { "filename": "0_INITIALIZE", "resetOnCompletion": false },
+        { "filename": "1_ANALYZE", "resetOnCompletion": false },
+        { "filename": "2_PLAN_STRUCTURE", "resetOnCompletion": false },
+        { "filename": "3_EVALUATE", "resetOnCompletion": false },
+        { "filename": "4_IMPLEMENT", "resetOnCompletion": false },
+        { "filename": "5_VERIFY", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": 1,
+      "prompt": null
     }
   ]
 }
