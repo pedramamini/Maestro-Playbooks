@@ -2,6 +2,38 @@
  * Embeddings Generation
  *
  * Generates text embeddings for semantic search capabilities.
+ *
+ * ⚠️  CONFIGURATION REQUIRED ⚠️
+ *
+ * This file contains a PLACEHOLDER implementation that returns random vectors.
+ * You MUST replace generateEmbedding() with a real embedding provider:
+ *
+ * Option 1: OpenAI (recommended)
+ * ```
+ * import OpenAI from 'openai';
+ * const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+ *
+ * export async function generateEmbedding(text: string): Promise<number[]> {
+ *   const response = await openai.embeddings.create({
+ *     model: 'text-embedding-3-small',
+ *     input: text,
+ *   });
+ *   return response.data[0].embedding;
+ * }
+ * ```
+ *
+ * Option 2: Ollama (local)
+ * ```
+ * export async function generateEmbedding(text: string): Promise<number[]> {
+ *   const response = await fetch('http://localhost:11434/api/embeddings', {
+ *     method: 'POST',
+ *     body: JSON.stringify({ model: 'nomic-embed-text', prompt: text }),
+ *   });
+ *   return (await response.json()).embedding;
+ * }
+ * ```
+ *
+ * See _Core/README.md for more options.
  */
 
 interface EmbeddingConfig {
@@ -18,6 +50,9 @@ const defaultConfig: EmbeddingConfig = {
 
 /**
  * Generate embedding for a single text
+ *
+ * ⚠️  PLACEHOLDER - Returns random vectors!
+ * Replace this function with a real embedding provider.
  */
 export async function generateEmbedding(
   text: string,
@@ -25,8 +60,13 @@ export async function generateEmbedding(
 ): Promise<number[]> {
   const finalConfig = { ...defaultConfig, ...config };
 
-  // Placeholder implementation
-  // In production, this would call an embedding API
+  // ⚠️  PLACEHOLDER IMPLEMENTATION - REPLACE ME!
+  // This returns random vectors which will NOT provide meaningful semantic search.
+  // See the file header comments for implementation examples.
+  console.warn(
+    '⚠️  embeddings.ts: Using placeholder implementation. ' +
+    'Configure a real embedding provider for semantic search to work.'
+  );
   return new Array(finalConfig.dimensions).fill(0).map(() => Math.random());
 }
 

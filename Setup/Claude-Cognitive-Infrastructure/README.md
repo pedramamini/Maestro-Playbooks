@@ -71,6 +71,56 @@ Once the infrastructure is installed, you can:
 3. Add custom hooks for automation
 4. Start using the agent with full cognitive capabilities
 
+## Git Configuration
+
+### What to Commit
+
+The `.claude/` directory contains both shareable configuration and potentially sensitive session data:
+
+| Directory | Commit? | Reason |
+|-----------|---------|--------|
+| `.claude/settings.json` | ✅ Yes | Hook configuration, shareable |
+| `.claude/VERSION` | ✅ Yes | Infrastructure version tracking |
+| `.claude/config/` | ✅ Yes | Runtime settings, shareable |
+| `.claude/skills/` | ✅ Yes | Skill definitions, shareable |
+| `.claude/context/memory/` | ⚠️ Consider | May contain sensitive session data |
+| `.claude/context/knowledge/` | ✅ Yes | Indexed knowledge, shareable |
+| `.claude/hooks/` | ✅ Yes | Event hooks, shareable |
+| `CLAUDE.md` | ✅ Yes | Agent identity, shareable |
+
+### Recommended .gitignore
+
+Add to your `.gitignore` if memory files may contain sensitive information:
+
+```gitignore
+# Claude Cognitive Infrastructure - sensitive memory files
+.claude/context/memory/learnings.md
+.claude/context/memory/user_preferences.md
+.claude/context/memory/work_status.md
+```
+
+Alternatively, commit empty placeholder files and ignore changes:
+```bash
+git update-index --assume-unchanged .claude/context/memory/*.md
+```
+
+## Version Migration
+
+### Upgrading Infrastructure
+
+When a new infrastructure version is released:
+
+1. **Check current version**: Read `.claude/VERSION`
+2. **Backup existing**: `cp -r .claude .claude.backup`
+3. **Run upgrade playbook**: Future versions will include migration scripts
+4. **Verify**: Run the 5_VERIFY phase to confirm upgrade success
+
+### Version History
+
+| Version | Changes |
+|---------|---------|
+| 1.1.0 | Initial release with memory, skills, context, hooks |
+
 ## Version
 
 Current infrastructure version: **1.1.0**

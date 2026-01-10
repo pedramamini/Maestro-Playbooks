@@ -1,0 +1,97 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/pedramamini/Maestro-Playbooks/Setup/Claude-Cognitive-Infrastructure/schemas/settings.schema.json",
+  "title": "Claude Code Settings",
+  "description": "Configuration schema for Claude Code settings.json",
+  "type": "object",
+  "properties": {
+    "hooks": {
+      "type": "object",
+      "description": "Hook configurations for various triggers",
+      "properties": {
+        "preToolCall": {
+          "type": "array",
+          "description": "Hooks that run before tool calls",
+          "items": {
+            "$ref": "#/definitions/hook"
+          }
+        },
+        "postToolCall": {
+          "type": "array",
+          "description": "Hooks that run after tool calls",
+          "items": {
+            "$ref": "#/definitions/hook"
+          }
+        },
+        "onError": {
+          "type": "array",
+          "description": "Hooks that run when errors occur",
+          "items": {
+            "$ref": "#/definitions/hook"
+          }
+        }
+      },
+      "additionalProperties": {
+        "type": "array",
+        "items": {
+          "$ref": "#/definitions/hook"
+        }
+      }
+    },
+    "permissions": {
+      "type": "object",
+      "description": "Permission settings",
+      "properties": {
+        "allow": {
+          "type": "array",
+          "description": "Allowed operations or paths",
+          "items": {
+            "type": "string"
+          }
+        },
+        "deny": {
+          "type": "array",
+          "description": "Denied operations or paths",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "hook": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Type of hook (command or script)",
+          "enum": ["command", "script"]
+        },
+        "command": {
+          "type": "string",
+          "description": "Command to execute (for command type)"
+        },
+        "script": {
+          "type": "string",
+          "description": "Path to script file (for script type)"
+        },
+        "timeout": {
+          "type": "integer",
+          "description": "Timeout in milliseconds",
+          "minimum": 0,
+          "default": 30000
+        },
+        "tools": {
+          "type": "array",
+          "description": "Tools this hook applies to (empty = all tools)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": ["type"]
+    }
+  },
+  "additionalProperties": true
+}
