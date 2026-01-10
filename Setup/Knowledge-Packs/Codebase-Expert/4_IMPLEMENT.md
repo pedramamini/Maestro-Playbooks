@@ -6,13 +6,13 @@ Execute the Codebase Expert knowledge pack installation.
 
 ## Prerequisites
 
-> **Important**: Before proceeding, you must configure an embedding provider. The default `embeddings.ts` contains placeholder code that returns random vectors. See `Setup/Knowledge-Packs/_Core/README.md` for configuration options.
+> **Important**: Before proceeding, you must configure an embedding provider. The default `embeddings.ts` contains placeholder code that returns random vectors. See the assets folder for the file to configure.
 
 ### Embedding Provider Options
 
 1. **OpenAI** (recommended): Set `OPENAI_API_KEY` environment variable
 2. **Ollama** (local): Run `ollama pull nomic-embed-text`
-3. **Other**: Modify `_Core/lib/embeddings.ts` for your provider
+3. **Other**: Modify `{{AUTORUN_FOLDER}}/assets/lib/embeddings.ts` for your provider
 
 ## Implementation Steps
 
@@ -24,7 +24,7 @@ mkdir -p .claude/skills/Codebase-Expert
 
 ### Step 2: Install SKILL.md
 
-Copy the skill template to:
+Copy the skill template from `{{AUTORUN_FOLDER}}/assets/templates/skills/Codebase-Expert/SKILL.md` to:
 `.claude/skills/Codebase-Expert/SKILL.md`
 
 ### Step 3: Create Knowledge Directory
@@ -35,7 +35,7 @@ mkdir -p .claude/context/knowledge/codebase
 
 ### Step 4: Configure Embedding Provider
 
-Before indexing, update `_Core/lib/embeddings.ts` with your chosen provider:
+Before indexing, update `{{AUTORUN_FOLDER}}/assets/lib/embeddings.ts` with your chosen provider:
 
 **For OpenAI:**
 ```typescript
@@ -71,10 +71,13 @@ For each source file:
 4. Store in vector store
 
 **Example indexing script:**
+
+Copy the library files from `{{AUTORUN_FOLDER}}/assets/lib/` to your hooks directory, then use:
+
 ```typescript
-import { chunkCode } from './_Core/lib/chunking';
-import { generateEmbedding } from './_Core/lib/embeddings';
-import { VectorStore } from './_Core/lib/vector-store';
+import { chunkCode } from '.claude/hooks/lib/chunking';
+import { generateEmbedding } from '.claude/hooks/lib/embeddings';
+import { VectorStore } from '.claude/hooks/lib/vector-store';
 
 const store = new VectorStore('codebase');
 
@@ -121,7 +124,7 @@ Add to `.claude/config/knowledge-packs.yaml`:
 
 ### Step 8: Configure RAG Hook (Optional)
 
-The RAG retrieval hook in `_Core/hooks/rag-retrieval.ts` is a reference implementation. Integration options:
+The RAG retrieval hook in `{{AUTORUN_FOLDER}}/assets/hooks/rag-retrieval.ts` is a reference implementation. Integration options:
 
 1. **Manual**: Query the vector store directly when you need code context
 2. **MCP Server**: Implement as an MCP server for Claude integration

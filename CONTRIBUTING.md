@@ -22,7 +22,8 @@ Category/
     ├── 3_EVALUATE.md       # Rate candidates by priority
     ├── 4_IMPLEMENT.md      # Execute one item per loop
     ├── 5_PROGRESS.md       # Loop gate: continue or exit
-    └── Agent-Prompt.md     # Optional: Custom prompt (if not using default)
+    ├── Agent-Prompt.md     # Optional: Custom prompt (if not using default)
+    └── assets/             # Optional: Non-markdown assets (configs, scripts, etc.)
 ```
 
 ### Optional Initialization Document
@@ -32,6 +33,39 @@ If your playbook needs one-time setup (folder structure, agents, etc.), add:
 ```
 0_INITIALIZE.md         # Runs once, never resets
 ```
+
+### Assets Folder
+
+The `assets/` subfolder bundles non-markdown files with your playbook:
+
+```
+assets/
+├── config.yaml         # Configuration templates
+├── schema.json         # Schema definitions
+├── Dockerfile          # Container files
+└── helper.sh           # Utility scripts
+```
+
+**When to use assets:**
+- Pre-configured templates that agents should read or copy
+- Schema files for validation
+- Docker/container configurations
+- Helper scripts for complex operations
+- Reference data (lookup tables, mappings)
+
+**Referencing assets in documents:**
+
+Use the `{{AUTORUN_FOLDER}}/assets/` path:
+
+```markdown
+- [ ] Read the API schema from `{{AUTORUN_FOLDER}}/assets/openapi.yaml`
+- [ ] Copy `{{AUTORUN_FOLDER}}/assets/Dockerfile` to the project root
+```
+
+**Important notes:**
+- Assets are copied along with the playbook when installed from the exchange
+- Keep assets small—large binary files slow down installation
+- Document any assets in your playbook's README.md
 
 ## Required Files
 
@@ -215,6 +249,7 @@ Before submitting:
 - [ ] All `path` and `filename` values match actual files
 - [ ] `id` is unique across all playbooks
 - [ ] `lastUpdated` uses `YYYY-MM-DD` format
+- [ ] If using `assets/` folder: assets are documented in README.md
 - [ ] Tested the playbook with Maestro
 
 ## Testing Your Playbook

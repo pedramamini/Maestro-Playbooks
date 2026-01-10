@@ -125,6 +125,16 @@ When a new infrastructure version is released:
 
 Current infrastructure version: **1.1.0**
 
+## Assets
+
+This playbook includes the following assets in the `assets/` folder:
+
+| Asset | Purpose |
+|-------|---------|
+| `settings.schema.json` | JSON schema for validating `.claude/settings.json` |
+
+Reference assets using `{{AUTORUN_FOLDER}}/assets/` in playbook documents.
+
 ## Credits
 
 The Claude Cognitive Infrastructure was influenced by [Daniel Miessler's](https://danielmiessler.com/) [Personal AI Infrastructure](https://github.com/danielmiessler/Personal_AI_Infrastructure) project, which pioneered many of the concepts around persistent memory, modular skills, and structured context for AI assistants.

@@ -40,6 +40,25 @@ The Codebase-Expert skill activates on queries about:
 - Understanding how components work
 - Debugging and troubleshooting
 
+## Assets
+
+This playbook includes the following assets in the `assets/` folder:
+
+| Asset | Purpose |
+|-------|---------|
+| `hooks/rag-retrieval.ts` | Pre-tool hook for context injection |
+| `lib/embeddings.ts` | Text embedding generation (placeholder - configure provider) |
+| `lib/vector-store.ts` | Vector storage for semantic search |
+| `lib/chunking.ts` | Document chunking strategies |
+| `lib/registry.ts` | Knowledge pack registration |
+| `templates/skills/Codebase-Expert/SKILL.md` | Skill definition template |
+
+Reference assets using `{{AUTORUN_FOLDER}}/assets/` in playbook documents.
+
+### Configuration Required
+
+The `embeddings.ts` file contains a **placeholder implementation**. You must configure an actual embedding provider (OpenAI, Ollama, etc.) for semantic search to work. See the file comments for configuration examples.
+
 ---
 
 *Codebase Expert Knowledge Pack v1.0.0*

@@ -120,6 +120,17 @@ When editing playbooks:
 - Maintain document chain references (e.g., `LOOP_{{LOOP_NUMBER}}_PLAN.md`)
 - Each playbook's README.md contains specific configuration details
 
+### Assets Folder Convention
+
+Playbooks can include non-markdown assets in an `assets/` subfolder:
+- Configuration templates (YAML, JSON, TOML)
+- Dockerfiles and container configurations
+- Helper scripts
+- Schema definitions (OpenAPI, JSON Schema)
+- Reference data files
+
+Reference assets using `{{AUTORUN_FOLDER}}/assets/filename`. Maestro copies the entire playbook folder (including assets/) when installing from the exchange.
+
 ### Critical Design Considerations
 
 1. **One task per document step**: Each document should do ONE thing, then stop. This allows proper loop iteration.
