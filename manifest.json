@@ -1,6 +1,28 @@
 {
-  "lastUpdated": "2025-12-26",
+  "lastUpdated": "2026-04-10",
   "playbooks": [
+    {
+      "id": "development-pr-bot-cleanup",
+      "title": "PR Bot Thread Cleanup",
+      "description": "Systematically cleans up unresolved CodeRabbit and Greptile PR review threads by separating stale bot comments from real findings, applying small validated fixes, and resolving newly stale threads after each push.",
+      "category": "Development",
+      "subcategory": "PR-Bot-Cleanup",
+      "author": "Jeff Scott Ward",
+      "authorLink": "https://github.com/jeffscottward",
+      "tags": ["pull-request", "github", "coderabbit", "greptile", "review-bots", "thread-cleanup"],
+      "lastUpdated": "2026-04-10",
+      "path": "Development/PR-Bot-Cleanup",
+      "documents": [
+        { "filename": "1_ANALYZE", "resetOnCompletion": false },
+        { "filename": "2_FIND_THREADS", "resetOnCompletion": false },
+        { "filename": "3_EVALUATE", "resetOnCompletion": false },
+        { "filename": "4_IMPLEMENT", "resetOnCompletion": false },
+        { "filename": "5_PROGRESS", "resetOnCompletion": true }
+      ],
+      "loopEnabled": true,
+      "maxLoops": 10,
+      "prompt": null
+    },
     {
       "id": "development-security",
       "title": "Security Audit",
