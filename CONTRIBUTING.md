@@ -36,6 +36,8 @@ If your playbook needs one-time setup (folder structure, agents, etc.), add:
 
 ### Assets Folder
 
+> **Exchange-only feature.** The `assets/` folder is supported **only for playbooks submitted to this repository** (the Maestro in-app Playbook Exchange). User-shared playbooks distributed via direct links or copied between machines do not carry an `assets/` folder—Maestro's share/install flow only transports the markdown documents. If your playbook depends on bundled files, it must be PR'd here so the Exchange installer copies the full folder.
+
 The `assets/` subfolder bundles non-markdown files with your playbook:
 
 ```
@@ -63,9 +65,9 @@ Use the `{{AUTORUN_FOLDER}}/assets/` path:
 ```
 
 **Important notes:**
-- Assets are copied along with the playbook when installed from the exchange
+- Assets ship with the playbook **only when installed from the Exchange**—not when shared peer-to-peer via Maestro's direct-share links
 - Keep assets small—large binary files slow down installation
-- Document any assets in your playbook's README.md
+- Document any assets in your playbook's README.md so users understand what's bundled
 
 ## Required Files
 
@@ -159,11 +161,35 @@ Add your playbook entry to the `playbooks` array in `manifest.json`:
 | `authorLink` | No | URL to your website/profile |
 | `tags` | No | Searchable keywords array |
 | `lastUpdated` | Yes | Date in `YYYY-MM-DD` format |
+| `minMaestroVersion` | No | Semver string (e.g. `0.16.17`, `0.16.17-RC`). Match the exact case of Maestro's released version tags — semver prerelease comparison is case-sensitive (`-RC` and `-rc` sort differently in ASCII order). Maestro versions older than this hide or disable the tile in the exchange and render a "Requires Maestro X.Y.Z+" badge. Omit if your playbook works on every shipped version. |
+| `beta` | No | Boolean. Set `true` while the playbook is still maturing. The exchange renders a `BETA` badge on the tile but does not block install. Default: `false`. Remove the flag (or set `false`) once you have shipped a stable version. |
 | `path` | Yes | Folder path relative to repo root |
 | `documents` | Yes | Ordered array of `{ filename, resetOnCompletion }` |
 | `loopEnabled` | Yes | `true` if playbook loops, `false` otherwise |
 | `maxLoops` | No | Loop limit (`null` for unlimited) |
 | `prompt` | Yes | Custom prompt string, or `null` for Maestro default |
+
+### When to set `minMaestroVersion`
+
+Set this **only** when your playbook depends on a Maestro capability that does not degrade gracefully on older versions. Examples:
+
+- **A new Auto Run primitive that older versions cannot dispatch** — e.g. the `<!-- maestro:halt -->` marker (added in `0.16.17-RC`). If your playbook uses halt as a UX improvement on top of an already-correct fallback path, you can still pin the version so users on older builds see a clear "Requires Maestro 0.16.17+" badge instead of getting the slow-but-functional path.
+- **A new template variable** — older Maestro will not substitute it, so the agent receives the literal `{{NEW_VAR}}` and behavior is undefined.
+- **A new manifest field that affects safe execution** — e.g. permission flags, isolation settings — where running the playbook on a version that ignores the field would be unsafe.
+
+Do **not** set this for ordinary code changes that work fine on the version you developed against. The field is a hard gate; an unnecessary version pin cuts off users who could otherwise run your playbook successfully.
+
+Use the lowest version that actually contains the dependency. If a feature shipped in `0.16.17-RC`, pin to `0.16.17-RC` (exact case — see note above), not the date you wrote the playbook.
+
+### When to set `beta`
+
+Set `beta: true` while you are iterating publicly and want the exchange to flag the playbook as not-yet-stable. The badge tells users "expect rough edges" without blocking install. Common reasons to keep `beta` on:
+
+- The playbook depends on a Maestro feature that itself is in RC / preview.
+- You expect breaking changes to the document chain or generated-file names within the next few releases.
+- Real-world testing has been narrow and you want explicit feedback before declaring stable.
+
+Remove the flag once the playbook has had at least one full release cycle without breaking changes and you are comfortable defaulting it for users.
 
 ### Document Array
 
@@ -226,6 +252,7 @@ Use consistent status values in `LOOP_N_PLAN.md`:
 
 ### Existing Categories
 
+- **Assistants** - One-shot setup workflows that install personal-AI frameworks into an agent (PAI-Setup)
 - **Development** - Code improvement workflows (Security, Performance, Refactor, Documentation, Testing, Usage)
 - **Research** - Knowledge-building workflows (Market)
 

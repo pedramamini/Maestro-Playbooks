@@ -1,6 +1,54 @@
 {
-  "lastUpdated": "2026-04-10",
+  "lastUpdated": "2026-05-06",
   "playbooks": [
+    {
+      "id": "assistants-pai-setup",
+      "title": "PAI Setup",
+      "description": "Installs Daniel Miessler's Personal AI Infrastructure (PAI) — the Life Operating System that sits underneath Claude Code (with OpenCode and Pi listed by upstream and Codex in development). For Claude Code agents the install runs end-to-end unattended via PAI_TEST_AUTOMATED=1: the agent ensures bun, executes the bootstrap, the wizard completes all 9 steps with sensible defaults, and the user runs /interview later to customize the placeholder identity. Other providers short-circuit cleanly via the maestro:halt marker with a pointer to upstream.",
+      "category": "Assistants",
+      "subcategory": "PAI-Setup",
+      "author": "Pedram Amini",
+      "authorLink": "https://www.pedramamini.com",
+      "tags": ["pai", "personal-ai-infrastructure", "daniel-miessler", "claude-code", "opencode", "assistant", "setup", "pulse", "telos", "digital-assistant", "life-os"],
+      "lastUpdated": "2026-05-06",
+      "minMaestroVersion": "0.16.17-RC",
+      "beta": true,
+      "path": "Assistants/PAI-Setup",
+      "documents": [
+        { "filename": "1_DETECT", "resetOnCompletion": false },
+        { "filename": "2_PLAN", "resetOnCompletion": false },
+        { "filename": "3_INSTALL", "resetOnCompletion": false },
+        { "filename": "4_VERIFY", "resetOnCompletion": false },
+        { "filename": "5_SUMMARY", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": null,
+      "prompt": null
+    },
+    {
+      "id": "development-superpowers-setup",
+      "title": "Superpowers Setup",
+      "description": "Detects which AI coding harness the agent is running inside (Claude Code, Codex, OpenCode, Factory Droid, Copilot CLI, Gemini CLI) and installs obra/superpowers for that specific provider — automating what it can and staging paste-ready instructions for steps the harness only accepts interactively. For unsupported harnesses (Qwen3 Coder, unknown) the playbook short-circuits via the maestro:halt marker.",
+      "category": "Development",
+      "subcategory": "Superpowers-Setup",
+      "author": "Pedram Amini",
+      "authorLink": "https://www.pedramamini.com",
+      "tags": ["superpowers", "setup", "plugin", "skills", "claude-code", "codex", "opencode", "gemini-cli", "copilot-cli", "factory-droid"],
+      "lastUpdated": "2026-05-06",
+      "minMaestroVersion": "0.16.17-RC",
+      "beta": true,
+      "path": "Development/Superpowers-Setup",
+      "documents": [
+        { "filename": "1_DETECT_PROVIDER", "resetOnCompletion": false },
+        { "filename": "2_PLAN_INSTALL", "resetOnCompletion": false },
+        { "filename": "3_INSTALL", "resetOnCompletion": false },
+        { "filename": "4_VERIFY", "resetOnCompletion": false },
+        { "filename": "5_SUMMARY", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": null,
+      "prompt": null
+    },
     {
       "id": "development-pr-bot-cleanup",
       "title": "PR Bot Thread Cleanup",
