@@ -20,7 +20,7 @@ Evaluate each documentation gap from the discovery phase and assign visibility a
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps (or skip if empty)**: Read LOOP_{{LOOP_NUMBER}}_GAPS.md. If it contains no gaps OR all gaps have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, rate each gap by VISIBILITY (PUBLIC/INTERNAL/UTILITY/IMPLEMENTATION) and IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW). Mark PUBLIC or INTERNAL visibility with HIGH or CRITICAL importance as PENDING for auto-documentation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Evaluate gaps (or skip if empty)**: Read LOOP_{{LOOP_NUMBER}}_GAPS.md. If it contains no gaps OR all gaps have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, rate each gap by VISIBILITY (PUBLIC/INTERNAL/UTILITY/IMPLEMENTATION) and IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW). Mark `[AUTO_DOC_VISIBILITY]` visibility with `[AUTO_DOC_IMPORTANCE]` importance as PENDING for auto-documentation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -45,8 +45,8 @@ Evaluate each documentation gap from the discovery phase and assign visibility a
 ### Auto-Documentation Criteria
 
 Gaps will be auto-documented if:
-- **Visibility:** PUBLIC or INTERNAL
-- **Importance:** CRITICAL or HIGH
+- **Visibility:** matches `[AUTO_DOC_VISIBILITY]`
+- **Importance:** matches `[AUTO_DOC_IMPORTANCE]`
 
 Gaps marked `PENDING - NEEDS CONTEXT` if:
 - Complex behavior that needs domain knowledge
@@ -72,7 +72,7 @@ Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with:
 - **Won't Do:** [count]
 
 ## Current Coverage: [XX.X%]
-## Target Coverage: 90%
+## Target Coverage: `[COVERAGE_TARGET]`
 ## Estimated Post-Loop Coverage: [XX.X%]
 
 ---

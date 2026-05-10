@@ -21,7 +21,7 @@ Write documentation for `PENDING` gaps from the evaluation phase. Create high-qu
 
 ## Implementation Checklist
 
-- [ ] **Write documentation (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, write documentation for ONE `PENDING` item with PUBLIC/INTERNAL visibility and HIGH/CRITICAL importance. Follow project documentation conventions. Update status to `IMPLEMENTED` in the plan. Log to DOC_LOG. Only document ONE export per task.
+- [ ] **Write documentation (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, write documentation for ONE `PENDING` item with `[AUTO_DOC_VISIBILITY]` visibility and `[AUTO_DOC_IMPORTANCE]` importance. Follow project documentation conventions. Update status to `IMPLEMENTED` in the plan. Log to DOC_LOG. Only document ONE export per task.
 
 ## Documentation Structure
 

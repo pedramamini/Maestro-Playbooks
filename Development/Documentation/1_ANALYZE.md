@@ -71,7 +71,7 @@ Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_DOC_REPORT.md` with:
 
 ## Summary
 - **Overall Coverage:** [XX.X%]
-- **Target:** 90%
+- **Target:** `[COVERAGE_TARGET]`
 - **Gap to Target:** [XX.X%]
 - **Documentation Style:** [describe the format used]
 
