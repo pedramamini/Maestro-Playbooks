@@ -20,6 +20,8 @@ This document is the **coverage gate** for the documentation pipeline. It checks
 
 ## Coverage Check
 
+- [ ] **Read configured values**: Read the agent prompt for `COVERAGE_TARGET`, `AUTO_DOC_VISIBILITY`, and `AUTO_DOC_IMPORTANCE`. These define the documentation coverage threshold and which exports are eligible for auto-documentation. Use these values throughout this document wherever you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` placeholders.
+
 - [ ] **Check coverage and decide**: Calculate current documentation coverage. If coverage is below `[COVERAGE_TARGET]` AND there are still `PENDING` items with `[AUTO_DOC_VISIBILITY]` visibility and `[AUTO_DOC_IMPORTANCE]` importance in LOOP_{{LOOP_NUMBER}}_PLAN.md, then reset documents 1-4 to continue the loop. If coverage >= `[COVERAGE_TARGET]` OR no documentable work remains, do NOT reset anything - allow the pipeline to exit.
 
 ## Reset Tasks (Only if coverage < `[COVERAGE_TARGET]` AND work remains)

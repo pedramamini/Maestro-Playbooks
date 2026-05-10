@@ -20,6 +20,8 @@ Evaluate each documentation gap from the discovery phase and assign visibility a
 
 ## Evaluation Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `COVERAGE_TARGET`, `AUTO_DOC_VISIBILITY`, and `AUTO_DOC_IMPORTANCE`. These define the documentation coverage threshold and which exports are eligible for auto-documentation. Use these values throughout this document wherever you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` placeholders.
+
 - [ ] **Evaluate gaps (or skip if empty)**: Read LOOP_{{LOOP_NUMBER}}_GAPS.md. If it contains no gaps OR all gaps have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, rate each gap by VISIBILITY (PUBLIC/INTERNAL/UTILITY/IMPLEMENTATION) and IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW). Mark `[AUTO_DOC_VISIBILITY]` visibility with `[AUTO_DOC_IMPORTANCE]` importance as PENDING for auto-documentation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria

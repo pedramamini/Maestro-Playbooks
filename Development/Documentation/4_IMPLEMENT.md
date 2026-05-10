@@ -21,6 +21,8 @@ Write documentation for `PENDING` gaps from the evaluation phase. Create high-qu
 
 ## Implementation Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `COVERAGE_TARGET`, `AUTO_DOC_VISIBILITY`, and `AUTO_DOC_IMPORTANCE`. These define the documentation coverage threshold and which exports are eligible for auto-documentation. Use these values throughout this document wherever you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` placeholders.
+
 - [ ] **Write documentation (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, write documentation for ONE `PENDING` item with `[AUTO_DOC_VISIBILITY]` visibility and `[AUTO_DOC_IMPORTANCE]` importance. Follow project documentation conventions. Update status to `IMPLEMENTED` in the plan. Log to DOC_LOG. Only document ONE export per task.
 
 ## Documentation Structure

@@ -20,6 +20,8 @@ Using the documentation report, identify specific undocumented exports that need
 
 ## Discovery Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `COVERAGE_TARGET`, `AUTO_DOC_VISIBILITY`, and `AUTO_DOC_IMPORTANCE`. These define the documentation coverage threshold and which exports are eligible for auto-documentation. Use these values throughout this document wherever you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` placeholders.
+
 - [ ] **Find documentation gaps (or skip if not needed)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_DOC_REPORT.md`. If the report shows overall coverage of `[COVERAGE_TARGET]` or higher, OR there are no modules with coverage below `[COVERAGE_TARGET]`, mark this task complete without creating a gaps file—the coverage target has been met. Otherwise, examine low-coverage modules, identify specific undocumented functions, classes, and types. List each gap with file path, export name, type, and why documentation is needed. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
 
 ## What to Look For

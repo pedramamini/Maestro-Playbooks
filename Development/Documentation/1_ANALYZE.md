@@ -21,6 +21,8 @@ Measure current documentation coverage and identify the documentation landscape.
 
 ## Analysis Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `COVERAGE_TARGET`, `AUTO_DOC_VISIBILITY`, and `AUTO_DOC_IMPORTANCE`. These define the documentation coverage threshold and which exports are eligible for auto-documentation. Use these values throughout this document wherever you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` placeholders.
+
 - [ ] **Measure documentation coverage (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_DOC_REPORT.md` already exists with coverage data (look for "Overall Coverage:" with a percentage). If it does, skip the survey and mark this task complete—the coverage report is already in place. If it doesn't exist, survey the codebase for exported/public functions, classes, and types. Count how many have doc comments vs how many are undocumented. Calculate the percentage. Identify the existing documentation style and conventions. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_DOC_REPORT.md`.
 
 ## What to Count
