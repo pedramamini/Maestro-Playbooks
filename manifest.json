@@ -91,7 +91,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 5,
-      "prompt": null
+      "prompt": "# Security Audit Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Auto-Fix Policy\n\nThe playbook auto-remediates only findings that match BOTH the severity AND remediability filters below. Findings outside these filters are routed to `PENDING - MANUAL REVIEW` (CRITICAL/HIGH but harder to fix) or `WON'T DO` (low impact).\n\n<!-- CONFIGURE: Comma-separated severity levels eligible for auto-fix. Findings outside this list are not auto-remediated. -->\n**AUTO_FIX_SEVERITY:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default; fix high-impact issues only\n- `CRITICAL`             — most conservative; only the most urgent\n- `CRITICAL,HIGH,MEDIUM` — aggressive; also auto-fix defense-in-depth issues\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW, INFO\n-->\n\n<!-- CONFIGURE: Comma-separated remediability tiers eligible for auto-fix. Tiers outside this list are flagged for manual triage instead. -->\n**AUTO_FIX_REMEDIABILITY:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default; skip fixes that need architectural changes\n- `EASY`                — most conservative; only mechanical / one-line fixes\n- `EASY,MEDIUM,HARD`    — aggressive; attempt complex refactors too\n- Valid tiers: EASY, MEDIUM, HARD, VERY HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a security audit agent. Each loop runs the full pipeline against the target codebase: analyze attack surface → find specific vulnerabilities → rate severity and remediability → fix the in-scope ones → check whether more loops are needed. The loop exits when no findings match the configured `AUTO_FIX_SEVERITY` × `AUTO_FIX_REMEDIABILITY` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[AUTO_FIX_SEVERITY]` or `[AUTO_FIX_REMEDIABILITY]` in those docs, substitute the values you configured here — do not use the inline default literals.\n"
     },
     {
       "id": "development-performance",
@@ -262,7 +262,7 @@
         "decision-making",
         "weighted-scoring"
       ],
-      "lastUpdated": "2026-01-09",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Best-PR",
       "documents": [
         { "filename": "1_ESTABLISH_CONTEXT", "resetOnCompletion": false },
@@ -273,7 +273,7 @@
       ],
       "loopEnabled": false,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# Best PR Comparison Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Pull Requests to Compare\n\n<!-- CONFIGURE: Full GitHub URL of the first PR -->\n**PR_A_URL:** `https://github.com/OWNER/REPO/pull/XXX`\n\n<!-- CONFIGURE: Full GitHub URL of the second PR (same feature, competing implementation) -->\n**PR_B_URL:** `https://github.com/OWNER/REPO/pull/YYY`\n\n### Category Weights\n\nThe playbook scores each PR across 7 categories on a 0-5 scale, then multiplies by category weight. Tune the weights to match your project's priorities. Total max score = 5 × sum of weights.\n\n<!-- CONFIGURE: Weight for security findings (input validation, injection, auth, secrets) -->\n**WEIGHT_SECURITY:** `3`\n\n<!-- CONFIGURE: Weight for correctness (feature completeness, edge cases, error handling) -->\n**WEIGHT_CORRECTNESS:** `3`\n\n<!-- CONFIGURE: Weight for performance (algorithm efficiency, queries, memory) -->\n**WEIGHT_PERFORMANCE:** `2`\n\n<!-- CONFIGURE: Weight for test coverage (unit + integration + edge cases) -->\n**WEIGHT_TESTS:** `2`\n\n<!-- CONFIGURE: Weight for code quality (readability, DRY, naming) -->\n**WEIGHT_QUALITY:** `1`\n\n<!-- CONFIGURE: Weight for documentation (comments, README, API docs) -->\n**WEIGHT_DOCS:** `1`\n\n<!-- CONFIGURE: Weight for PR size/simplicity (smaller often better) -->\n**WEIGHT_SIZE:** `1`\n\n### Tie Threshold\n\n<!-- CONFIGURE: Percentage difference below which the result is 'Too Close to Call'. Default 8% ≈ 5 points on a 65-point max -->\n**TIE_THRESHOLD_PCT:** `8`\n\n<!-- Examples / valid values:\n- 5 (stricter — only declare a winner with a clear lead)\n- 8 (default)\n- 12 (looser — declare a winner more often)\n-->\n\n---\n\n## Agent Instructions\n\nThis playbook objectively compares two competing PRs that implement the same feature, scores them against weighted categories, and determines a winner.\n\nThe numbered task documents reference the configured variables above as `[VARIABLE_NAME]` placeholders — substitute the configured values throughout. In particular:\n\n- `[PR_A_URL]` and `[PR_B_URL]` are the targets fetched in document 1\n- `[WEIGHT_SECURITY]`, `[WEIGHT_CORRECTNESS]`, etc. drive the weighted scoring math in documents 2-4\n- `[TIE_THRESHOLD_PCT]` is the cutoff used in document 4 to declare 'Too Close to Call'\n"
     }
   ]
 }

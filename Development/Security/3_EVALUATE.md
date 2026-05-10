@@ -20,7 +20,9 @@ Evaluate each security finding from the discovery phase and assign severity and 
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate one finding (or skip if empty)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_VULNERABILITIES.md. If it contains no findings OR all findings have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, pick one unevaluated finding, rate by SEVERITY (CRITICAL/HIGH/MEDIUM/LOW) and REMEDIABILITY (EASY/MEDIUM/HARD), mark CRITICAL or HIGH severity with EASY/MEDIUM remediation as PENDING for auto-fix, and append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Read configured values**: Read the agent prompt for `AUTO_FIX_SEVERITY` and `AUTO_FIX_REMEDIABILITY`. These define which findings are eligible for auto-remediation. Use these values throughout this document wherever you see `[AUTO_FIX_SEVERITY]` or `[AUTO_FIX_REMEDIABILITY]` placeholders.
+
+- [ ] **Evaluate one finding (or skip if empty)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_VULNERABILITIES.md. If it contains no findings OR all findings have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, pick one unevaluated finding, rate by SEVERITY (CRITICAL/HIGH/MEDIUM/LOW) and REMEDIABILITY (EASY/MEDIUM/HARD), mark `[AUTO_FIX_SEVERITY]` severity with `[AUTO_FIX_REMEDIABILITY]` remediation as PENDING for auto-fix, and append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -46,11 +48,11 @@ Evaluate each security finding from the discovery phase and assign severity and 
 ### Auto-Remediation Criteria
 
 Vulnerabilities will be auto-remediated if:
-- **Severity:** CRITICAL or HIGH
-- **Remediability:** EASY or MEDIUM
+- **Severity:** matches `[AUTO_FIX_SEVERITY]`
+- **Remediability:** matches `[AUTO_FIX_REMEDIABILITY]`
 
 Vulnerabilities marked `PENDING - MANUAL REVIEW` if:
-- **Severity:** CRITICAL/HIGH but **Remediability:** HARD
+- **Severity:** matches `[AUTO_FIX_SEVERITY]` but **Remediability:** HARD
 - Complex fixes that need human judgment
 - Potential for breaking changes
 
