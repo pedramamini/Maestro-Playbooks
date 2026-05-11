@@ -42,15 +42,15 @@ Each loop iteration creates working documents with the loop number:
 - Repeated patterns that could be abstracted
 
 ### File Size Reduction
-- Files over 500 LOC that should be split
+- Files over `MAX_FILE_LOC` LOC that should be split
 - Components with too many responsibilities
 - Modules that violate single-responsibility principle
 
 ### Complexity Simplification
-- Functions over 50 LOC
-- Deeply nested conditionals (3+ levels)
+- Functions over `MAX_FUNCTION_LOC` LOC
+- Deeply nested conditionals (`MAX_NESTING_DEPTH`+ levels)
 - Complex boolean expressions
-- Functions with too many parameters (5+)
+- Functions with too many parameters (`MAX_PARAMETERS`+)
 
 ### Code Organization
 - Dead code removal

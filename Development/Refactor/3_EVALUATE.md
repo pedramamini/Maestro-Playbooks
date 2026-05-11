@@ -22,6 +22,8 @@ Evaluate each refactoring candidate with **risk and benefit ratings** to determi
 
 ## Evaluation Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, and `[AUTO_IMPLEMENT_BENEFIT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Evaluate one candidate (or skip if empty)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. If it contains no findings OR all findings have already been evaluated in LOOP_{{LOOP_NUMBER}}_PLAN.md, mark this task complete without changes. Otherwise, pick one unevaluated candidate, assess risk/benefit, and append to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Risk Assessment Criteria

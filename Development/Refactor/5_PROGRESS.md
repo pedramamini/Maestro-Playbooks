@@ -9,19 +9,21 @@
 
 ## Purpose
 
-This document is the **progress gate** for the refactoring pipeline. It checks whether there are still `PENDING` refactoring items with LOW risk and HIGH/VERY HIGH benefit to implement. **This is the only document with Reset ON** - it controls loop continuation by resetting tasks in documents 1-4 when more work is needed.
+This document is the **progress gate** for the refactoring pipeline. It checks whether there are still `PENDING` refactoring items matching [AUTO_IMPLEMENT_RISK] risk and [AUTO_IMPLEMENT_BENEFIT] benefit to implement. **This is the only document with Reset ON** - it controls loop continuation by resetting tasks in documents 1-4 when more work is needed.
 
 ## Instructions
 
 1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** to check for remaining work
 2. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md`** to check tactic exhaustion status
-3. **Check if there are any `PENDING` items** with LOW risk AND HIGH/VERY HIGH benefit (not `IMPLEMENTED`, not `WON'T DO`, not `PENDING - MANUAL REVIEW`)
+3. **Check if there are any `PENDING` items** with [AUTO_IMPLEMENT_RISK] risk AND [AUTO_IMPLEMENT_BENEFIT] benefit (not `IMPLEMENTED`, not `WON'T DO`, not `PENDING - MANUAL REVIEW`)
 4. **If auto-implementable PENDING items exist OR tactics remain**: Reset all tasks in documents 1-4 to continue the loop
 5. **If NO auto-implementable PENDING items AND all tactics exhausted**: Do NOT reset - pipeline exits
 
 ## Progress Check
 
-- [ ] **Check for remaining work**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are items with status exactly `PENDING` that have LOW risk AND HIGH/VERY HIGH benefit, OR (2) CANDIDATES.md does NOT contain `## ALL_TACTICS_EXHAUSTED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no auto-implementable PENDING items AND all tactics are exhausted.
+- [ ] **Read configured values**: Read the agent prompt for `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, and `[AUTO_IMPLEMENT_BENEFIT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Check for remaining work**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are items with status exactly `PENDING` matching [AUTO_IMPLEMENT_RISK] risk AND [AUTO_IMPLEMENT_BENEFIT] benefit, OR (2) CANDIDATES.md does NOT contain `## ALL_TACTICS_EXHAUSTED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no auto-implementable PENDING items AND all tactics are exhausted.
 
 ## Reset Tasks (Only if work remains)
 
@@ -40,7 +42,7 @@ If the progress check above determines we need to continue (auto-implementable P
 IF LOOP_{{LOOP_NUMBER}}_PLAN.md doesn't exist:
     → Do NOT reset anything (PIPELINE JUST STARTED - LET IT RUN)
 
-ELSE IF items with status exactly `PENDING` exist with LOW risk AND HIGH/VERY HIGH benefit:
+ELSE IF items with status exactly `PENDING` exist matching [AUTO_IMPLEMENT_RISK] risk AND [AUTO_IMPLEMENT_BENEFIT] benefit:
     → Reset documents 1-4 (CONTINUE TO IMPLEMENT PENDING ITEMS)
 
 ELSE IF LOOP_{{LOOP_NUMBER}}_CANDIDATES.md does NOT contain "ALL_TACTICS_EXHAUSTED":
@@ -51,7 +53,7 @@ ELSE:
 ```
 
 **Key insight:** The loop should continue if EITHER:
-1. There are PENDING items with LOW risk AND HIGH/VERY HIGH benefit to implement, OR
+1. There are PENDING items matching [AUTO_IMPLEMENT_RISK] risk AND [AUTO_IMPLEMENT_BENEFIT] benefit to implement, OR
 2. There are still tactics to execute (no `ALL_TACTICS_EXHAUSTED` marker)
 
 ## How This Works
@@ -64,7 +66,7 @@ This document controls loop continuation through resets:
 
 Exit when ALL of these are true:
 1. **Tactics exhausted**: `LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` contains `## ALL_TACTICS_EXHAUSTED`
-2. **No auto-implementable PENDING items**: All LOW risk + HIGH/VERY HIGH benefit items are `IMPLEMENTED`, `WON'T DO`, or `PENDING - MANUAL REVIEW`
+2. **No auto-implementable PENDING items**: All matching [AUTO_IMPLEMENT_RISK] + [AUTO_IMPLEMENT_BENEFIT] items are `IMPLEMENTED`, `WON'T DO`, or `PENDING - MANUAL REVIEW`
 
 Also exit if:
 3. **Max Loops**: Hit the loop limit in Batch Runner
@@ -72,7 +74,7 @@ Also exit if:
 ### Continue Conditions (Reset Documents 1-4)
 
 Continue if EITHER is true:
-1. There are items with status exactly `PENDING` that have LOW risk AND HIGH/VERY HIGH benefit in LOOP_{{LOOP_NUMBER}}_PLAN.md
+1. There are items with status exactly `PENDING` matching [AUTO_IMPLEMENT_RISK] risk AND [AUTO_IMPLEMENT_BENEFIT] benefit in LOOP_{{LOOP_NUMBER}}_PLAN.md
 2. `LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` does NOT contain `## ALL_TACTICS_EXHAUSTED` (more tactics to run)
 
 ## Current Status
@@ -81,7 +83,7 @@ Before making a decision, check both files:
 
 | Metric | Value |
 |--------|-------|
-| **PENDING (LOW risk, HIGH+ benefit)** | ___ |
+| **PENDING (matching auto-implement policy)** | ___ |
 | **PENDING (other)** | ___ |
 | **IMPLEMENTED** | ___ |
 | **WON'T DO** | ___ |
@@ -113,7 +115,7 @@ Track progress across loops:
 
 ## Notes
 
-- This playbook focuses on LOW risk refactors with HIGH or VERY HIGH benefit
+- This playbook focuses on refactors matching [AUTO_IMPLEMENT_RISK] risk × [AUTO_IMPLEMENT_BENEFIT] benefit
 - MEDIUM and HIGH risk refactors are marked for manual review
 - Each loop iteration implements ONE refactor at a time for safety
 - The REFACTOR_LOG tracks all changes across loops for easy review
