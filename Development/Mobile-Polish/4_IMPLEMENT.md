@@ -23,7 +23,9 @@ Implement mobile polish improvements for `PENDING` items from the evaluation pha
 
 ## Implementation Checklist
 
-- [ ] **Implement mobile fix (or skip if none)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, implement exactly ONE `PENDING` item with EASY or MEDIUM effort. Follow framework conventions (Next.js, Tailwind, etc.). Test on mobile viewport. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/MOBILE_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE fix per task execution.
+- [ ] **Read configured values**: Read the agent prompt for `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, and `[AUTO_IMPLEMENT_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders. When generating Tailwind classes from examples like `min-h-[44px]` or `md:flex`, substitute the configured values.
+
+- [ ] **Implement mobile fix (or skip if none)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`. If the file doesn't exist OR contains no items with status exactly `PENDING` matching `[AUTO_IMPLEMENT_IMPACT]` × `[AUTO_IMPLEMENT_EFFORT]`, mark this task complete without changes. Otherwise, implement exactly ONE matching `PENDING` item. Follow framework conventions (Next.js, Tailwind, etc.). Test on mobile viewport. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/MOBILE_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE fix per task execution.
 
 ## Implementation Guidelines
 
@@ -257,7 +259,7 @@ import Image from 'next/image'
 
 #### 4. Touch Target Sizes
 
-**Minimum 44×44px for all interactive elements:**
+**Minimum [MIN_TOUCH_TARGET_PX]×[MIN_TOUCH_TARGET_PX]px for all interactive elements:**
 
 ```tsx
 // Before - too small

@@ -22,7 +22,7 @@ The Mobile Polish playbook implements:
    - Accessible mobile navigation
 
 3. **Touch Optimization**
-   - Minimum 44×44px touch targets (WCAG compliant)
+   - Minimum `MIN_TOUCH_TARGET_PX`×`MIN_TOUCH_TARGET_PX`px touch targets (default 44, WCAG compliant; configurable in the agent prompt)
    - Adequate spacing between interactive elements
    - Mobile-friendly button and link sizes
    - Touch-optimized form controls

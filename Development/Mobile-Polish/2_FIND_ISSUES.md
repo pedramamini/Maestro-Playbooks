@@ -22,6 +22,8 @@ Using the assessment from the analysis phase, identify specific mobile polish is
 
 ## Discovery Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, and `[AUTO_IMPLEMENT_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Find mobile issues (or skip if comprehensive)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ASSESSMENT.md`. If the assessment shows the site is fully mobile-optimized (responsive navigation, proper viewport, lazy loading, appropriate touch targets, no critical issues), mark this task complete without creating an issues file. Otherwise, search for specific components and code that need mobile optimization. Document each issue with file path, problem description, and suggested fix. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ISSUES.md`.
 
 ## What to Look For
@@ -79,7 +81,7 @@ grep -r "container" --include="*.tsx" --include="*.jsx"
 
 ### Touch Target Issues
 
-**Minimum size:** 44×44px (Apple) or 48×48px (Android)
+**Minimum size:** [MIN_TOUCH_TARGET_PX]×[MIN_TOUCH_TARGET_PX]px (Apple HIG default 44; Material Design 48)
 
 Search for small interactive elements:
 
@@ -94,7 +96,7 @@ grep -r "<button.*<.*Icon" --include="*.tsx" --include="*.jsx"
 
 **Issue indicators:**
 
-- Buttons smaller than 44px
+- Buttons smaller than [MIN_TOUCH_TARGET_PX]px
 - Links with insufficient spacing
 - Icon buttons without adequate tap area
 - Dense navigation items
@@ -132,7 +134,7 @@ grep -r "<textarea" --include="*.tsx" --include="*.jsx"
 
 **Issue indicators:**
 
-- Small input fields (< 44px height)
+- Small input fields (< [MIN_TOUCH_TARGET_PX]px height)
 - Missing mobile-friendly input types (tel, email, url)
 - No autocomplete attributes
 - Labels not properly associated with inputs
@@ -223,7 +225,7 @@ Create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ISSUES.md` with:
 - **Priority:** CRITICAL
 - **File:** `[components/Header.tsx:15-45]`
 - **Current State:** Horizontal menu links overflow on mobile
-- **Impact:** Navigation unusable on screens < 768px
+- **Impact:** Navigation unusable on screens < [MOBILE_BREAKPOINT_PX]px
 - **Fix Required:** Implement responsive hamburger menu for mobile
 - **Approach:**
   1. Add mobile menu state (useState)
@@ -263,7 +265,7 @@ Create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ISSUES.md` with:
 - **File:** `[components/CallToAction.tsx:8-12]`
 - **Current State:** Buttons are 36×36px on mobile
 - **Impact:** Difficult to tap, poor mobile UX, accessibility issue
-- **Fix Required:** Increase to minimum 44×44px
+- **Fix Required:** Increase to minimum [MIN_TOUCH_TARGET_PX]×[MIN_TOUCH_TARGET_PX]px
 - **Current Code:**
 
   ```tsx

@@ -22,7 +22,9 @@ Evaluate each mobile polish issue from the discovery phase and assign priority a
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate issues (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ISSUES.md`. If it contains no issues OR all issues have been evaluated in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`, mark this task complete without changes. Otherwise, rate each issue by IMPACT (CRITICAL/HIGH/MEDIUM/LOW) and EFFORT (EASY/MEDIUM/HARD). Mark EASY+HIGH impact or better as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`.
+- [ ] **Read configured values**: Read the agent prompt for `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, and `[AUTO_IMPLEMENT_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Evaluate issues (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ISSUES.md`. If it contains no issues OR all issues have been evaluated in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`, mark this task complete without changes. Otherwise, rate each issue by IMPACT (CRITICAL/HIGH/MEDIUM/LOW) and EFFORT (EASY/MEDIUM/HARD). Mark items matching `[AUTO_IMPLEMENT_IMPACT]` × `[AUTO_IMPLEMENT_EFFORT]` as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md`.
 
 ## Rating Criteria
 

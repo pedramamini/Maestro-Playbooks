@@ -235,7 +235,7 @@
       "author": "Kayvan Sylvan",
       "authorLink": "https://www.sylvan.com",
       "tags": ["mobile", "responsive", "react", "nextjs", "tailwind", "performance", "accessibility", "touch-targets", "hamburger-menu"],
-      "lastUpdated": "2026-01-04",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Mobile-Polish",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -246,7 +246,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# Mobile Polish Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Touch & Layout Targets\n\n<!-- CONFIGURE: Minimum touch-target size in pixels. Apple HIG = 44, Material Design = 48. -->\n**MIN_TOUCH_TARGET_PX:** `44`\n\n<!-- Examples / valid values:\n- `44`   — Apple Human Interface Guidelines default\n- `48`   — Material Design default (recommended for Android-first apps)\n- `40`   — looser; for desktop-leaning responsive layouts\n-->\n\n<!-- CONFIGURE: Tailwind/CSS breakpoint (in px) where desktop nav transitions to mobile nav. -->\n**MOBILE_BREAKPOINT_PX:** `768`\n\n<!-- Examples / valid values:\n- `768`   — Tailwind `md:` default (recommended)\n- `640`   — Tailwind `sm:` for narrower phone-first cutoff\n- `1024`  — Tailwind `lg:` for tablet-leaning apps\n-->\n\n### Auto-Implement Policy\n\nThe playbook auto-applies fixes that match BOTH the impact AND effort filters below. Fixes outside these filters are flagged for manual review.\n\n<!-- CONFIGURE: Comma-separated impact levels eligible for auto-fix. -->\n**AUTO_IMPLEMENT_IMPACT:** `HIGH,CRITICAL`\n\n<!-- Examples / valid values:\n- `HIGH,CRITICAL`        — recommended default\n- `CRITICAL`             — most conservative\n- `MEDIUM,HIGH,CRITICAL` — aggressive\n- Valid levels: LOW, MEDIUM, HIGH, CRITICAL\n-->\n\n<!-- CONFIGURE: Comma-separated effort tiers eligible for auto-fix. -->\n**AUTO_IMPLEMENT_EFFORT:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default\n- `EASY`                — most conservative; only one-line Tailwind class additions\n- `EASY,MEDIUM,HARD`    — aggressive; accept new components and refactors\n- Valid tiers: EASY, MEDIUM, HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a mobile responsiveness agent for React/Next.js codebases. Each loop runs the pipeline against the target site: analyze responsive patterns → find mobile-unfriendly code → rate each by impact and effort → apply the in-scope fixes → check whether more work remains. The loop exits when no fixes match the configured `AUTO_IMPLEMENT_IMPACT` × `AUTO_IMPLEMENT_EFFORT` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, or `[AUTO_IMPLEMENT_EFFORT]` in those docs, substitute the values you configured here. Code examples using literal Tailwind classes (`min-h-[44px]`, `md:flex`) reflect the defaults — adapt them to the configured values when generating new code."
     },
     {
       "id": "development-best-pr",

@@ -22,6 +22,8 @@ Analyze the React-based website to understand its current mobile-readiness state
 
 ## Analysis Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, and `[AUTO_IMPLEMENT_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders. Code examples using Tailwind literals like `min-h-[44px]` or `md:flex` reflect the defaults — substitute the configured values when generating new code.
+
 - [ ] **Assess mobile readiness (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_ASSESSMENT.md` already exists with tech stack and baseline assessment. If it does, skip the analysis and mark this task complete—the assessment is already in place. If it doesn't exist, examine the project structure, identify frameworks and libraries, check for existing mobile optimizations, and document current state.
 
 ## What to Identify
@@ -202,7 +204,7 @@ The following tactics will be used to find specific mobile polish opportunities:
 
 1. **Responsive Navigation** - Implement hamburger menu
 2. **Viewport & Meta Tags** - Ensure proper configuration
-3. **Touch Targets** - Verify 44×44px minimum sizes
+3. **Touch Targets** - Verify [MIN_TOUCH_TARGET_PX]×[MIN_TOUCH_TARGET_PX]px minimum sizes
 4. **Image Optimization** - Add lazy loading and responsive images
 5. **Form Optimization** - Mobile-friendly inputs
 6. **Performance** - Optimize for mobile networks
