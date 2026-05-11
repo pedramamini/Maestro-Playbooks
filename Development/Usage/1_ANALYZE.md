@@ -13,14 +13,16 @@ Survey the codebase to discover user-facing features and read the current README
 
 ## Instructions
 
-1. **Read the README.md** at `{{AGENT_PATH}}/README.md` (or `{{AGENT_PATH}}/readme.md`)
+1. **Read the README** at `{{AGENT_PATH}}/[README_PATH]`
 2. **Survey the codebase** to identify major user-facing features
 3. **Create a feature inventory** listing both documented and actual features
 4. **Output report** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md`
 
 ## Analysis Checklist
 
-- [ ] **Discover features and scan README (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md` already exists with feature data (at least one feature listed in either "Features Documented in README" or "Features Found in Code" tables). If it does, skip the survey and mark this task complete—the feature inventory is already in place. If it doesn't exist, read the project's README.md to extract what features are currently documented. Survey the codebase (entry points, CLI commands, API endpoints, UI components, configuration options) to identify actual user-facing features. Output a feature inventory to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md`.
+- [ ] **Read configured values**: Read the agent prompt for `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, and `[AUTO_FIX_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Discover features and scan README (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md` already exists with feature data (at least one feature listed in either "Features Documented in README" or "Features Found in Code" tables). If it does, skip the survey and mark this task complete—the feature inventory is already in place. If it doesn't exist, read the project's README at `{{AGENT_PATH}}/[README_PATH]` to extract what features are currently documented. Survey the codebase (entry points, CLI commands, API endpoints, UI components, configuration options) to identify actual user-facing features. Output a feature inventory to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md`.
 
 ## What to Look For in the Codebase
 

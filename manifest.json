@@ -190,7 +190,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["readme", "documentation", "accuracy", "features", "usage"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Usage",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -201,7 +201,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 5,
-      "prompt": null
+      "prompt": "# README Accuracy Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### README File Location\n\n<!-- CONFIGURE: Path to the README file the playbook should audit and update, relative to the project root. -->\n**README_PATH:** `README.md`\n\n<!-- Examples / valid values:\n- `README.md`        — recommended default\n- `readme.md`        — lowercase variant\n- `docs/README.md`   — for projects with docs subfolder\n- `Documentation.md` — for projects with a different convention\n-->\n\n### Auto-Fix Policy\n\nThe playbook auto-fixes only gaps that match BOTH the importance AND effort filters below. Gaps outside these filters are flagged for manual review.\n\n<!-- CONFIGURE: Comma-separated importance levels eligible for auto-fix. -->\n**AUTO_FIX_IMPORTANCE:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default\n- `CRITICAL`             — most conservative\n- `CRITICAL,HIGH,MEDIUM` — aggressive\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW\n-->\n\n<!-- CONFIGURE: Comma-separated effort tiers eligible for auto-fix. -->\n**AUTO_FIX_EFFORT:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default\n- `EASY`                — most conservative; only one-line additions\n- `EASY,MEDIUM,HARD`    — aggressive\n- Valid tiers: EASY, MEDIUM, HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a README accuracy agent. Each loop runs the pipeline against the target codebase: survey actual features → compare against the README at `[README_PATH]` → rate each gap by importance and effort → apply the in-scope fixes → check whether more work remains. The loop exits when no gaps match the configured `AUTO_FIX_IMPORTANCE` × `AUTO_FIX_EFFORT` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, or `[AUTO_FIX_EFFORT]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "research-market",

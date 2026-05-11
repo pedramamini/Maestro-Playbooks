@@ -4,7 +4,7 @@ A systematic Auto Run playbook for auditing and updating your project's README t
 
 ## Requirements
 
-**Agent Prompt**: This playbook works with Maestro's **default agent prompt**. No custom agent configuration required.
+**Agent Prompt**: This playbook uses a custom agent prompt that surfaces `README_PATH` (default `README.md`), `AUTO_FIX_IMPORTANCE` (default `CRITICAL,HIGH`), and `AUTO_FIX_EFFORT` (default `EASY,MEDIUM`) as configurable variables. Tune them in the Auto Run panel before launch — especially `README_PATH` if your project's README lives somewhere non-standard.
 
 ## Overview
 
@@ -22,7 +22,7 @@ This playbook creates an automated pipeline that:
 | `1_ANALYZE.md` | Survey codebase for features, scan README | No |
 | `2_FIND_GAPS.md` | Compare features vs README, find discrepancies | No |
 | `3_EVALUATE.md` | Rate each gap by user importance & fix effort | No |
-| `4_IMPLEMENT.md` | Update README for CRITICAL/HIGH importance gaps | No |
+| `4_IMPLEMENT.md` | Update README for gaps matching `AUTO_FIX_IMPORTANCE` × `AUTO_FIX_EFFORT` | No |
 | `5_PROGRESS.md` | Accuracy gate - resets 1-4 if gaps remain, exits if accurate | **Yes** |
 
 ## Generated Files

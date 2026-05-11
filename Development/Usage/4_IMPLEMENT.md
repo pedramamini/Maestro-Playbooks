@@ -14,14 +14,16 @@ Implement ONE documentation fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PL
 ## Instructions
 
 1. **Read the plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
-2. **Find a `PENDING` item** with CRITICAL/HIGH importance and EASY/MEDIUM effort
-3. **Implement the fix** in `{{AGENT_PATH}}/README.md`
+2. **Find a `PENDING` item** matching `[AUTO_FIX_IMPORTANCE]` × `[AUTO_FIX_EFFORT]`
+3. **Implement the fix** in `{{AGENT_PATH}}/[README_PATH]`
 4. **Update status** to `IMPLEMENTED` in the plan file
 5. **Log the change** to `{{AUTORUN_FOLDER}}/USAGE_LOG_{{AGENT_NAME}}_{{DATE}}.md`
 
 ## Implementation Checklist
 
-- [ ] **Fix one documentation gap (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, find an item with status exactly `PENDING`, implement the fix in the project's README.md, mark as IMPLEMENTED in the plan, and log to {{AUTORUN_FOLDER}}/USAGE_LOG_{{AGENT_NAME}}_{{DATE}}.md. Only fix ONE gap per task.
+- [ ] **Read configured values**: Read the agent prompt for `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, and `[AUTO_FIX_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Fix one documentation gap (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` matching `[AUTO_FIX_IMPORTANCE]` × `[AUTO_FIX_EFFORT]`, mark this task complete without changes. Otherwise, find an item matching all criteria, implement the fix in `{{AGENT_PATH}}/[README_PATH]`, mark as IMPLEMENTED in the plan, and log to {{AUTORUN_FOLDER}}/USAGE_LOG_{{AGENT_NAME}}_{{DATE}}.md. Only fix ONE gap per task.
 
 ## Fix Types
 
