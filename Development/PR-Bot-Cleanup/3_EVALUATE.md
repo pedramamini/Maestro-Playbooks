@@ -11,6 +11,8 @@
 
 ## Tasks
 
+- [ ] **Read configured values**: Read the agent prompt for `[PR_URL]` and `[BOT_REVIEWERS]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] Re-read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_THREADS.md`, inspect the current PR head for each unresolved bot thread, and create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with one section per thread that classifies it as `STALE`, `DUPLICATE`, `PENDING`, `BLOCKED`, or `MANUAL`, plus the concrete evidence used for that judgment.
 
 - [ ] Resolve any bot thread that is already fixed, stale, or duplicated on the current head immediately on GitHub, record the thread URL and reason in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, and append the same action to `{{AUTORUN_FOLDER}}/BOT_THREAD_LEDGER.md`; do not touch human review threads.

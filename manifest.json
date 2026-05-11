@@ -58,7 +58,7 @@
       "author": "Jeff Scott Ward",
       "authorLink": "https://github.com/jeffscottward",
       "tags": ["pull-request", "github", "coderabbit", "greptile", "review-bots", "thread-cleanup"],
-      "lastUpdated": "2026-04-10",
+      "lastUpdated": "2026-05-10",
       "path": "Development/PR-Bot-Cleanup",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -69,7 +69,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# PR Bot Thread Cleanup Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Target Pull Request\n\n<!-- CONFIGURE: Full GitHub URL of the PR whose bot threads should be cleaned up. Required — the playbook will not infer this. -->\n**PR_URL:** `https://github.com/OWNER/REPO/pull/XXX`\n\n### Bot Reviewers in Scope\n\n<!-- CONFIGURE: Comma-separated list of bot reviewer login names (or matching prefixes). Threads from reviewers outside this list are ignored. -->\n**BOT_REVIEWERS:** `coderabbitai,greptile`\n\n<!-- Examples / valid values:\n- `coderabbitai,greptile`             — recommended default; the two most common review bots\n- `coderabbitai`                      — CodeRabbit only\n- `coderabbitai,greptile,sourcery-ai` — also include Sourcery\n- `coderabbitai,greptile,bito-bot,qodo-merge` — broad sweep\n-->\n\n---\n\n## Agent Instructions\n\nThis playbook cleans up unresolved PR review threads from automated review bots. Each loop iteration: re-fetches PR state, lists unresolved bot-authored threads, evaluates each as actionable vs. stale, applies a small validated batch of fixes, pushes, and re-polls. Loop exits when no `PENDING` bot findings remain.\n\nThe numbered task documents reference the configured variables as `[VARIABLE_NAME]` placeholders — substitute the configured values throughout. In particular:\n\n- `[PR_URL]` is the target fetched in document 1 and re-polled each iteration\n- `[BOT_REVIEWERS]` defines the in-scope reviewer login names for thread filtering in documents 2 and 4\n\nHuman review threads are always ignored regardless of `BOT_REVIEWERS` — this playbook does not touch threads authored by people."
     },
     {
       "id": "development-security",
