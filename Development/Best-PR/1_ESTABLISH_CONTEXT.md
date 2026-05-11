@@ -14,27 +14,27 @@ Understand the feature both PRs implement, fetch their diffs, and establish the 
 
 ## Pull Request Information
 
-**PR-A**: <https://github.com/OWNER/REPO/pull/XXX>
-
-**PR-B**: <https://github.com/OWNER/REPO/pull/YYY>
-
-Note: Update both URLs above before running this playbook
+PR URLs and category weights are configured in the agent prompt. The agent should read them before starting.
 
 ## Tasks
 
+### Task 0: Read Configured Values
+
+- [ ] **Read configured values**: Read the agent prompt for `[PR_A_URL]`, `[PR_B_URL]`, the category weights (`[WEIGHT_SECURITY]`, `[WEIGHT_CORRECTNESS]`, `[WEIGHT_PERFORMANCE]`, `[WEIGHT_TESTS]`, `[WEIGHT_QUALITY]`, `[WEIGHT_DOCS]`, `[WEIGHT_SIZE]`), and `[TIE_THRESHOLD_PCT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 ### Task 1: Fetch PR-A Details
 
-- [ ] **Get PR-A information**: Run `gh pr view <PR-A-URL> --json title,body,additions,deletions,changedFiles,author` to get PR metadata.
+- [ ] **Get PR-A information**: Run `gh pr view [PR_A_URL] --json title,body,additions,deletions,changedFiles,author` to get PR metadata.
 
-- [ ] **Get PR-A diff**: Run `gh pr diff <PR-A-URL>` to get the full diff. Save key observations.
+- [ ] **Get PR-A diff**: Run `gh pr diff [PR_A_URL]` to get the full diff. Save key observations.
 
 - [ ] **Note PR-A files changed**: List the files modified by PR-A.
 
 ### Task 2: Fetch PR-B Details
 
-- [ ] **Get PR-B information**: Run `gh pr view <PR-B-URL> --json title,body,additions,deletions,changedFiles,author` to get PR metadata.
+- [ ] **Get PR-B information**: Run `gh pr view [PR_B_URL] --json title,body,additions,deletions,changedFiles,author` to get PR metadata.
 
-- [ ] **Get PR-B diff**: Run `gh pr diff <PR-B-URL>` to get the full diff. Save key observations.
+- [ ] **Get PR-B diff**: Run `gh pr diff [PR_B_URL]` to get the full diff. Save key observations.
 
 - [ ] **Note PR-B files changed**: List the files modified by PR-B.
 
@@ -80,62 +80,59 @@ Note: Update both URLs above before running this playbook
 
 ## Weighted Evaluation Categories
 
-### 1. Security (Weight: 3x)
+### 1. Security (Weight: [WEIGHT_SECURITY]x)
 - Input validation present and correct
 - No injection vulnerabilities (SQL, command, XSS)
 - Proper authentication/authorization checks
 - No secrets or credentials exposed
 - Secure data handling
 
-### 2. Correctness (Weight: 3x)
+### 2. Correctness (Weight: [WEIGHT_CORRECTNESS]x)
 - Feature completeness (does it fully solve the problem?)
 - Edge case handling
 - Error handling robustness
 - Null/undefined safety
 - Logic correctness
 
-### 3. Performance (Weight: 2x)
+### 3. Performance (Weight: [WEIGHT_PERFORMANCE]x)
 - Algorithm efficiency
 - No N+1 queries or unnecessary loops
 - Memory usage considerations
 - Caching where appropriate
 - Async/concurrent handling
 
-### 4. Test Coverage (Weight: 2x)
+### 4. Test Coverage (Weight: [WEIGHT_TESTS]x)
 - Unit test coverage for new code
 - Integration tests where needed
 - Edge case tests
 - Test quality and clarity
 - Mocking appropriateness
 
-### 5. Code Quality (Weight: 1x)
+### 5. Code Quality (Weight: [WEIGHT_QUALITY]x)
 - Readability and clarity
 - Follows existing codebase patterns
 - DRY principle adherence
 - Appropriate abstraction level
 - Naming conventions
 
-### 6. Documentation (Weight: 1x)
+### 6. Documentation (Weight: [WEIGHT_DOCS]x)
 - Code comments where needed
 - README/docs updated if applicable
 - API documentation
 - Clear commit messages
 
-### 7. PR Size/Simplicity (Weight: 1x)
+### 7. PR Size/Simplicity (Weight: [WEIGHT_SIZE]x)
 - Lines of code changed (smaller often better)
 - Number of files touched
 - Complexity introduced
 - Focused scope (no unrelated changes)
 
 ## Maximum Possible Score
-- Security: 5 × 3 = 15
-- Correctness: 5 × 3 = 15
-- Performance: 5 × 2 = 10
-- Test Coverage: 5 × 2 = 10
-- Code Quality: 5 × 1 = 5
-- Documentation: 5 × 1 = 5
-- PR Size: 5 × 1 = 5
-- **Total: 65 points**
+
+For each category, max contribution = 5 × (configured weight).
+Total max = 5 × ([WEIGHT_SECURITY] + [WEIGHT_CORRECTNESS] + [WEIGHT_PERFORMANCE] + [WEIGHT_TESTS] + [WEIGHT_QUALITY] + [WEIGHT_DOCS] + [WEIGHT_SIZE]).
+
+With default weights (3, 3, 2, 2, 1, 1, 1) the total is 65 points.
 ```
 
 ## Success Criteria

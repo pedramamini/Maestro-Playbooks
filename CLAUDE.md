@@ -133,6 +133,42 @@ Reference assets using `{{AUTORUN_FOLDER}}/assets/filename`. Maestro copies the 
 
 **Exchange-only feature.** The `assets/` folder is bundled only for playbooks PR'd to this repository and installed via the in-app Playbook Exchange. Maestro's user-share / peer-to-peer flows transport only the markdown documents and drop `assets/`. If a playbook depends on bundled files, it must be contributed here via PR (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
+### Outer Prompt Convention
+
+The manifest's `prompt` field pre-fills the Auto Run panel when a user installs a playbook from the Exchange. Use it to surface per-run configuration variables (thresholds, targets, scopes, URLs) instead of hardcoding them in task documents.
+
+**When to lift a variable:** lift values the user would reasonably tune per run AND that are not auto-detectable. Don't lift values inferable from the codebase or workflow constants that define the playbook's shape.
+
+**Template structure:**
+
+```markdown
+# {Playbook Name} Agent Prompt
+
+**IMPORTANT: Configure the placeholders below before running this playbook.**
+
+## Configuration
+
+### {Group}
+
+<!-- CONFIGURE: {description} -->
+**{VARIABLE_NAME}:** `{default}`
+
+<!-- Examples:
+- {example}
+-->
+
+## Agent Instructions
+{Generic context.}
+```
+
+**Naming and references:**
+
+- `UPPER_SNAKE_CASE` variable names — `AUTO_FIX_SEVERITY`, `COVERAGE_TARGET`, `PR_URL`
+- In task docs, use `[VARIABLE_NAME]` (square brackets) as the substitution placeholder
+- Add an early task in each consuming doc: "Read the agent prompt for [VAR_X] and [VAR_Y]"
+
+`Research/Market` is the canonical reference implementation.
+
 ### Critical Design Considerations
 
 1. **One task per document step**: Each document should do ONE thing, then stop. This allows proper loop iteration.

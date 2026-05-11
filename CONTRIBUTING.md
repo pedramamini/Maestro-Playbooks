@@ -200,8 +200,56 @@ Remove the flag once the playbook has had at least one full release cycle withou
 
 ### Prompt Field
 
-- Use `null` if your playbook works with Maestro's default agent prompt
-- Include full prompt text (with escaped newlines) if custom prompt required
+The `prompt` field holds the text that pre-fills the Auto Run panel when a user installs your playbook from the Exchange. Use it to surface per-run configuration the user would reasonably tune (severity thresholds, coverage targets, file size limits, target URLs, framework choices).
+
+**Use `null`** if your playbook works with Maestro's default agent prompt and has no per-run knobs.
+
+**Use a configured prompt** when your playbook has values that vary by user or codebase. Follow this template:
+
+```markdown
+# {Playbook Name} Agent Prompt
+
+**IMPORTANT: Configure the placeholders below before running this playbook.**
+
+---
+
+## Configuration
+
+### {Group, e.g. "Severity Thresholds"}
+
+<!-- CONFIGURE: {one-line description} -->
+**{VARIABLE_NAME}:** `{default value}`
+
+<!-- Examples / valid values:
+- {example 1}
+- {example 2}
+-->
+
+---
+
+## Agent Instructions
+
+{Generic playbook context. Reference configured variables as `[VARIABLE_NAME]` in task docs.}
+```
+
+**Conventions:**
+
+- `UPPER_SNAKE_CASE` variable names — `AUTO_FIX_SEVERITY`, `COVERAGE_TARGET`, `PR_URL`
+- Wrap each variable in `<!-- CONFIGURE: -->` markers so users can find them quickly
+- Include 2-4 examples in HTML comments to show valid values
+- Group related variables under shared section headings
+- In task documents, reference variables as `[VARIABLE_NAME]` (square brackets), and add an early task instructing the agent to read configured values from the prompt
+
+**Reference implementation:** `Research/Market` lifts `MARKET_TOPIC` and `OUTPUT_FOLDER` using this pattern.
+
+**What NOT to lift:**
+
+- Values inferable from the codebase (detected language, test runner, framework version)
+- Workflow constants that define the playbook's shape (number of documents, loop trigger)
+- Internal artifact paths (`LOOP_N_*.md` filenames)
+- Placeholder identity values that are intentional (e.g. PAI-Setup's `principalName="User"` is meant to be replaced via post-install `/interview`)
+
+**Storage in `manifest.json`:** the prompt text must be a single JSON string with newlines escaped as `\n`. To author it, write the markdown into `Agent-Prompt.md` in your playbook folder for editor friendliness, then encode it as a JSON string when updating `manifest.json`.
 
 ## Design Guidelines
 

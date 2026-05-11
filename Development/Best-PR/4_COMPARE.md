@@ -28,24 +28,24 @@ Create a side-by-side comparison matrix and determine the winner based on weight
 
 ### Task 2: Build Comparison Matrix
 
-- [ ] **Calculate weighted scores**: For each category, multiply the raw score by the weight:
-  - Security: score × 3
-  - Correctness: score × 3
-  - Performance: score × 2
-  - Test Coverage: score × 2
-  - Code Quality: score × 1
-  - Documentation: score × 1
-  - PR Size: score × 1
+- [ ] **Calculate weighted scores**: Read the agent prompt for the configured category weights. For each category, multiply the raw score by the configured weight:
+  - Security: score × [WEIGHT_SECURITY]
+  - Correctness: score × [WEIGHT_CORRECTNESS]
+  - Performance: score × [WEIGHT_PERFORMANCE]
+  - Test Coverage: score × [WEIGHT_TESTS]
+  - Code Quality: score × [WEIGHT_QUALITY]
+  - Documentation: score × [WEIGHT_DOCS]
+  - PR Size: score × [WEIGHT_SIZE]
 
 - [ ] **Calculate totals**: Sum all weighted scores for each PR.
 
-- [ ] **Calculate percentages**: (Total / 65) × 100 for relative comparison.
+- [ ] **Calculate percentages**: (Total / max possible) × 100, where max = 5 × ([WEIGHT_SECURITY] + [WEIGHT_CORRECTNESS] + [WEIGHT_PERFORMANCE] + [WEIGHT_TESTS] + [WEIGHT_QUALITY] + [WEIGHT_DOCS] + [WEIGHT_SIZE]).
 
 ### Task 3: Determine Winner
 
-- [ ] **Apply decision logic**:
-  - If difference > 5 points: Clear winner
-  - If difference ≤ 5 points (~8% of max): "Too Close to Call"
+- [ ] **Apply decision logic**: Read `[TIE_THRESHOLD_PCT]` from the agent prompt.
+  - If percentage difference > [TIE_THRESHOLD_PCT]%: Clear winner
+  - If percentage difference ≤ [TIE_THRESHOLD_PCT]%: "Too Close to Call"
   - Note: A tie on points still needs examination of critical categories
 
 - [ ] **Check for disqualifiers**: Regardless of total score:
