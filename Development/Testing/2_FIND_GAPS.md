@@ -21,7 +21,9 @@ Using the coverage report from the analysis phase, identify specific untested fu
 
 ## Gap Finding Checklist
 
-- [ ] **Find untested code (or skip if not needed)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`. If the report shows overall line coverage of 80% or higher, OR there are no files with coverage below 80%, mark this task complete without creating a gaps file—the coverage target has been met. Otherwise, examine low-coverage files, identify specific functions and branches without test coverage. List each gap with file path, function name, and why it matters. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
+- [ ] **Read configured values**: Read the agent prompt for `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, and `[AUTO_TEST_IMPORTANCE]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Find untested code (or skip if not needed)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`. If the report shows overall line coverage of [COVERAGE_TARGET] or higher, OR there are no files with coverage below [COVERAGE_TARGET], mark this task complete without creating a gaps file—the coverage target has been met. Otherwise, examine low-coverage files, identify specific functions and branches without test coverage. List each gap with file path, function name, and why it matters. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
 
 ## What to Look For
 
@@ -120,10 +122,10 @@ Code that cannot be tested without changes:
 This task is complete when ONE of the following is true:
 
 **Option A - Coverage target already met:**
-1. The coverage report shows overall line coverage of 80% or higher
+1. The coverage report shows overall line coverage of [COVERAGE_TARGET] or higher
 2. No gaps file is needed—mark the task complete without changes
 
 **Option B - Gaps identified:**
-1. The coverage report shows line coverage below 80%
+1. The coverage report shows line coverage below [COVERAGE_TARGET]
 2. You've examined low-coverage files and found untested functions/branches
 3. You've created `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md` with all findings

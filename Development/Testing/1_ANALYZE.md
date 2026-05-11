@@ -21,6 +21,8 @@ Measure current test coverage and identify the testing landscape. This document 
 
 ## Analysis Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, and `[AUTO_TEST_IMPORTANCE]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Measure coverage (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md` already exists with coverage data (look for "Overall Line Coverage:" with a percentage). If it does, skip the analysis and mark this task complete—the coverage report is already in place. If it doesn't exist, identify the project's test framework and run the test suite with coverage enabled. Document line coverage percentage and identify lowest-covered modules. Output results to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md`.
 
 ## How to Find Coverage Commands
@@ -48,7 +50,7 @@ Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_COVERAGE_REPORT.md` with:
 
 ## Summary
 - **Overall Line Coverage:** [XX.X%]
-- **Target:** 80%
+- **Target:** [COVERAGE_TARGET]
 - **Gap to Target:** [XX.X%]
 - **Test Framework:** [name and version]
 - **Coverage Command Used:** [the command that was run]

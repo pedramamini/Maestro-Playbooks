@@ -168,7 +168,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["testing", "coverage", "unit-tests", "integration-tests", "quality"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Testing",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -179,7 +179,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# Test Coverage Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Coverage Target\n\n<!-- CONFIGURE: Line-coverage threshold (% of executable lines that must be covered by tests). The pipeline loops until coverage reaches this value or no eligible PENDING items remain. -->\n**COVERAGE_TARGET:** `80%`\n\n<!-- Examples / valid values:\n- `80%`  — recommended default; pragmatic baseline for application code\n- `90%`  — high bar suitable for libraries and SDKs\n- `95%`  — strictest; safety-critical or embedded code\n- `60%`  — minimum-viable for legacy codebases just starting to adopt tests\n-->\n\n### Auto-Test Policy\n\nThe playbook auto-writes tests only for gaps that match BOTH the testability AND importance filters below. Gaps outside these filters are routed to `PENDING - MANUAL REVIEW` (hard to test) or `WON'T DO` (low importance).\n\n<!-- CONFIGURE: Comma-separated testability tiers eligible for auto-test. Tiers outside this list are flagged for manual triage instead. -->\n**AUTO_TEST_TESTABILITY:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default; skip tests that need significant scaffolding\n- `EASY`                — most conservative; only mechanical / pure-function tests\n- `EASY,MEDIUM,HARD`    — aggressive; attempt integration tests too\n- Valid tiers: EASY, MEDIUM, HARD, VERY HARD\n-->\n\n<!-- CONFIGURE: Comma-separated importance levels eligible for auto-test. Levels outside this list are flagged for manual triage instead. -->\n**AUTO_TEST_IMPORTANCE:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default; test the critical paths first\n- `CRITICAL`             — most conservative; only core, high-risk code\n- `CRITICAL,HIGH,MEDIUM` — aggressive; also test moderately-used helpers\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW\n-->\n\n---\n\n## Agent Instructions\n\nYou are a test coverage agent. Each loop runs the full pipeline against the target codebase: measure current coverage → find untested code → rate each gap by importance and testability → write tests for the in-scope ones → check whether the coverage target has been met. The loop exits when coverage reaches `COVERAGE_TARGET` or no eligible PENDING items remain under the configured `AUTO_TEST_TESTABILITY` × `AUTO_TEST_IMPORTANCE` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, or `[AUTO_TEST_IMPORTANCE]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-usage",
