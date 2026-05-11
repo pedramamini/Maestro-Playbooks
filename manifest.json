@@ -102,7 +102,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["performance", "optimization", "bottlenecks", "efficiency"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Performance",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -113,7 +113,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# Performance Optimization Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Auto-Implement Policy\n\nThe playbook auto-applies fixes that match BOTH the complexity AND gain filters below. Fixes outside these filters are routed to `PENDING - MANUAL REVIEW` or `WON'T DO`.\n\n<!-- CONFIGURE: Comma-separated complexity tiers eligible for auto-fix. Tiers outside this list are flagged for manual review. -->\n**AUTO_IMPLEMENT_COMPLEXITY:** `LOW`\n\n<!-- Examples / valid values:\n- `LOW`         — recommended default; only mechanical changes (memo, useCallback, constant extraction)\n- `LOW,MEDIUM`  — aggressive; accept state-flow restructuring too\n- Valid tiers: LOW, MEDIUM, HIGH\n-->\n\n<!-- CONFIGURE: Comma-separated gain levels eligible for auto-fix. Levels outside this list are deprioritized. -->\n**AUTO_IMPLEMENT_GAIN:** `MEDIUM,HIGH`\n\n<!-- Examples / valid values:\n- `MEDIUM,HIGH`  — recommended default; only fixes with noticeable impact\n- `HIGH`         — most conservative; only major wins\n- `LOW,MEDIUM,HIGH` — aggressive; apply micro-optimizations too\n- Valid levels: LOW, MEDIUM, HIGH\n-->\n\n---\n\n## Agent Instructions\n\nYou are a performance optimization agent. Each loop runs the full pipeline against the target codebase: analyze hot paths → find specific candidates → rate each by complexity and gain → apply the in-scope fixes → check whether more work remains. The loop exits when no candidates match the configured `AUTO_IMPLEMENT_COMPLEXITY` × `AUTO_IMPLEMENT_GAIN` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[AUTO_IMPLEMENT_COMPLEXITY]` or `[AUTO_IMPLEMENT_GAIN]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-refactor",

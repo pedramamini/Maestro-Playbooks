@@ -4,7 +4,7 @@ A systematic Auto Run playbook for finding and fixing performance issues in your
 
 ## Requirements
 
-**Agent Prompt**: This playbook works with Maestro's **default agent prompt**. No custom agent configuration required.
+**Agent Prompt**: This playbook uses a custom agent prompt that surfaces `AUTO_IMPLEMENT_COMPLEXITY` (default `LOW`) and `AUTO_IMPLEMENT_GAIN` (default `MEDIUM,HIGH`) as configurable variables. Tune them in the Auto Run panel to adjust aggressiveness.
 
 ## Overview
 
@@ -22,7 +22,7 @@ This playbook creates an automated pipeline that:
 | `1_ANALYZE.md` | Survey codebase, create investigation tactics | No |
 | `2_FIND_ISSUES.md` | Execute tactics, find specific candidates | No |
 | `3_EVALUATE.md` | Rate each candidate by complexity & gain | No |
-| `4_IMPLEMENT.md` | Implement LOW complexity / HIGH gain fixes | No |
+| `4_IMPLEMENT.md` | Implement fixes matching `AUTO_IMPLEMENT_COMPLEXITY` × `AUTO_IMPLEMENT_GAIN` | No |
 | `5_PROGRESS.md` | Progress gate - resets 1-4 if PENDING items exist, exits if none | **Yes** |
 
 ## Generated Files
