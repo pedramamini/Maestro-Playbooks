@@ -22,13 +22,15 @@ NOTE: *(Update the URL above before running this playbook)*
 
 ### Task 1: Fetch PR Context
 
+- [ ] **Validate PR URL**: If the PR URL above is still the placeholder `https://github.com/USER/PROJECT/pull/XXXX`, stop and instruct the user to update the URL before re-running. Do not proceed with any subsequent tasks.
+
 - [ ] **Read the PR description**: If a PR URL is provided above, understand what the PR claims to do. Note the stated goals and any linked issues.
 
 - [ ] **Identify the base branch**: Determine what branch this PR is targeting (usually `main` or `develop`).
 
 ### Task 2: Analyze Changed Files
 
-- [ ] **Get the diff summary**: Run `git diff --stat origin/main...HEAD` (or appropriate base branch) to see all changed files and their modification sizes.
+- [ ] **Get the diff summary**: Run `git diff --stat origin/main...HEAD` (or appropriate base branch) to see all changed files and their modification sizes. If the diff output is empty (no changed files), record "No changed files detected" as the scope, skip Tasks 3 and the file-level sections of Task 4, and produce a minimal `REVIEW_SCOPE.md` noting the empty diff so downstream documents can short-circuit cleanly.
 
 - [ ] **Categorize changes**: Group files by type:
   - Source code files
