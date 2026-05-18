@@ -129,7 +129,9 @@ Playbooks can include non-markdown assets in an `assets/` subfolder:
 - Schema definitions (OpenAPI, JSON Schema)
 - Reference data files
 
-Reference assets using `{{AUTORUN_FOLDER}}/assets/filename`. Maestro copies the entire playbook folder (including assets/) when installing from the exchange.
+Reference assets using `{{AUTORUN_FOLDER}}/assets/filename`. Maestro copies the entire playbook folder (including assets/) when installing from the Exchange.
+
+**Exchange-only feature.** The `assets/` folder is bundled only for playbooks PR'd to this repository and installed via the in-app Playbook Exchange. Maestro's user-share / peer-to-peer flows transport only the markdown documents and drop `assets/`. If a playbook depends on bundled files, it must be contributed here via PR (see [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ### Critical Design Considerations
 
