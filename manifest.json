@@ -250,6 +250,28 @@
       "prompt": null
     },
     {
+      "id": "development-code-review",
+      "title": "Code Review",
+      "description": "Comprehensive pull request code review covering correctness, security, performance, test coverage, and documentation.",
+      "category": "Development",
+      "subcategory": "Review",
+      "author": "Kayvan Sylvan",
+      "authorLink": "https://www.sylvan.com",
+      "tags": ["code-review", "pull-request", "security", "testing", "best-practices"],
+      "lastUpdated": "2026-01-09",
+      "path": "Development/Code-Review",
+      "documents": [
+        { "filename": "1_ANALYZE_CHANGES", "resetOnCompletion": false },
+        { "filename": "2_REVIEW_CODE", "resetOnCompletion": false },
+        { "filename": "3_CHECK_SECURITY", "resetOnCompletion": false },
+        { "filename": "4_VERIFY_TESTS", "resetOnCompletion": false },
+        { "filename": "5_SUMMARIZE", "resetOnCompletion": false }
+      ],
+      "loopEnabled": false,
+      "maxLoops": null,
+      "prompt": null
+    },
+    {
       "id": "development-best-pr",
       "title": "Best PR Comparison",
       "description": "Objectively compares two competing PRs implementing the same feature using weighted criteria, determines a winner, and extracts valuable insights from the runner-up.",
