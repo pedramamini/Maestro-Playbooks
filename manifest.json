@@ -220,7 +220,8 @@
         { "filename": "2_DISCOVER", "resetOnCompletion": false },
         { "filename": "3_EVALUATE", "resetOnCompletion": false },
         { "filename": "4_RESEARCH", "resetOnCompletion": false },
-        { "filename": "5_PROGRESS", "resetOnCompletion": true }
+        { "filename": "5_PROGRESS", "resetOnCompletion": true },
+        { "filename": "Agent-Prompt.md", "resetOnCompletion": false }
       ],
       "loopEnabled": true,
       "maxLoops": 30,
