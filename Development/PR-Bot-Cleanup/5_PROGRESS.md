@@ -11,6 +11,8 @@
 
 ## Tasks
 
+- [ ] **Read configured values**: Read the agent prompt for `[PR_URL]` and `[BOT_REVIEWERS]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, count how many findings remain in each status bucket, and append a concise loop summary with the current head SHA, status counts, and latest check state to `{{AUTORUN_FOLDER}}/BOT_THREAD_LEDGER.md`.
 
 - [ ] If no `PENDING` findings remain and only `IMPLEMENTED`, `STALE`, `DUPLICATE`, `BLOCKED`, or `MANUAL` findings are left, do not reset documents 1-4 and instead write `{{AUTORUN_FOLDER}}/FINAL_SUMMARY.md` summarizing the PR URL, latest head SHA, threads resolved by bot, latest validation and check status, remaining blockers if any, and whether the PR is accept-ready.

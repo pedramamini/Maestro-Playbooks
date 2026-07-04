@@ -9,16 +9,16 @@
 
 ## Objective
 
-Implement ONE refactoring candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` that has status `PENDING` and meets criteria (LOW risk + HIGH/VERY HIGH benefit). Log all changes to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`.
+Implement ONE refactoring candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` that has status `PENDING` and matches the configured `[AUTO_IMPLEMENT_RISK]` × `[AUTO_IMPLEMENT_BENEFIT]` policy. Log all changes to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`.
 
 ## Instructions
 
 1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** to find evaluated refactoring candidates
 2. **Filter for actionable items**: Only consider candidates where:
    - **Status = `PENDING`** (exactly - not `PENDING - MANUAL REVIEW` or `WON'T DO`)
-   - **Risk = LOW** (not MEDIUM or HIGH)
-   - **Benefit = HIGH or VERY HIGH** (not LOW or MEDIUM)
-3. **Select ONE candidate** that meets all criteria (prioritize VERY HIGH benefit over HIGH)
+   - **Risk** is in `[AUTO_IMPLEMENT_RISK]`
+   - **Benefit** is in `[AUTO_IMPLEMENT_BENEFIT]`
+3. **Select ONE candidate** that meets all criteria (prefer higher benefit when ties)
 4. **Implement the refactoring**: Make the code changes as specified
 5. **Verify the change**: Ensure the code still works (syntax check, no obvious errors)
 6. **Log the change** to `{{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md`
@@ -26,14 +26,16 @@ Implement ONE refactoring candidate from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}
 
 ## Task
 
-- [ ] **Implement one PENDING refactor (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` that also have LOW risk AND HIGH/VERY HIGH benefit, mark this task complete without changes. Otherwise, find ONE item that meets all criteria, implement the refactoring, log to {{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
+- [ ] **Read configured values**: Read the agent prompt for `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, and `[AUTO_IMPLEMENT_BENEFIT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Implement one PENDING refactor (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` that also match the `[AUTO_IMPLEMENT_RISK]` × `[AUTO_IMPLEMENT_BENEFIT]` policy, mark this task complete without changes. Otherwise, find ONE item that meets all criteria, implement the refactoring, log to {{AUTORUN_FOLDER}}/REFACTOR_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
 ## Implementation Checklist
 
 Before implementing, verify:
 - [ ] The status is exactly `PENDING` (not `PENDING - MANUAL REVIEW`)
-- [ ] Risk is LOW (not MEDIUM or HIGH)
-- [ ] Benefit is HIGH or VERY HIGH (not LOW or MEDIUM)
+- [ ] Risk is in `[AUTO_IMPLEMENT_RISK]`
+- [ ] Benefit is in `[AUTO_IMPLEMENT_BENEFIT]`
 - [ ] The refactor is clearly specified with before/after code or description
 - [ ] No other changes are required (no dependencies)
 

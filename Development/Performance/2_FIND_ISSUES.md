@@ -21,6 +21,8 @@ Execute ONE tactic from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md` t
 
 ## Task
 
+- [ ] **Read configured values**: Read the agent prompt for `[AUTO_IMPLEMENT_COMPLEXITY]` and `[AUTO_IMPLEMENT_GAIN]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Execute one tactic (or mark exhausted)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md and check for unexecuted tactics. If ALL tactics are already marked `[EXECUTED]`, append a section `## ALL_TACTICS_EXHAUSTED` to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md and mark this task complete. Otherwise, pick one unexecuted tactic, search the codebase for matching issues, append findings to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md, and mark the tactic as `[EXECUTED]` in the game plan.
 
 ## Output Format

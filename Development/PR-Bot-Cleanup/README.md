@@ -4,7 +4,7 @@ A Maestro Auto Run playbook for cleaning up unresolved PR review threads from bo
 
 ## Requirements
 
-**Agent Prompt**: This playbook works with Maestro's default agent prompt.
+**Agent Prompt**: This playbook uses a custom agent prompt that surfaces `PR_URL` (required) and `BOT_REVIEWERS` (default `coderabbitai,greptile`) as configurable variables. Set them in the Auto Run panel before launch.
 
 **GitHub Access**: Best results require Maestro's GitHub integration and a working `gh` CLI session. The playbook should prefer Maestro GitHub tools first and use `gh` only when thread-level metadata or check details are unavailable.
 
@@ -41,8 +41,8 @@ Each loop iteration creates working documents in the Auto Run folder:
 
 This playbook is intentionally bot-focused. It should:
 
-- Include unresolved threads from CodeRabbit and Greptile
-- Tolerate minor variations in bot login names
+- Include unresolved threads from the bots configured in `BOT_REVIEWERS` (default `coderabbitai,greptile`)
+- Tolerate minor variations in bot login names (match by prefix)
 - Ignore human review threads completely
 - Resolve stale bot threads only when the current PR head proves the issue is already fixed or no longer applicable
 

@@ -25,6 +25,8 @@ Analyze the codebase to identify **categories of potential performance issues** 
 
 ## Analysis Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[AUTO_IMPLEMENT_COMPLEXITY]` and `[AUTO_IMPLEMENT_GAIN]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Survey codebase (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md` already exists with at least one tactic defined. If it does, skip the survey and mark this task complete—the game plan is already in place. If it doesn't exist, examine project structure, identify framework(s) and language(s) used, find main entry points and largest files. Note any performance-related libraries or patterns already in use.
 
 ## Output Format

@@ -22,14 +22,16 @@ Implement fixes for `PENDING` security vulnerabilities from the evaluation phase
 
 ## Task
 
-- [ ] **Fix one vulnerability (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` that have CRITICAL/HIGH severity AND EASY/MEDIUM remediability, mark this task complete without changes. Otherwise, find ONE such item, implement the fix following secure coding practices, verify the fix, log to {{AUTORUN_FOLDER}}/SECURITY_LOG_{{AGENT_NAME}}_{{DATE}}.md, and update status to `IMPLEMENTED` in the plan file.
+- [ ] **Read configured values**: Read the agent prompt for `AUTO_FIX_SEVERITY` and `AUTO_FIX_REMEDIABILITY`. These define which findings are eligible for auto-remediation. Use these values throughout this document wherever you see `[AUTO_FIX_SEVERITY]` or `[AUTO_FIX_REMEDIABILITY]` placeholders.
+
+- [ ] **Fix one vulnerability (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING` that have `[AUTO_FIX_SEVERITY]` severity AND `[AUTO_FIX_REMEDIABILITY]` remediability, mark this task complete without changes. Otherwise, find ONE such item, implement the fix following secure coding practices, verify the fix, log to {{AUTORUN_FOLDER}}/SECURITY_LOG_{{AGENT_NAME}}_{{DATE}}.md, and update status to `IMPLEMENTED` in the plan file.
 
 ## Implementation Checklist
 
 Before implementing, verify:
 - [ ] The status is exactly `PENDING` (not `PENDING - MANUAL REVIEW` or `WON'T DO`)
-- [ ] The severity is CRITICAL or HIGH
-- [ ] The remediability is EASY or MEDIUM
+- [ ] The severity matches `[AUTO_FIX_SEVERITY]`
+- [ ] The remediability matches `[AUTO_FIX_REMEDIABILITY]`
 - [ ] The fix strategy is clearly specified
 - [ ] No other changes are required (no dependencies)
 
@@ -169,7 +171,7 @@ This task is complete when ONE of the following is true:
 
 **Option B - No PENDING fixes available:**
 1. `LOOP_{{LOOP_NUMBER}}_PLAN.md` doesn't exist, OR
-2. It contains no items with status exactly `PENDING` that have CRITICAL/HIGH severity AND EASY/MEDIUM remediability
+2. It contains no items with status exactly `PENDING` that have `[AUTO_FIX_SEVERITY]` severity AND `[AUTO_FIX_REMEDIABILITY]` remediability
 3. Mark this task complete without making changes
 
 This graceful handling allows the pipeline to continue when a loop iteration produces no actionable fixes.
@@ -186,7 +188,7 @@ If there are no qualifying `PENDING` items in the plan file, append to `{{AUTORU
 **Agent:** {{AGENT_NAME}}
 **Project:** {{AGENT_PATH}}
 **Loop:** {{LOOP_NUMBER}}
-**Status:** No PENDING fixes available (CRITICAL/HIGH severity with EASY/MEDIUM remediability)
+**Status:** No PENDING fixes available (`[AUTO_FIX_SEVERITY]` severity with `[AUTO_FIX_REMEDIABILITY]` remediability)
 
 **Summary:**
 - Items IMPLEMENTED: [count]

@@ -14,7 +14,7 @@ One-shot setup workflows that install personal-AI frameworks into a fresh agent.
 
 | Playbook | Purpose | Exit Condition |
 |----------|---------|----------------|
-| `Assistants/PAI-Setup/` | Install Daniel Miessler's Personal AI Infrastructure (PAI) on a Claude Code agent | All 5 documents completed (no loop) |
+| `Assistants/LifeOS-Setup/` | Install Daniel Miessler's LifeOS (formerly PAI) — the AI-powered Life Operating System — onto a Claude Code or other agent | All 5 documents completed (no loop) |
 
 ### Development Playbooks
 

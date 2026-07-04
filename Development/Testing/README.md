@@ -1,10 +1,10 @@
 # Test Coverage Playbook
 
-A systematic Auto Run playbook for achieving and maintaining 80% test coverage through incremental test creation.
+A systematic Auto Run playbook for achieving and maintaining a configurable test-coverage target through incremental test creation.
 
 ## Requirements
 
-**Agent Prompt**: This playbook works with Maestro's **default agent prompt**. No custom agent configuration required.
+**Agent Prompt**: This playbook uses a custom agent prompt that surfaces `COVERAGE_TARGET`, `AUTO_TEST_TESTABILITY`, and `AUTO_TEST_IMPORTANCE` as configurable variables. Defaults are `80%`, `EASY,MEDIUM`, and `CRITICAL,HIGH` respectively — tune them in the Auto Run panel before launch.
 
 ## Overview
 
@@ -13,7 +13,7 @@ This playbook creates an automated pipeline that:
 2. **Finds** untested or under-tested code paths
 3. **Evaluates** each candidate by testability and importance
 4. **Implements** high-value tests for critical code paths
-5. **Loops** until 80% coverage is achieved or no auto-testable work remains
+5. **Loops** until `COVERAGE_TARGET` is achieved or no auto-testable work remains
 
 ## Document Chain
 
@@ -23,7 +23,7 @@ This playbook creates an automated pipeline that:
 | `2_FIND_GAPS.md` | Find untested functions, branches, modules | No |
 | `3_EVALUATE.md` | Rate each candidate by testability & importance | No |
 | `4_IMPLEMENT.md` | Write tests for HIGH importance targets | No |
-| `5_PROGRESS.md` | Coverage gate - resets 1-4 if below 80%, exits if met | **Yes** |
+| `5_PROGRESS.md` | Coverage gate - resets 1-4 if below `COVERAGE_TARGET`, exits if met | **Yes** |
 
 ## Generated Files
 
@@ -34,12 +34,12 @@ Each loop iteration creates working documents:
 - `LOOP_N_PLAN.md` - Evaluated candidates with ratings
 - `TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md` - Cumulative log of all tests added
 
-## Coverage Target: 80%
+## Coverage Target
 
-The playbook uses **80% line coverage** as the exit condition. This target is:
+The playbook uses **line coverage** as the exit condition. The threshold is configured in the agent prompt's `COVERAGE_TARGET` field (default `80%`). Choose a value that is:
 - **Achievable** without excessive effort
 - **Meaningful** for catching regressions
-- **Industry standard** for production code
+- **Appropriate** for your codebase (libraries lean higher, prototypes lower)
 
 ### Coverage Types Tracked
 

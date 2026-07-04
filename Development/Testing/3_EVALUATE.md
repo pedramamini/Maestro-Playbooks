@@ -9,7 +9,7 @@
 
 ## Objective
 
-Evaluate each test gap from the discovery phase and assign importance and testability ratings. This prioritization ensures we write the most valuable tests first and reach 80% coverage efficiently.
+Evaluate each test gap from the discovery phase and assign importance and testability ratings. This prioritization ensures we write the most valuable tests first and reach [COVERAGE_TARGET] coverage efficiently.
 
 ## Instructions
 
@@ -21,7 +21,9 @@ Evaluate each test gap from the discovery phase and assign importance and testab
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and TESTABILITY (EASY/MEDIUM/HARD/VERY HARD). Mark EASY+HIGH or better as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Read configured values**: Read the agent prompt for `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, and `[AUTO_TEST_IMPORTANCE]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Evaluate gaps (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and TESTABILITY (EASY/MEDIUM/HARD/VERY HARD). Mark items matching `[AUTO_TEST_IMPORTANCE]` × `[AUTO_TEST_TESTABILITY]` as PENDING for auto-implementation. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -46,8 +48,8 @@ Evaluate each test gap from the discovery phase and assign importance and testab
 ### Auto-Implementation Criteria
 
 Tests will be auto-implemented if:
-- **Importance:** HIGH or CRITICAL
-- **Testability:** EASY or MEDIUM
+- **Importance:** matches `[AUTO_TEST_IMPORTANCE]`
+- **Testability:** matches `[AUTO_TEST_TESTABILITY]`
 
 Tests marked `PENDING - MANUAL REVIEW` if:
 - **Importance:** HIGH/CRITICAL but **Testability:** HARD
@@ -72,7 +74,7 @@ Create/update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` with:
 - **Won't Do:** [count]
 
 ## Current Coverage: [XX.X%]
-## Target Coverage: 80%
+## Target Coverage: [COVERAGE_TARGET]
 ## Estimated Post-Loop Coverage: [XX.X%]
 
 ---
@@ -146,7 +148,7 @@ Tests that share setup or mocking infrastructure:
 - **Group related tests**: Tests sharing mocks can be implemented together
 - **Balance risk and reward**: CRITICAL importance trumps easy testability
 - **Be realistic about VERY HARD**: Some code needs refactoring before testing
-- **Track estimates**: We need to know when we'll hit 80%
+- **Track estimates**: We need to know when we'll hit [COVERAGE_TARGET]
 
 ## How to Know You're Done
 

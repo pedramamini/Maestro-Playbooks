@@ -15,14 +15,16 @@ Analyze the codebase to identify **categories of refactoring opportunities** and
 
 1. **Survey the codebase structure** - Identify main directories, file sizes, and organization patterns
 2. **Identify refactoring-sensitive areas** based on:
-   - Large files (500+ LOC)
-   - Complex functions (50+ LOC, deep nesting)
+   - Large files ([MAX_FILE_LOC]+ LOC)
+   - Complex functions ([MAX_FUNCTION_LOC]+ LOC, deep nesting)
    - Code duplication patterns
    - Inconsistent organization
    - Dead or unused code
 3. **Output a tactical game plan** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md`
 
 ## Analysis Checklist
+
+- [ ] **Read configured values**: Read the agent prompt for `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, and `[AUTO_IMPLEMENT_BENEFIT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
 
 - [ ] **Survey codebase (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md` already exists with at least one tactic defined. If it does, skip the survey and mark this task complete—the game plan is already in place. If it doesn't exist, examine project structure, find largest files, identify patterns. Note file size distribution and any obvious organizational issues.
 
@@ -58,7 +60,7 @@ Each tactic is a specific, actionable search pattern for finding refactoring opp
 When creating tactics, consider these common refactoring opportunity categories:
 
 ### File Size Issues
-- Files over 500 lines of code
+- Files over [MAX_FILE_LOC] lines of code
 - Components with multiple unrelated functions
 - "God" modules that do too many things
 - Files that should be split by feature/concern
@@ -70,9 +72,9 @@ When creating tactics, consider these common refactoring opportunity categories:
 - Similar components that could share a base
 
 ### Function Complexity
-- Functions over 50 lines
-- Deeply nested conditionals (3+ levels of if/else/switch)
-- Functions with 5+ parameters
+- Functions over [MAX_FUNCTION_LOC] lines
+- Deeply nested conditionals ([MAX_NESTING_DEPTH]+ levels of if/else/switch)
+- Functions with [MAX_PARAMETERS]+ parameters
 - Complex boolean expressions that should be extracted
 - Long chains of method calls
 

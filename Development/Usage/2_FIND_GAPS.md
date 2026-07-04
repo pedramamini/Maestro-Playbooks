@@ -20,6 +20,8 @@ Compare the feature inventory against the README to identify specific documentat
 
 ## Gap Discovery Checklist
 
+- [ ] **Read configured values**: Read the agent prompt for `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, and `[AUTO_FIX_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Find documentation gaps (or skip if no discrepancies)**: Read LOOP_{{LOOP_NUMBER}}_FEATURE_INVENTORY.md and compare features in code vs README. If the feature inventory shows NO discrepancies (code and README are fully aligned), mark this task complete without creating LOOP_{{LOOP_NUMBER}}_GAPS.md. Otherwise, identify: (1) features in code but missing from README, (2) features in README but removed from code, (3) features documented inaccurately. Output findings to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`.
 
 ## How to Know You're Done

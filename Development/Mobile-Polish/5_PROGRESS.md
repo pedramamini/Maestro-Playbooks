@@ -22,7 +22,9 @@ Track overall mobile polish progress, re-run the coverage analysis after each lo
 
 ## Progress Tracking Checklist
 
-- [ ] **Track progress**: Read the implementation plan from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md` and count how many items are marked as `IMPLEMENTED` vs total items. Test the site on mobile viewport (375px, 768px) to verify fixes are working. Update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PROGRESS.md` with current status, completed fixes, remaining work, and whether to continue looping. If all critical and high-priority items are `IMPLEMENTED`, recommend stopping the loop.
+- [ ] **Read configured values**: Read the agent prompt for `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, and `[AUTO_IMPLEMENT_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Track progress**: Read the implementation plan from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MOBILE_PLAN.md` and count how many items are marked as `IMPLEMENTED` vs total items. Test the site on mobile viewport (375px, [MOBILE_BREAKPOINT_PX]px) to verify fixes are working. Update `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PROGRESS.md` with current status, completed fixes, remaining work, and whether to continue looping. If no PENDING items matching `[AUTO_IMPLEMENT_IMPACT]` × `[AUTO_IMPLEMENT_EFFORT]` remain, recommend stopping the loop.
 
 ## What to Check
 

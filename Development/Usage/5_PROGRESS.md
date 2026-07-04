@@ -20,7 +20,9 @@ This document is the **accuracy gate** for the usage documentation pipeline. It 
 
 ## Accuracy Gate Check
 
-- [ ] **Check for remaining gaps**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and check if there are any items with status `PENDING` that have CRITICAL or HIGH user importance AND EASY or MEDIUM fix effort. If such items exist, reset documents 1-4 to continue the loop. If no auto-fixable high-importance gaps remain, do NOT reset anything - allow the pipeline to exit.
+- [ ] **Read configured values**: Read the agent prompt for `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, and `[AUTO_FIX_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Check for remaining gaps**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and check if there are any items with status `PENDING` matching `[AUTO_FIX_IMPORTANCE]` × `[AUTO_FIX_EFFORT]`. If such items exist, reset documents 1-4 to continue the loop. If no auto-fixable items remain, do NOT reset anything - allow the pipeline to exit.
 
 ## Reset Tasks (Only if PENDING high-importance gaps exist)
 

@@ -22,7 +22,9 @@ Implement tests for `PENDING` candidates from the evaluation phase. Write high-q
 
 ## Implementation Checklist
 
-- [ ] **Write tests (or skip if none)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, implement tests for ONE `PENDING` item with EASY/MEDIUM testability and HIGH/CRITICAL importance. Follow project test conventions. Run tests to verify they pass. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE test per task execution.
+- [ ] **Read configured values**: Read the agent prompt for `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, and `[AUTO_TEST_IMPORTANCE]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Write tests (or skip if none)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, implement tests for ONE `PENDING` item with `[AUTO_TEST_TESTABILITY]` testability and `[AUTO_TEST_IMPORTANCE]` importance. Follow project test conventions. Run tests to verify they pass. Update status to `IMPLEMENTED` in the plan. Log to `{{AUTORUN_FOLDER}}/TEST_LOG_{{AGENT_NAME}}_{{DATE}}.md`. Only implement ONE test per task execution.
 
 ## Test Writing Guidelines
 

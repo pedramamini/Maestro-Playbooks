@@ -11,7 +11,9 @@
 
 ## Tasks
 
-- [ ] Identify the target pull request from the current task context, Maestro GitHub metadata, or a supplied PR URL, then write `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CONTEXT.md` with the repository, PR number, PR URL, base branch, head branch, current remote head SHA, and the source of truth used for each field.
+- [ ] **Read configured values**: Read the agent prompt for `[PR_URL]` and `[BOT_REVIEWERS]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] Identify the target pull request from `[PR_URL]` in the agent prompt (preferred), or fall back to Maestro GitHub metadata / current task context only if the prompt is unset. Write `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CONTEXT.md` with the repository, PR number, PR URL, base branch, head branch, current remote head SHA, and the source of truth used for each field.
 
 - [ ] Inspect the repository before changing code by checking project docs and validation hints in files such as `README*`, `CONTRIBUTING*`, `package.json`, `pnpm-workspace.yaml`, `turbo.json`, `Makefile`, `justfile`, `pyproject.toml`, `.github/workflows/*`, and any repo-specific developer guides, then append the likely fast validation commands, likely branch-level validation commands, package manager or task runner details, and any repo-specific constraints to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CONTEXT.md`.
 

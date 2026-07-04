@@ -20,7 +20,9 @@ Evaluate each documentation gap from the discovery phase and assign importance a
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate gaps (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps with HIGH/CRITICAL importance and EASY/MEDIUM effort as PENDING for auto-fix. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
+- [ ] **Read configured values**: Read the agent prompt for `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, and `[AUTO_FIX_EFFORT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Evaluate gaps (or skip if empty)**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAPS.md`. If it contains no gaps OR all gaps have already been evaluated in `LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete without changes. Otherwise, rate each gap by USER IMPORTANCE (CRITICAL/HIGH/MEDIUM/LOW) and FIX EFFORT (EASY/MEDIUM/HARD). Mark gaps matching `[AUTO_FIX_IMPORTANCE]` × `[AUTO_FIX_EFFORT]` as PENDING for auto-fix. Output to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`.
 
 ## Rating Criteria
 
@@ -44,8 +46,8 @@ Evaluate each documentation gap from the discovery phase and assign importance a
 ### Auto-Fix Criteria
 
 Gaps will be auto-fixed if:
-- **User Importance:** CRITICAL or HIGH
-- **Fix Effort:** EASY or MEDIUM
+- **User Importance:** matches `[AUTO_FIX_IMPORTANCE]`
+- **Fix Effort:** matches `[AUTO_FIX_EFFORT]`
 
 Gaps marked `PENDING - NEEDS REVIEW` if:
 - Complex changes that need maintainer input

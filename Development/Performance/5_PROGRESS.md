@@ -20,7 +20,9 @@ This document is the **progress gate** for the performance pipeline. It checks w
 
 ## Progress Check
 
-- [ ] **Check for remaining work**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are items with status exactly `PENDING`, OR (2) CANDIDATES.md does NOT contain `## ALL_TACTICS_EXHAUSTED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no PENDING items AND all tactics are exhausted.
+- [ ] **Read configured values**: Read the agent prompt for `[AUTO_IMPLEMENT_COMPLEXITY]` and `[AUTO_IMPLEMENT_GAIN]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
+- [ ] **Check for remaining work**: Read LOOP_{{LOOP_NUMBER}}_PLAN.md and LOOP_{{LOOP_NUMBER}}_CANDIDATES.md. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are items with status exactly `PENDING` matching the `[AUTO_IMPLEMENT_COMPLEXITY]` × `[AUTO_IMPLEMENT_GAIN]` policy, OR (2) CANDIDATES.md does NOT contain `## ALL_TACTICS_EXHAUSTED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no PENDING items AND all tactics are exhausted.
 
 ## Reset Tasks (Only if work remains)
 
@@ -110,7 +112,7 @@ Track progress across loops:
 
 ## Notes
 
-- This playbook focuses on LOW complexity fixes with MEDIUM or HIGH gain
+- This playbook focuses on fixes matching the configured `[AUTO_IMPLEMENT_COMPLEXITY]` × `[AUTO_IMPLEMENT_GAIN]` policy
 - MEDIUM and HIGH complexity fixes are marked for manual review
 - Each loop iteration implements ONE fix at a time for safety
 - The PERF_LOG tracks all changes across loops for easy review

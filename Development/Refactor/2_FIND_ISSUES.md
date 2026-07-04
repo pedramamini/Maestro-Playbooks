@@ -21,6 +21,8 @@ Execute ONE tactic from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md` t
 
 ## Task
 
+- [ ] **Read configured values**: Read the agent prompt for `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, and `[AUTO_IMPLEMENT_BENEFIT]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
+
 - [ ] **Execute one tactic (or mark exhausted)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_GAME_PLAN.md and check for unexecuted tactics. If ALL tactics are already marked `[EXECUTED]`, append a section `## ALL_TACTICS_EXHAUSTED` to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md and mark this task complete. Otherwise, pick one unexecuted tactic, search the codebase for matching issues, append findings to {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md, and mark the tactic as `[EXECUTED]` in the game plan.
 
 ## Output Format
@@ -54,7 +56,7 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` using this for
 ## What to Look For
 
 ### File Size Candidates
-- Files over 500 LOC → Consider splitting by concern
+- Files over [MAX_FILE_LOC] LOC → Consider splitting by concern
 - Single file with multiple unrelated exports → Extract to separate modules
 - Component files with embedded utilities → Move utilities to shared location
 
@@ -64,8 +66,8 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_CANDIDATES.md` using this for
 - Similar components → Create shared base or composition
 
 ### Complexity Candidates
-- Functions with 3+ levels of nesting → Extract to smaller functions
-- Functions over 50 LOC → Break into logical steps
+- Functions with [MAX_NESTING_DEPTH]+ levels of nesting → Extract to smaller functions
+- Functions over [MAX_FUNCTION_LOC] LOC → Break into logical steps
 - Complex conditionals → Extract to named boolean functions
 - Many parameters → Use options object pattern
 

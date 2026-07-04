@@ -12,8 +12,8 @@ This playbook creates an automated pipeline that:
 1. **Analyzes** your codebase for security-sensitive areas and runs vulnerability scans
 2. **Finds** specific vulnerabilities: injection flaws, secrets, auth issues, dependencies
 3. **Evaluates** each finding by severity and remediability
-4. **Implements** fixes for HIGH and CRITICAL vulnerabilities
-5. **Loops** until no CRITICAL or HIGH severity issues with EASY/MEDIUM remediability remain
+4. **Implements** fixes for vulnerabilities matching `[AUTO_FIX_SEVERITY]`
+5. **Loops** until no `[AUTO_FIX_SEVERITY]` severity issues with `[AUTO_FIX_REMEDIABILITY]` remediability remain
 
 ## Document Chain
 
@@ -22,8 +22,8 @@ This playbook creates an automated pipeline that:
 | `1_ANALYZE.md` | Run security scans, identify attack surface | No |
 | `2_FIND_ISSUES.md` | Find specific vulnerabilities in code | No |
 | `3_EVALUATE.md` | Rate severity and ease of remediation | No |
-| `4_IMPLEMENT.md` | Fix CRITICAL and HIGH severity issues | No |
-| `5_PROGRESS.md` | Security gate - resets 1-4 if CRITICAL/HIGH remain, exits if clear | **Yes** |
+| `4_IMPLEMENT.md` | Fix `[AUTO_FIX_SEVERITY]` severity issues | No |
+| `5_PROGRESS.md` | Security gate - resets 1-4 if `[AUTO_FIX_SEVERITY]` remain, exits if clear | **Yes** |
 
 ## Generated Files
 
@@ -63,6 +63,8 @@ Each loop iteration creates working documents with the loop number:
 
 ## Severity Levels
 
+> The "Auto-Fix?" column below reflects the default policy. Configure `AUTO_FIX_SEVERITY` and `AUTO_FIX_REMEDIABILITY` in the Auto Run panel to change which severity × remediability buckets the playbook auto-remediates.
+
 | Level | Description | Auto-Fix? |
 |-------|-------------|-----------|
 | **CRITICAL** | Actively exploitable, immediate risk, data breach potential | Yes |
@@ -81,7 +83,7 @@ The key to understanding this playbook is how `5_PROGRESS.md` controls the loop:
 - **Document 5** has `Reset: ON` - it's the only one that resets, and it manually resets 1-4
 
 When `5_PROGRESS.md` runs:
-1. It reads `LOOP_{{LOOP_NUMBER}}_PLAN.md` to check for PENDING items with CRITICAL/HIGH severity and EASY/MEDIUM remediability
+1. It reads `LOOP_{{LOOP_NUMBER}}_PLAN.md` to check for PENDING items with `[AUTO_FIX_SEVERITY]` severity and `[AUTO_FIX_REMEDIABILITY]` remediability
 2. **If such PENDING items exist**: It resets all tasks in documents 1-4
    - This triggers a fresh pass through the pipeline
    - The loop continues
@@ -92,7 +94,7 @@ When `5_PROGRESS.md` runs:
 ### Single Pass (No Loop)
 1. Documents execute in order: 1 → 2 → 3 → 4 → 5
 2. Each document reads outputs from previous steps
-3. `5_PROGRESS.md` evaluates whether CRITICAL/HIGH PENDING items exist
+3. `5_PROGRESS.md` evaluates whether `[AUTO_FIX_SEVERITY]` PENDING items exist
 4. If such items exist, it resets tasks in docs 1-4 → loop continues
 5. If no such items remain, it does NOT reset → pipeline exits
 
@@ -100,10 +102,10 @@ When `5_PROGRESS.md` runs:
 1. Enable loop mode in Batch Runner settings
 2. First pass: Analyze → Find Issues → Evaluate → Implement → Check Progress
 3. `5_PROGRESS.md` checks for auto-remediable vulnerabilities:
-   - CRITICAL/HIGH with EASY/MEDIUM remediability? Reset docs 1-4 → continue
+   - `[AUTO_FIX_SEVERITY]` with `[AUTO_FIX_REMEDIABILITY]` remediability? Reset docs 1-4 → continue
    - No such items? Don't reset → exit
 4. Each new loop creates `LOOP_N_*` files with incremented loop number
-5. Loop exits when no CRITICAL/HIGH issues with EASY/MEDIUM remediability remain
+5. Loop exits when no `[AUTO_FIX_SEVERITY]` issues with `[AUTO_FIX_REMEDIABILITY]` remediability remain
 
 ## Recommended Setup
 
@@ -116,7 +118,7 @@ Documents:
   2_FIND_ISSUES.md  [Reset: OFF] ← Gets reset manually by 5_PROGRESS
   3_EVALUATE.md     [Reset: OFF] ← Gets reset manually by 5_PROGRESS
   4_IMPLEMENT.md    [Reset: OFF] ← Gets reset manually by 5_PROGRESS
-  5_PROGRESS.md     [Reset: ON]  ← Controls loop: resets 1-4 if CRITICAL/HIGH remain, exits if clear
+  5_PROGRESS.md     [Reset: ON]  ← Controls loop: resets 1-4 if `[AUTO_FIX_SEVERITY]` remain, exits if clear
 ```
 
 ### For Review-First Approach

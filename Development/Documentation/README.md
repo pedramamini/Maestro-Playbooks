@@ -1,6 +1,6 @@
 # Documentation Coverage Playbook
 
-A systematic Auto Run playbook for achieving and maintaining 90% documentation coverage through incremental doc generation.
+A systematic Auto Run playbook for achieving and maintaining `[COVERAGE_TARGET]` documentation coverage through incremental doc generation.
 
 ## Requirements
 
@@ -13,7 +13,7 @@ This playbook creates an automated pipeline that:
 2. **Finds** undocumented exports: functions, classes, types, modules
 3. **Evaluates** each gap by visibility and importance
 4. **Implements** documentation for high-visibility, high-importance exports
-5. **Loops** until 90% documentation coverage is achieved
+5. **Loops** until `[COVERAGE_TARGET]` documentation coverage is achieved
 
 ## Document Chain
 
@@ -22,8 +22,8 @@ This playbook creates an automated pipeline that:
 | `1_ANALYZE.md` | Measure current coverage, identify doc patterns | No |
 | `2_FIND_GAPS.md` | Find specific undocumented exports | No |
 | `3_EVALUATE.md` | Rate each gap by visibility & importance | No |
-| `4_IMPLEMENT.md` | Write docs for HIGH importance, PUBLIC/INTERNAL exports | No |
-| `5_PROGRESS.md` | Coverage gate - resets 1-4 if below 90%, exits if met | **Yes** |
+| `4_IMPLEMENT.md` | Write docs for `[AUTO_DOC_IMPORTANCE]` importance, `[AUTO_DOC_VISIBILITY]` exports | No |
+| `5_PROGRESS.md` | Coverage gate - resets 1-4 if below `[COVERAGE_TARGET]`, exits if met | **Yes** |
 
 ## Generated Files
 
@@ -35,6 +35,8 @@ Each loop iteration creates working documents with the loop number:
 - `DOC_LOG_{{AGENT_NAME}}_{{DATE}}.md` - Cumulative log of all documentation added
 
 ## Documentation Categories
+
+> The default policy auto-documents exports matching `AUTO_DOC_VISIBILITY` × `AUTO_DOC_IMPORTANCE` (defaults: `PUBLIC,INTERNAL` × `CRITICAL,HIGH`). Configure both in the Auto Run panel. The full rubric below shows all available rating values; the configured policy decides which combinations are eligible.
 
 ### By Visibility
 | Level | Description |
@@ -75,11 +77,11 @@ The key to understanding this playbook is how `5_PROGRESS.md` controls the loop:
 - **Document 5** has `Reset: ON` - it's the only one that resets, and it manually resets 1-4
 
 When `5_PROGRESS.md` runs:
-1. It checks current documentation coverage against the 90% target
-2. **If coverage < 90% AND there are PENDING items**: It resets all tasks in documents 1-4
+1. It checks current documentation coverage against the `[COVERAGE_TARGET]` target
+2. **If coverage < `[COVERAGE_TARGET]` AND there are PENDING items**: It resets all tasks in documents 1-4
    - This triggers a fresh pass through the pipeline
    - The loop continues
-3. **If coverage >= 90% OR no PENDING items**: It does NOT reset documents 1-4
+3. **If coverage >= `[COVERAGE_TARGET]` OR no PENDING items**: It does NOT reset documents 1-4
    - Documents 1-4 remain completed
    - The pipeline exits (no more uncompleted work)
 
@@ -94,10 +96,10 @@ When `5_PROGRESS.md` runs:
 1. Enable loop mode in Batch Runner settings
 2. First pass: Analyze → Find Gaps → Evaluate → Implement → Check Progress
 3. `5_PROGRESS.md` checks coverage:
-   - Below 90% with PENDING items? Reset docs 1-4 → continue
-   - At 90% or no more work? Don't reset → exit
+   - Below `[COVERAGE_TARGET]` with PENDING items? Reset docs 1-4 → continue
+   - At `[COVERAGE_TARGET]` or no more work? Don't reset → exit
 4. Each new loop creates `LOOP_N_*` files with incremented loop number
-5. Loop exits when 90% coverage is reached or no documentable work remains
+5. Loop exits when `[COVERAGE_TARGET]` coverage is reached or no documentable work remains
 
 ## Recommended Setup
 
@@ -110,7 +112,7 @@ Documents:
   2_FIND_GAPS.md    [Reset: OFF] ← Gets reset manually by 5_PROGRESS
   3_EVALUATE.md     [Reset: OFF] ← Gets reset manually by 5_PROGRESS
   4_IMPLEMENT.md    [Reset: OFF] ← Gets reset manually by 5_PROGRESS
-  5_PROGRESS.md     [Reset: ON]  ← Controls loop: resets 1-4 if <90%, exits if >=90%
+  5_PROGRESS.md     [Reset: ON]  ← Controls loop: resets 1-4 if <`[COVERAGE_TARGET]`, exits if >=`[COVERAGE_TARGET]`
 ```
 
 ### For Review-First Approach
@@ -129,7 +131,7 @@ Candidates in `LOOP_N_PLAN.md` have these statuses:
 
 | Status | Meaning | Auto-Documents? |
 |--------|---------|-----------------|
-| `PENDING` | Ready to document | Yes (if HIGH importance, PUBLIC/INTERNAL visibility) |
+| `PENDING` | Ready to document | Yes (if `[AUTO_DOC_IMPORTANCE]` importance, `[AUTO_DOC_VISIBILITY]` visibility) |
 | `IMPLEMENTED` | Documented in this loop | No |
 | `WON'T DO` | Skipped (private, self-explanatory) | No |
 | `PENDING - NEEDS CONTEXT` | Needs maintainer input | No |
@@ -173,7 +175,7 @@ These variables are automatically substituted:
 ## Exit Conditions
 
 The pipeline exits when ANY of these are true:
-1. Coverage reaches 90% or higher
+1. Coverage reaches `[COVERAGE_TARGET]` or higher
 2. Max loop limit reached (if set)
-3. No more PENDING items with HIGH importance
+3. No more PENDING items with `[AUTO_DOC_IMPORTANCE]` importance
 4. All remaining gaps are marked NEEDS CONTEXT or WON'T DO

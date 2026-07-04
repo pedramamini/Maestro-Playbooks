@@ -65,7 +65,7 @@ This playbook follows a **linear 5-document pattern** (no looping):
 ## Setup in Maestro
 
 1. Place this folder in your Maestro Auto Run directory
-2. Edit `1_ESTABLISH_CONTEXT.md` to add both PR URLs
+2. In the Auto Run agent prompt panel, set `PR_A_URL` and `PR_B_URL` to the GitHub URLs of the two competing PRs. Optionally tune the category weights and `TIE_THRESHOLD_PCT`.
 3. Configure Auto Run settings:
    - **Loop Mode**: OFF (sequential execution)
    - **Max Loops**: N/A (no looping)
@@ -95,10 +95,10 @@ The final summary includes:
 
 ### Adjusting Weights
 
-Edit `1_ESTABLISH_CONTEXT.md` to change category weights based on your project's priorities. For example:
-- Increase Documentation weight for public APIs
-- Increase Performance weight for hot paths
-- Decrease PR Size weight for complex features
+Tune `WEIGHT_SECURITY`, `WEIGHT_CORRECTNESS`, `WEIGHT_PERFORMANCE`, `WEIGHT_TESTS`, `WEIGHT_QUALITY`, `WEIGHT_DOCS`, and `WEIGHT_SIZE` in the agent prompt to match your project's priorities. For example:
+- Increase `WEIGHT_DOCS` for public APIs
+- Increase `WEIGHT_PERFORMANCE` for hot paths
+- Decrease `WEIGHT_SIZE` for complex features
 
 ### Adding Criteria
 

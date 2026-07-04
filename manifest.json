@@ -1,19 +1,19 @@
 {
-  "lastUpdated": "2026-05-06",
+  "lastUpdated": "2026-07-04",
   "playbooks": [
     {
-      "id": "assistants-pai-setup",
-      "title": "PAI Setup",
-      "description": "Installs Daniel Miessler's Personal AI Infrastructure (PAI) — the Life Operating System that sits underneath Claude Code (with OpenCode and Pi listed by upstream and Codex in development). For Claude Code agents the install runs end-to-end unattended via PAI_TEST_AUTOMATED=1: the agent ensures bun, executes the bootstrap, the wizard completes all 9 steps with sensible defaults, and the user runs /interview later to customize the placeholder identity. Other providers short-circuit cleanly via the maestro:halt marker with a pointer to upstream.",
+      "id": "assistants-lifeos-setup",
+      "title": "LifeOS Setup",
+      "description": "Installs Daniel Miessler's LifeOS — the AI-powered Life Operating System (formerly PAI, Personal AI Infrastructure) — onto a Claude Code or other agent. LifeOS v6 ships as one self-contained skill that installs additively (never clobbering your other files). The agent detects the harness and config root, drops the skill, then drives the install Tools to deploy Core (skill + ~50-skill library + LIFEOS runtime + system prompt + lifeos launch command) plus the chosen enhancements, wires hooks and the launch alias, and verifies with real evidence. The user runs /lifeos-setup afterwards for the Interview (TELOS current→ideal state) that seeds Pulse. Non-Claude harnesses get a degraded-but-real install; chat-only assistants fail the capability gate.",
       "category": "Assistants",
-      "subcategory": "PAI-Setup",
+      "subcategory": "LifeOS-Setup",
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
-      "tags": ["pai", "personal-ai-infrastructure", "daniel-miessler", "claude-code", "opencode", "assistant", "setup", "pulse", "telos", "digital-assistant", "life-os"],
-      "lastUpdated": "2026-05-06",
+      "tags": ["lifeos", "life-os", "pai", "personal-ai-infrastructure", "daniel-miessler", "claude-code", "assistant", "setup", "pulse", "telos", "algorithm", "digital-assistant", "skill"],
+      "lastUpdated": "2026-07-04",
       "minMaestroVersion": "0.16.17-RC",
       "beta": true,
-      "path": "Assistants/PAI-Setup",
+      "path": "Assistants/LifeOS-Setup",
       "documents": [
         { "filename": "1_DETECT", "resetOnCompletion": false },
         { "filename": "2_PLAN", "resetOnCompletion": false },
@@ -23,7 +23,7 @@
       ],
       "loopEnabled": false,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# LifeOS Setup Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\nLifeOS installs *additively* — it never clobbers your other files — but it is not *isolated* by default. In `user` scope the skill (and any hooks) land in the shared `~/.claude` and become visible to every Claude Code agent on this machine. Use `project` scope for genuine single-agent isolation.\n\n## Configuration\n\n### Components\n\n<!-- CONFIGURE: Which à-la-carte enhancements to install. Comma-separated subset of hooks,statusline,tooltips,spinnerverbs,agents,pulse,worksweep,derivedsync — or `none`. Core (skill + skill library + LIFEOS runtime + system prompt + launch command) always installs regardless. `hooks` (Claude Code only) lights up the mode banner, memory loop, voice, and per-turn context injection. launchd components (pulse/worksweep/derivedsync) are macOS-only. -->\n**LIFEOS_ENHANCEMENTS:** `hooks`\n\n<!-- Examples:\n- hooks,statusline,pulse   (recommended full Claude Code setup on macOS)\n- hooks                    (default — always-on behavior, no dashboard)\n- none                     (Core only)\n-->\n\n### Launch command\n\n<!-- CONFIGURE: Whether to append the `lifeos` shell alias so the constitution (LIFEOS_SYSTEM_PROMPT.md) loads. Without it, Core is installed but a plain `claude` session runs un-constituted. yes / no. -->\n**WIRE_LAUNCH_ALIAS:** `yes`\n\n### Scope\n\n<!-- CONFIGURE: Where LifeOS installs. `user` = shared ~/.claude (skill + hooks visible to every Claude Code agent on this machine). `project` = <AGENT_PATH>/.claude, scoped to this agent only (true single-agent isolation). Pulse's launchd service is machine-wide regardless. user / project. -->\n**INSTALL_SCOPE:** `user`\n\n## Agent Instructions\n\nYou are the AI LifeOS is being handed to. The user consented by launching this Auto Run, so self-consent at each mutation and drive the install Tools directly — do not wait for interactive approval. The install is additive: never clobber a populated file, never mutate the LifeOS source tree, and never write a harness config it won't read. Once the skill is dropped, its shipped `INSTALL.md` and `Workflows/Setup.md` are the authoritative, version-matched source for exact Tool flags and ordering — follow them. This playbook automates the logistics only; the Interview (identity + TELOS current→ideal state, which seeds Pulse) is a human conversation the user runs afterwards via `/lifeos-setup`."
     },
     {
       "id": "development-superpowers-setup",
@@ -58,7 +58,7 @@
       "author": "Jeff Scott Ward",
       "authorLink": "https://github.com/jeffscottward",
       "tags": ["pull-request", "github", "coderabbit", "greptile", "review-bots", "thread-cleanup"],
-      "lastUpdated": "2026-04-10",
+      "lastUpdated": "2026-05-10",
       "path": "Development/PR-Bot-Cleanup",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -69,7 +69,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# PR Bot Thread Cleanup Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Target Pull Request\n\n<!-- CONFIGURE: Full GitHub URL of the PR whose bot threads should be cleaned up. Required — the playbook will not infer this. -->\n**PR_URL:** `https://github.com/OWNER/REPO/pull/XXX`\n\n### Bot Reviewers in Scope\n\n<!-- CONFIGURE: Comma-separated list of bot reviewer login names (or matching prefixes). Threads from reviewers outside this list are ignored. -->\n**BOT_REVIEWERS:** `coderabbitai,greptile`\n\n<!-- Examples / valid values:\n- `coderabbitai,greptile`             — recommended default; the two most common review bots\n- `coderabbitai`                      — CodeRabbit only\n- `coderabbitai,greptile,sourcery-ai` — also include Sourcery\n- `coderabbitai,greptile,bito-bot,qodo-merge` — broad sweep\n-->\n\n---\n\n## Agent Instructions\n\nThis playbook cleans up unresolved PR review threads from automated review bots. Each loop iteration: re-fetches PR state, lists unresolved bot-authored threads, evaluates each as actionable vs. stale, applies a small validated batch of fixes, pushes, and re-polls. Loop exits when no `PENDING` bot findings remain.\n\nThe numbered task documents reference the configured variables as `[VARIABLE_NAME]` placeholders — substitute the configured values throughout. In particular:\n\n- `[PR_URL]` is the target fetched in document 1 and re-polled each iteration\n- `[BOT_REVIEWERS]` defines the in-scope reviewer login names for thread filtering in documents 2 and 4\n\nHuman review threads are always ignored regardless of `BOT_REVIEWERS` — this playbook does not touch threads authored by people."
     },
     {
       "id": "development-security",
@@ -91,7 +91,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 5,
-      "prompt": null
+      "prompt": "# Security Audit Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Auto-Fix Policy\n\nThe playbook auto-remediates only findings that match BOTH the severity AND remediability filters below. Findings outside these filters are routed to `PENDING - MANUAL REVIEW` (CRITICAL/HIGH but harder to fix) or `WON'T DO` (low impact).\n\n<!-- CONFIGURE: Comma-separated severity levels eligible for auto-fix. Findings outside this list are not auto-remediated. -->\n**AUTO_FIX_SEVERITY:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default; fix high-impact issues only\n- `CRITICAL`             — most conservative; only the most urgent\n- `CRITICAL,HIGH,MEDIUM` — aggressive; also auto-fix defense-in-depth issues\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW, INFO\n-->\n\n<!-- CONFIGURE: Comma-separated remediability tiers eligible for auto-fix. Tiers outside this list are flagged for manual triage instead. -->\n**AUTO_FIX_REMEDIABILITY:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default; skip fixes that need architectural changes\n- `EASY`                — most conservative; only mechanical / one-line fixes\n- `EASY,MEDIUM,HARD`    — aggressive; attempt complex refactors too\n- Valid tiers: EASY, MEDIUM, HARD, VERY HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a security audit agent. Each loop runs the full pipeline against the target codebase: analyze attack surface → find specific vulnerabilities → rate severity and remediability → fix the in-scope ones → check whether more loops are needed. The loop exits when no findings match the configured `AUTO_FIX_SEVERITY` × `AUTO_FIX_REMEDIABILITY` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[AUTO_FIX_SEVERITY]` or `[AUTO_FIX_REMEDIABILITY]` in those docs, substitute the values you configured here — do not use the inline default literals.\n"
     },
     {
       "id": "development-performance",
@@ -102,7 +102,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["performance", "optimization", "bottlenecks", "efficiency"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Performance",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -113,7 +113,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# Performance Optimization Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Auto-Implement Policy\n\nThe playbook auto-applies fixes that match BOTH the complexity AND gain filters below. Fixes outside these filters are routed to `PENDING - MANUAL REVIEW` or `WON'T DO`.\n\n<!-- CONFIGURE: Comma-separated complexity tiers eligible for auto-fix. Tiers outside this list are flagged for manual review. -->\n**AUTO_IMPLEMENT_COMPLEXITY:** `LOW`\n\n<!-- Examples / valid values:\n- `LOW`         — recommended default; only mechanical changes (memo, useCallback, constant extraction)\n- `LOW,MEDIUM`  — aggressive; accept state-flow restructuring too\n- Valid tiers: LOW, MEDIUM, HIGH\n-->\n\n<!-- CONFIGURE: Comma-separated gain levels eligible for auto-fix. Levels outside this list are deprioritized. -->\n**AUTO_IMPLEMENT_GAIN:** `MEDIUM,HIGH`\n\n<!-- Examples / valid values:\n- `MEDIUM,HIGH`  — recommended default; only fixes with noticeable impact\n- `HIGH`         — most conservative; only major wins\n- `LOW,MEDIUM,HIGH` — aggressive; apply micro-optimizations too\n- Valid levels: LOW, MEDIUM, HIGH\n-->\n\n---\n\n## Agent Instructions\n\nYou are a performance optimization agent. Each loop runs the full pipeline against the target codebase: analyze hot paths → find specific candidates → rate each by complexity and gain → apply the in-scope fixes → check whether more work remains. The loop exits when no candidates match the configured `AUTO_IMPLEMENT_COMPLEXITY` × `AUTO_IMPLEMENT_GAIN` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[AUTO_IMPLEMENT_COMPLEXITY]` or `[AUTO_IMPLEMENT_GAIN]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-refactor",
@@ -124,7 +124,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["refactoring", "code-quality", "duplication", "complexity", "maintainability"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Refactor",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -135,7 +135,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# Code Refactoring Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Complexity Thresholds\n\nFiles/functions exceeding these thresholds are flagged as refactoring candidates. Tune per codebase — a Rails app and a Go service have different norms.\n\n<!-- CONFIGURE: Files larger than this (in LOC) are flagged for splitting. -->\n**MAX_FILE_LOC:** `500`\n\n<!-- Examples / valid values:\n- `500`   — recommended default for application code\n- `300`   — strict; suitable for libraries\n- `1000`  — relaxed; for codebases with many large auto-generated files\n-->\n\n<!-- CONFIGURE: Functions larger than this (in LOC) are flagged for breaking into smaller steps. -->\n**MAX_FUNCTION_LOC:** `50`\n\n<!-- Examples / valid values:\n- `50`    — recommended default\n- `30`    — strict; favors tight composition\n- `100`   — relaxed; for service handlers with linear flows\n-->\n\n<!-- CONFIGURE: Functions nested deeper than this (if/else/switch levels) are flagged for extraction. -->\n**MAX_NESTING_DEPTH:** `3`\n\n<!-- Examples / valid values:\n- `3`     — recommended default\n- `2`     — strict; encourages guard clauses and early returns\n- `4`     — relaxed; tolerates some embedded validation flows\n-->\n\n<!-- CONFIGURE: Functions with more parameters than this are flagged for extraction to a config object. -->\n**MAX_PARAMETERS:** `5`\n\n<!-- Examples / valid values:\n- `5`     — recommended default\n- `4`     — strict; pushes builder/options patterns\n- `7`     — relaxed; for low-level adapters and constructors\n-->\n\n### Auto-Implement Policy\n\nThe playbook auto-applies refactors that match BOTH the risk AND benefit filters below. Refactors outside these filters are flagged for manual review or skipped.\n\n<!-- CONFIGURE: Comma-separated risk tiers eligible for auto-refactor. Tiers outside this list are flagged for manual triage. -->\n**AUTO_IMPLEMENT_RISK:** `LOW`\n\n<!-- Examples / valid values:\n- `LOW`         — recommended default; only mechanical refactors with full test coverage\n- `LOW,MEDIUM`  — aggressive; accept some structural changes\n- Valid tiers: LOW, MEDIUM, HIGH, VERY HIGH\n-->\n\n<!-- CONFIGURE: Comma-separated benefit levels eligible for auto-refactor. Levels outside this list are deprioritized. -->\n**AUTO_IMPLEMENT_BENEFIT:** `HIGH,VERY HIGH`\n\n<!-- Examples / valid values:\n- `HIGH,VERY HIGH`  — recommended default; only meaningful improvements\n- `VERY HIGH`       — most conservative; only architectural wins\n- `MEDIUM,HIGH,VERY HIGH` — aggressive; cleanup nice-to-haves too\n- Valid levels: LOW, MEDIUM, HIGH, VERY HIGH\n-->\n\n---\n\n## Agent Instructions\n\nYou are a refactoring agent. Each loop runs the full pipeline against the target codebase: analyze structure → find specific candidates exceeding the complexity thresholds → rate each by risk and benefit → apply the in-scope refactors → check whether more work remains. The loop exits when no candidates match the configured `AUTO_IMPLEMENT_RISK` × `AUTO_IMPLEMENT_BENEFIT` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[MAX_FILE_LOC]`, `[MAX_FUNCTION_LOC]`, `[MAX_NESTING_DEPTH]`, `[MAX_PARAMETERS]`, `[AUTO_IMPLEMENT_RISK]`, or `[AUTO_IMPLEMENT_BENEFIT]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-documentation",
@@ -157,7 +157,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# Documentation Coverage Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Coverage Target\n\n<!-- CONFIGURE: Documentation coverage threshold (% of in-scope exports that must have docs). The pipeline loops until coverage reaches this value or no eligible PENDING items remain. -->\n**COVERAGE_TARGET:** `90%`\n\n<!-- Examples / valid values:\n- `90%`  — recommended default; high bar, suitable for libraries and public APIs\n- `80%`  — pragmatic baseline for application code\n- `100%` — strictest; every in-scope export must be documented\n- `70%`  — minimum-viable for legacy codebases just starting to adopt docs\n-->\n\n### Auto-Documentation Policy\n\nThe playbook auto-documents only exports that match BOTH the visibility AND importance filters below. Exports outside these filters are routed to `WON'T DO` (low visibility/importance) or `PENDING - NEEDS CONTEXT` (higher impact but require maintainer input).\n\n<!-- CONFIGURE: Comma-separated visibility tiers eligible for auto-documentation. Exports outside this list are not auto-documented. -->\n**AUTO_DOC_VISIBILITY:** `PUBLIC,INTERNAL`\n\n<!-- Examples / valid values:\n- `PUBLIC,INTERNAL`             — recommended default; document everything used across modules\n- `PUBLIC`                      — most conservative; document only the public API surface\n- `PUBLIC,INTERNAL,UTILITY`     — aggressive; also document helpers\n- Valid tiers: PUBLIC, INTERNAL, UTILITY, IMPLEMENTATION\n-->\n\n<!-- CONFIGURE: Comma-separated importance levels eligible for auto-documentation. Levels outside this list are flagged for manual triage instead. -->\n**AUTO_DOC_IMPORTANCE:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default; document widely-used and non-obvious exports\n- `CRITICAL`             — most conservative; only core, error-prone surface\n- `CRITICAL,HIGH,MEDIUM` — aggressive; document moderately-used exports too\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW\n-->\n\n---\n\n## Agent Instructions\n\nYou are a documentation coverage agent. Each loop runs the full pipeline against the target codebase: measure current coverage → find undocumented exports → rate each by visibility and importance → write docs for the in-scope ones → check whether the coverage target has been met. The loop exits when coverage reaches `COVERAGE_TARGET` or no eligible PENDING items remain under the configured `AUTO_DOC_VISIBILITY` × `AUTO_DOC_IMPORTANCE` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[COVERAGE_TARGET]`, `[AUTO_DOC_VISIBILITY]`, or `[AUTO_DOC_IMPORTANCE]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-testing",
@@ -168,7 +168,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["testing", "coverage", "unit-tests", "integration-tests", "quality"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Testing",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -179,7 +179,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# Test Coverage Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Coverage Target\n\n<!-- CONFIGURE: Line-coverage threshold (% of executable lines that must be covered by tests). The pipeline loops until coverage reaches this value or no eligible PENDING items remain. -->\n**COVERAGE_TARGET:** `80%`\n\n<!-- Examples / valid values:\n- `80%`  — recommended default; pragmatic baseline for application code\n- `90%`  — high bar suitable for libraries and SDKs\n- `95%`  — strictest; safety-critical or embedded code\n- `60%`  — minimum-viable for legacy codebases just starting to adopt tests\n-->\n\n### Auto-Test Policy\n\nThe playbook auto-writes tests only for gaps that match BOTH the testability AND importance filters below. Gaps outside these filters are routed to `PENDING - MANUAL REVIEW` (hard to test) or `WON'T DO` (low importance).\n\n<!-- CONFIGURE: Comma-separated testability tiers eligible for auto-test. Tiers outside this list are flagged for manual triage instead. -->\n**AUTO_TEST_TESTABILITY:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default; skip tests that need significant scaffolding\n- `EASY`                — most conservative; only mechanical / pure-function tests\n- `EASY,MEDIUM,HARD`    — aggressive; attempt integration tests too\n- Valid tiers: EASY, MEDIUM, HARD, VERY HARD\n-->\n\n<!-- CONFIGURE: Comma-separated importance levels eligible for auto-test. Levels outside this list are flagged for manual triage instead. -->\n**AUTO_TEST_IMPORTANCE:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default; test the critical paths first\n- `CRITICAL`             — most conservative; only core, high-risk code\n- `CRITICAL,HIGH,MEDIUM` — aggressive; also test moderately-used helpers\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW\n-->\n\n---\n\n## Agent Instructions\n\nYou are a test coverage agent. Each loop runs the full pipeline against the target codebase: measure current coverage → find untested code → rate each gap by importance and testability → write tests for the in-scope ones → check whether the coverage target has been met. The loop exits when coverage reaches `COVERAGE_TARGET` or no eligible PENDING items remain under the configured `AUTO_TEST_TESTABILITY` × `AUTO_TEST_IMPORTANCE` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[COVERAGE_TARGET]`, `[AUTO_TEST_TESTABILITY]`, or `[AUTO_TEST_IMPORTANCE]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "development-usage",
@@ -190,7 +190,7 @@
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
       "tags": ["readme", "documentation", "accuracy", "features", "usage"],
-      "lastUpdated": "2025-12-26",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Usage",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -201,7 +201,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 5,
-      "prompt": null
+      "prompt": "# README Accuracy Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### README File Location\n\n<!-- CONFIGURE: Path to the README file the playbook should audit and update, relative to the project root. -->\n**README_PATH:** `README.md`\n\n<!-- Examples / valid values:\n- `README.md`        — recommended default\n- `readme.md`        — lowercase variant\n- `docs/README.md`   — for projects with docs subfolder\n- `Documentation.md` — for projects with a different convention\n-->\n\n### Auto-Fix Policy\n\nThe playbook auto-fixes only gaps that match BOTH the importance AND effort filters below. Gaps outside these filters are flagged for manual review.\n\n<!-- CONFIGURE: Comma-separated importance levels eligible for auto-fix. -->\n**AUTO_FIX_IMPORTANCE:** `CRITICAL,HIGH`\n\n<!-- Examples / valid values:\n- `CRITICAL,HIGH`        — recommended default\n- `CRITICAL`             — most conservative\n- `CRITICAL,HIGH,MEDIUM` — aggressive\n- Valid levels: CRITICAL, HIGH, MEDIUM, LOW\n-->\n\n<!-- CONFIGURE: Comma-separated effort tiers eligible for auto-fix. -->\n**AUTO_FIX_EFFORT:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default\n- `EASY`                — most conservative; only one-line additions\n- `EASY,MEDIUM,HARD`    — aggressive\n- Valid tiers: EASY, MEDIUM, HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a README accuracy agent. Each loop runs the pipeline against the target codebase: survey actual features → compare against the README at `[README_PATH]` → rate each gap by importance and effort → apply the in-scope fixes → check whether more work remains. The loop exits when no gaps match the configured `AUTO_FIX_IMPORTANCE` × `AUTO_FIX_EFFORT` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[README_PATH]`, `[AUTO_FIX_IMPORTANCE]`, or `[AUTO_FIX_EFFORT]` in those docs, substitute the values you configured here — do not use the inline default literals."
     },
     {
       "id": "research-market",
@@ -236,7 +236,7 @@
       "author": "Kayvan Sylvan",
       "authorLink": "https://www.sylvan.com",
       "tags": ["mobile", "responsive", "react", "nextjs", "tailwind", "performance", "accessibility", "touch-targets", "hamburger-menu"],
-      "lastUpdated": "2026-01-04",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Mobile-Polish",
       "documents": [
         { "filename": "1_ANALYZE", "resetOnCompletion": false },
@@ -247,7 +247,7 @@
       ],
       "loopEnabled": true,
       "maxLoops": 10,
-      "prompt": null
+      "prompt": "# Mobile Polish Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Touch & Layout Targets\n\n<!-- CONFIGURE: Minimum touch-target size in pixels. Apple HIG = 44, Material Design = 48. -->\n**MIN_TOUCH_TARGET_PX:** `44`\n\n<!-- Examples / valid values:\n- `44`   — Apple Human Interface Guidelines default\n- `48`   — Material Design default (recommended for Android-first apps)\n- `40`   — looser; for desktop-leaning responsive layouts\n-->\n\n<!-- CONFIGURE: Tailwind/CSS breakpoint (in px) where desktop nav transitions to mobile nav. -->\n**MOBILE_BREAKPOINT_PX:** `768`\n\n<!-- Examples / valid values:\n- `768`   — Tailwind `md:` default (recommended)\n- `640`   — Tailwind `sm:` for narrower phone-first cutoff\n- `1024`  — Tailwind `lg:` for tablet-leaning apps\n-->\n\n### Auto-Implement Policy\n\nThe playbook auto-applies fixes that match BOTH the impact AND effort filters below. Fixes outside these filters are flagged for manual review.\n\n<!-- CONFIGURE: Comma-separated impact levels eligible for auto-fix. -->\n**AUTO_IMPLEMENT_IMPACT:** `HIGH,CRITICAL`\n\n<!-- Examples / valid values:\n- `HIGH,CRITICAL`        — recommended default\n- `CRITICAL`             — most conservative\n- `MEDIUM,HIGH,CRITICAL` — aggressive\n- Valid levels: LOW, MEDIUM, HIGH, CRITICAL\n-->\n\n<!-- CONFIGURE: Comma-separated effort tiers eligible for auto-fix. -->\n**AUTO_IMPLEMENT_EFFORT:** `EASY,MEDIUM`\n\n<!-- Examples / valid values:\n- `EASY,MEDIUM`         — recommended default\n- `EASY`                — most conservative; only one-line Tailwind class additions\n- `EASY,MEDIUM,HARD`    — aggressive; accept new components and refactors\n- Valid tiers: EASY, MEDIUM, HARD\n-->\n\n---\n\n## Agent Instructions\n\nYou are a mobile responsiveness agent for React/Next.js codebases. Each loop runs the pipeline against the target site: analyze responsive patterns → find mobile-unfriendly code → rate each by impact and effort → apply the in-scope fixes → check whether more work remains. The loop exits when no fixes match the configured `AUTO_IMPLEMENT_IMPACT` × `AUTO_IMPLEMENT_EFFORT` policy.\n\nThe numbered task documents reference the variables above by name. Where you see `[MIN_TOUCH_TARGET_PX]`, `[MOBILE_BREAKPOINT_PX]`, `[AUTO_IMPLEMENT_IMPACT]`, or `[AUTO_IMPLEMENT_EFFORT]` in those docs, substitute the values you configured here. Code examples using literal Tailwind classes (`min-h-[44px]`, `md:flex`) reflect the defaults — adapt them to the configured values when generating new code."
     },
     {
       "id": "development-code-review",
@@ -285,7 +285,7 @@
         "decision-making",
         "weighted-scoring"
       ],
-      "lastUpdated": "2026-01-09",
+      "lastUpdated": "2026-05-10",
       "path": "Development/Best-PR",
       "documents": [
         { "filename": "1_ESTABLISH_CONTEXT", "resetOnCompletion": false },
@@ -296,7 +296,7 @@
       ],
       "loopEnabled": false,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# Best PR Comparison Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\n---\n\n## Configuration\n\n### Pull Requests to Compare\n\n<!-- CONFIGURE: Full GitHub URL of the first PR -->\n**PR_A_URL:** `https://github.com/OWNER/REPO/pull/XXX`\n\n<!-- CONFIGURE: Full GitHub URL of the second PR (same feature, competing implementation) -->\n**PR_B_URL:** `https://github.com/OWNER/REPO/pull/YYY`\n\n### Category Weights\n\nThe playbook scores each PR across 7 categories on a 0-5 scale, then multiplies by category weight. Tune the weights to match your project's priorities. Total max score = 5 × sum of weights.\n\n<!-- CONFIGURE: Weight for security findings (input validation, injection, auth, secrets) -->\n**WEIGHT_SECURITY:** `3`\n\n<!-- CONFIGURE: Weight for correctness (feature completeness, edge cases, error handling) -->\n**WEIGHT_CORRECTNESS:** `3`\n\n<!-- CONFIGURE: Weight for performance (algorithm efficiency, queries, memory) -->\n**WEIGHT_PERFORMANCE:** `2`\n\n<!-- CONFIGURE: Weight for test coverage (unit + integration + edge cases) -->\n**WEIGHT_TESTS:** `2`\n\n<!-- CONFIGURE: Weight for code quality (readability, DRY, naming) -->\n**WEIGHT_QUALITY:** `1`\n\n<!-- CONFIGURE: Weight for documentation (comments, README, API docs) -->\n**WEIGHT_DOCS:** `1`\n\n<!-- CONFIGURE: Weight for PR size/simplicity (smaller often better) -->\n**WEIGHT_SIZE:** `1`\n\n### Tie Threshold\n\n<!-- CONFIGURE: Percentage difference below which the result is 'Too Close to Call'. Default 8% ≈ 5 points on a 65-point max -->\n**TIE_THRESHOLD_PCT:** `8`\n\n<!-- Examples / valid values:\n- 5 (stricter — only declare a winner with a clear lead)\n- 8 (default)\n- 12 (looser — declare a winner more often)\n-->\n\n---\n\n## Agent Instructions\n\nThis playbook objectively compares two competing PRs that implement the same feature, scores them against weighted categories, and determines a winner.\n\nThe numbered task documents reference the configured variables above as `[VARIABLE_NAME]` placeholders — substitute the configured values throughout. In particular:\n\n- `[PR_A_URL]` and `[PR_B_URL]` are the targets fetched in document 1\n- `[WEIGHT_SECURITY]`, `[WEIGHT_CORRECTNESS]`, etc. drive the weighted scoring math in documents 2-4\n- `[TIE_THRESHOLD_PCT]` is the cutoff used in document 4 to declare 'Too Close to Call'\n"
     }
   ]
 }

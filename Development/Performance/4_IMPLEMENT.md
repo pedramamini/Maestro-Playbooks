@@ -16,14 +16,16 @@ Implement ONE performance fix from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN
 1. **Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`** to find evaluated performance fixes
 2. **Filter for actionable items**: Only consider fixes where:
    - **Status = `PENDING`** (exactly - not `PENDING - MANUAL REVIEW` or `WON'T DO`)
-   - These are LOW complexity items with MEDIUM or HIGH gain
-3. **Select ONE fix** that meets the criteria (prioritize HIGH gain over MEDIUM)
+   - Complexity is in `[AUTO_IMPLEMENT_COMPLEXITY]` and gain is in `[AUTO_IMPLEMENT_GAIN]`
+3. **Select ONE fix** that meets the criteria (prefer higher gain when ties)
 4. **Implement the fix**: Make the code changes as specified in the proposed fix
 5. **Verify the change**: Ensure the code still works (syntax check, no obvious errors)
 6. **Log the change** to `{{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md`
 7. **Update status** in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` to `IMPLEMENTED`
 
 ## Task
+
+- [ ] **Read configured values**: Read the agent prompt for `[AUTO_IMPLEMENT_COMPLEXITY]` and `[AUTO_IMPLEMENT_GAIN]`. Use these values throughout this playbook wherever you see the corresponding placeholders.
 
 - [ ] **Implement one PENDING fix (or skip if none)**: Read {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md. If the file doesn't exist OR contains no items with status exactly `PENDING`, mark this task complete without changes. Otherwise, find an item with status exactly `PENDING`, implement the fix, log to {{AUTORUN_FOLDER}}/PERF_LOG_{{AGENT_NAME}}_{{DATE}}.md, and mark as IMPLEMENTED in {{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md.
 
