@@ -247,7 +247,7 @@ The `prompt` field holds the text that pre-fills the Auto Run panel when a user 
 - Values inferable from the codebase (detected language, test runner, framework version)
 - Workflow constants that define the playbook's shape (number of documents, loop trigger)
 - Internal artifact paths (`LOOP_N_*.md` filenames)
-- Placeholder identity values that are intentional (e.g. PAI-Setup's `principalName="User"` is meant to be replaced via post-install `/interview`)
+- Placeholder identity values that are intentional (e.g. LifeOS-Setup leaves the `DA_NAME`/`PRINCIPAL_NAME` placeholders at their defaults, to be filled in via the post-install `/lifeos-setup` Interview)
 
 **Storage in `manifest.json`:** the prompt text must be a single JSON string with newlines escaped as `\n`. To author it, write the markdown into `Agent-Prompt.md` in your playbook folder for editor friendliness, then encode it as a JSON string when updating `manifest.json`.
 
@@ -300,7 +300,7 @@ Use consistent status values in `LOOP_N_PLAN.md`:
 
 ### Existing Categories
 
-- **Assistants** - One-shot setup workflows that install personal-AI frameworks into an agent (PAI-Setup)
+- **Assistants** - One-shot setup workflows that install personal-AI frameworks into an agent (LifeOS-Setup)
 - **Development** - Code improvement workflows (Security, Performance, Refactor, Documentation, Testing, Usage)
 - **Research** - Knowledge-building workflows (Market)
 

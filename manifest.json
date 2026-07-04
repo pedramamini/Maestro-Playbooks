@@ -1,19 +1,19 @@
 {
-  "lastUpdated": "2026-05-06",
+  "lastUpdated": "2026-07-04",
   "playbooks": [
     {
-      "id": "assistants-pai-setup",
-      "title": "PAI Setup",
-      "description": "Installs Daniel Miessler's Personal AI Infrastructure (PAI) — the Life Operating System that sits underneath Claude Code (with OpenCode and Pi listed by upstream and Codex in development). For Claude Code agents the install runs end-to-end unattended via PAI_TEST_AUTOMATED=1: the agent ensures bun, executes the bootstrap, the wizard completes all 9 steps with sensible defaults, and the user runs /interview later to customize the placeholder identity. Other providers short-circuit cleanly via the maestro:halt marker with a pointer to upstream.",
+      "id": "assistants-lifeos-setup",
+      "title": "LifeOS Setup",
+      "description": "Installs Daniel Miessler's LifeOS — the AI-powered Life Operating System (formerly PAI, Personal AI Infrastructure) — onto a Claude Code or other agent. LifeOS v6 ships as one self-contained skill that installs additively (never clobbering your other files). The agent detects the harness and config root, drops the skill, then drives the install Tools to deploy Core (skill + ~50-skill library + LIFEOS runtime + system prompt + lifeos launch command) plus the chosen enhancements, wires hooks and the launch alias, and verifies with real evidence. The user runs /lifeos-setup afterwards for the Interview (TELOS current→ideal state) that seeds Pulse. Non-Claude harnesses get a degraded-but-real install; chat-only assistants fail the capability gate.",
       "category": "Assistants",
-      "subcategory": "PAI-Setup",
+      "subcategory": "LifeOS-Setup",
       "author": "Pedram Amini",
       "authorLink": "https://www.pedramamini.com",
-      "tags": ["pai", "personal-ai-infrastructure", "daniel-miessler", "claude-code", "opencode", "assistant", "setup", "pulse", "telos", "digital-assistant", "life-os"],
-      "lastUpdated": "2026-05-06",
+      "tags": ["lifeos", "life-os", "pai", "personal-ai-infrastructure", "daniel-miessler", "claude-code", "assistant", "setup", "pulse", "telos", "algorithm", "digital-assistant", "skill"],
+      "lastUpdated": "2026-07-04",
       "minMaestroVersion": "0.16.17-RC",
       "beta": true,
-      "path": "Assistants/PAI-Setup",
+      "path": "Assistants/LifeOS-Setup",
       "documents": [
         { "filename": "1_DETECT", "resetOnCompletion": false },
         { "filename": "2_PLAN", "resetOnCompletion": false },
@@ -23,7 +23,7 @@
       ],
       "loopEnabled": false,
       "maxLoops": null,
-      "prompt": null
+      "prompt": "# LifeOS Setup Agent Prompt\n\n**IMPORTANT: Configure the placeholders below before running this playbook.**\n\nLifeOS installs *additively* — it never clobbers your other files — but it is not *isolated* by default. In `user` scope the skill (and any hooks) land in the shared `~/.claude` and become visible to every Claude Code agent on this machine. Use `project` scope for genuine single-agent isolation.\n\n## Configuration\n\n### Components\n\n<!-- CONFIGURE: Which à-la-carte enhancements to install. Comma-separated subset of hooks,statusline,tooltips,spinnerverbs,agents,pulse,worksweep,derivedsync — or `none`. Core (skill + skill library + LIFEOS runtime + system prompt + launch command) always installs regardless. `hooks` (Claude Code only) lights up the mode banner, memory loop, voice, and per-turn context injection. launchd components (pulse/worksweep/derivedsync) are macOS-only. -->\n**LIFEOS_ENHANCEMENTS:** `hooks`\n\n<!-- Examples:\n- hooks,statusline,pulse   (recommended full Claude Code setup on macOS)\n- hooks                    (default — always-on behavior, no dashboard)\n- none                     (Core only)\n-->\n\n### Launch command\n\n<!-- CONFIGURE: Whether to append the `lifeos` shell alias so the constitution (LIFEOS_SYSTEM_PROMPT.md) loads. Without it, Core is installed but a plain `claude` session runs un-constituted. yes / no. -->\n**WIRE_LAUNCH_ALIAS:** `yes`\n\n### Scope\n\n<!-- CONFIGURE: Where LifeOS installs. `user` = shared ~/.claude (skill + hooks visible to every Claude Code agent on this machine). `project` = <AGENT_PATH>/.claude, scoped to this agent only (true single-agent isolation). Pulse's launchd service is machine-wide regardless. user / project. -->\n**INSTALL_SCOPE:** `user`\n\n## Agent Instructions\n\nYou are the AI LifeOS is being handed to. The user consented by launching this Auto Run, so self-consent at each mutation and drive the install Tools directly — do not wait for interactive approval. The install is additive: never clobber a populated file, never mutate the LifeOS source tree, and never write a harness config it won't read. Once the skill is dropped, its shipped `INSTALL.md` and `Workflows/Setup.md` are the authoritative, version-matched source for exact Tool flags and ordering — follow them. This playbook automates the logistics only; the Interview (identity + TELOS current→ideal state, which seeds Pulse) is a human conversation the user runs afterwards via `/lifeos-setup`."
     },
     {
       "id": "development-superpowers-setup",
