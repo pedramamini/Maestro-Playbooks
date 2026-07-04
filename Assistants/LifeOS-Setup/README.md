@@ -73,6 +73,19 @@ LifeOS is harness-agnostic by design (built on universal primitives — hooks, s
 | `LIFEOS_VERIFY.md` | Verification result with an explicit verdict |
 | `LIFEOS_SETUP.md` | The summary the user reads |
 
+## After the run: your next step
+
+This playbook installs the **logistics** — it cannot finish the **Interview** (naming your assistant, capturing your TELOS current → ideal state, seeding Pulse with your real data), which is an interactive conversation. Document 5 ends its final history message with an explicit `▶ Next step` block naming the exact commands. For a successful install those are, in order:
+
+```bash
+lifeos            # launch Claude Code with the LifeOS constitution loaded
+/lifeos-setup     # run inside that session — finishes Setup, then runs the Interview
+```
+
+`lifeos` is the launch alias wired during install (a plain `claude` session stays vanilla — it never loads the constitution). `/lifeos-setup` is the LifeOS skill's entry point: it completes system Setup and rolls into the Interview. Once the Interview seeds Pulse, open the **Life Dashboard** at <http://localhost:31337> (if the `pulse` enhancement was installed).
+
+Other verdicts get their own next step in the final message: `INSTALLED-UNCONSTITUTED` hands you the manual `lifeos` alias line first; `INSTALLED-PULSE-PENDING` gives the `launchctl load` to bind Pulse; `BLOCKED` gives the `bun` install command to run before re-running the playbook.
+
 ## Assets
 
 - `assets/INSTALL_NOTES.md` — pinned reference of the install command, the Tools sequence, the two-tier model, the verification surface, and version pins. Documents 2–4 read this. Edit it as LifeOS's upstream install path evolves.
