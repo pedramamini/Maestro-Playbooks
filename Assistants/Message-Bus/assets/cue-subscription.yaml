@@ -1,0 +1,48 @@
+# Maestro Cue subscription template for the @maestro message bus.
+#
+# This is a SHAPE, not a drop-in file. The playbook substitutes every
+# <PLACEHOLDER> from BUS_INSTALL_PLAN.md and appends the result to the
+# subscription list in .maestro/cue.yaml — it does not overwrite that file.
+#
+# The design in one line: a cheap deterministic gate runs on a timer and almost
+# always exits; the expensive agent is only reachable through a hit.
+
+- name: maestro-message-bus
+  event: time.heartbeat
+  agent_id: <HANDLER_AGENT_ID>
+  pipeline_name: Messages
+  label: '<TRIGGER_MARKER> Message Bus'
+  interval_minutes: <POLL_MINUTES>
+
+  # Installed disarmed. Flip to true only after 4_VERIFY reports a clean dry run.
+  # An armed bus that was never verified is a bus that texts on your behalf
+  # before anyone has confirmed it reads the right messages.
+  enabled: false
+
+  action: command
+  command:
+    mode: shell
+
+    # Every value the scanner needs comes through the environment, so the
+    # installed script stays identical to the bundled asset.
+    #
+    #   MAESTRO_HANDLER_AGENT_ID  who receives the dispatched command.
+    #                             UNSET => the scanner stays in dry-run and
+    #                             dispatches nothing. That is the safe default
+    #                             and it is how 4_VERIFY proves the bus works
+    #                             without sending a single message.
+    #   VAULT_DIR                 working dir. State lands in
+    #                             <VAULT_DIR>/automation/state/ and the handler
+    #                             spec is read from
+    #                             <VAULT_DIR>/automation/Maestro-Message-Channel.md
+    #   NODE_BIN                  absolute path to node. Cue's PATH is minimal,
+    #                             so a bare `node` is a coin flip.
+    #   MAESTRO_CLI_PATH          only if maestro-cli.js is not at the default
+    #                             /Applications/Maestro.app/... location.
+    #
+    # The interpreter is absolute for the same reason as NODE_BIN.
+    shell: >-
+      MAESTRO_HANDLER_AGENT_ID=<HANDLER_AGENT_ID>
+      VAULT_DIR=<WORK_DIR>
+      NODE_BIN=<ABSOLUTE_NODE_PATH>
+      /usr/bin/python3 <INSTALL_DIR>/maestro_message_scanner.py --live
