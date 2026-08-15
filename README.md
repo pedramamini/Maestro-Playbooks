@@ -15,6 +15,8 @@ One-shot setup workflows that install personal-AI frameworks into a fresh agent.
 | Playbook | Purpose | Exit Condition |
 |----------|---------|----------------|
 | `Assistants/LifeOS-Setup/` | Install Daniel Miessler's LifeOS (formerly PAI) — the AI-powered Life Operating System — onto a Claude Code or other agent | All 5 documents completed (no loop) |
+| `Assistants/Message-Bus/` | Put your agent on the other end of your iMessage threads via a Cue-scheduled scanner (macOS) | All 5 documents completed (no loop) |
+| `Assistants/Voice-Journal/` | Append Apple's on-device Voice Memos transcripts to a daily markdown journal (macOS) | All 5 documents completed (no loop) |
 
 ### Development Playbooks
 
@@ -37,6 +39,7 @@ Knowledge-building workflows that require **custom agent prompts** with user con
 
 | Playbook | Purpose | Exit Condition |
 |----------|---------|----------------|
+| `Research/Corpus/` | Turn a playlist, folder, or URL list into an interlinked knowledge base with a cross-cutting synthesis | Nothing pending, extraction complete, and synthesis written |
 | `Research/Market/` | Build Obsidian-style knowledge vault about a market | Coverage targets met or no HIGH importance entities remain |
 
 ## Design Philosophy: Context Engineering
