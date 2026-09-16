@@ -99,7 +99,11 @@ def normalize_name(name: str) -> str:
     """Fold a name to a comparison key for duplicate detection."""
     s = str(name).lower()
     s = re.sub(r"[^\w\s]", " ", s)              # punctuation -> space
-    parts = [p for p in s.split() if p and p not in LEGAL_SUFFIXES]
+    parts = s.split()
+    # Strip legal suffixes from the END only. "The Company Store" keeps its
+    # middle word; "Acme Holdings Inc" loses both trailing ones.
+    while len(parts) > 1 and parts[-1] in LEGAL_SUFFIXES:
+        parts.pop()
     return " ".join(parts)
 
 
@@ -127,12 +131,34 @@ def as_list(value):
     return [value]
 
 
+def to_date(raw):
+    """
+    Coerce a frontmatter value to a date, or return None if it is not one.
+    datetime is checked first because it is a subclass of date, and a
+    datetime compared against date.today() raises TypeError.
+    """
+    if isinstance(raw, datetime):
+        return raw.date()
+    if isinstance(raw, date):
+        return raw
+    if isinstance(raw, str) and DATE_RE.match(raw):
+        try:
+            return datetime.strptime(raw, "%Y-%m-%d").date()
+        except ValueError:
+            return None
+    return None
+
+
 def parse_frontmatter(path: Path):
-    """Return (frontmatter_dict, body_str). Frontmatter is None if absent."""
+    """
+    Return (frontmatter_dict, body_str). Frontmatter is None if absent,
+    "PARSE_ERROR" if present but invalid YAML, "READ_ERROR" if the file
+    could not be read at all.
+    """
     try:
         text = path.read_text(encoding="utf-8")
-    except (UnicodeDecodeError, OSError):
-        return None, ""
+    except (UnicodeDecodeError, OSError) as e:
+        return "READ_ERROR", str(e)
     if not text.startswith("---"):
         return None, text
     end = text.find("\n---", 3)
@@ -229,6 +255,10 @@ class HealthCheck:
                 rel = str(path.relative_to(self.vault))
                 fm, body = parse_frontmatter(path)
 
+                if fm == "READ_ERROR":
+                    self.add(CRITICAL, "unreadable", rel,
+                             f"File could not be read: {body}")
+                    continue
                 if fm == "PARSE_ERROR":
                     self.add(CRITICAL, "yaml-parse", rel,
                              "Frontmatter is not valid YAML.")
@@ -316,21 +346,15 @@ class HealthCheck:
                     if field not in fm or fm[field] is None:
                         continue
                     raw = fm[field]
-                    if isinstance(raw, date):
-                        parsed = raw
-                    elif isinstance(raw, datetime):
-                        parsed = raw.date()
-                    else:
-                        if not DATE_RE.match(str(raw)):
-                            self.add(MEDIUM, "date-format", rel,
-                                     f"{field}='{raw}' is not YYYY-MM-DD.")
-                            continue
-                        try:
-                            parsed = datetime.strptime(str(raw), "%Y-%m-%d").date()
-                        except ValueError:
+                    parsed = to_date(raw)
+                    if parsed is None:
+                        if isinstance(raw, str) and DATE_RE.match(raw):
                             self.add(MEDIUM, "date-invalid", rel,
                                      f"{field}='{raw}' is not a real date.")
-                            continue
+                        else:
+                            self.add(MEDIUM, "date-format", rel,
+                                     f"{field}='{raw}' is not YYYY-MM-DD.")
+                        continue
                     if parsed > today:
                         self.add(MEDIUM, "date-future", rel,
                                  f"{field}='{parsed}' is in the future.")
@@ -340,7 +364,7 @@ class HealthCheck:
                     if field not in fm or fm[field] is None:
                         continue
                     v = fm[field]
-                    if isinstance(v, bool) or not isinstance(v, (int, float)):
+                    if isinstance(v, bool) or not isinstance(v, int):
                         self.add(MEDIUM, "money-format", rel,
                                  f"{field}={v!r} must be a plain integer in "
                                  f"{self.settings.get('currency', 'USD')} "
@@ -499,17 +523,14 @@ class HealthCheck:
             stale_days = led.get("rumor_stale_days")
             reported = fm.get(reported_f) if reported_f else None
             if state in open_states and reported and stale_days:
-                try:
-                    rd = (reported if isinstance(reported, date)
-                          else datetime.strptime(str(reported), "%Y-%m-%d").date())
+                rd = to_date(reported)
+                if rd is not None:
                     age = (date.today() - rd).days
                     if age > stale_days:
                         self.add(LOW, "rumor-stale", rel,
                                  f"Rumor reported {age} days ago with no movement "
                                  f"(threshold {stale_days}). Note the staleness in "
                                  f"the body; do not delete the trail.")
-                except (ValueError, TypeError):
-                    pass
 
     # ---- funding consistency ----
     def check_funding(self):
@@ -577,13 +598,8 @@ class HealthCheck:
         today = date.today()
         for etype in self.entities:
             for name, card in self.cards[etype].items():
-                lu = card["fm"].get("last_updated")
-                if lu is None:
-                    continue
-                try:
-                    d = (lu if isinstance(lu, date)
-                         else datetime.strptime(str(lu), "%Y-%m-%d").date())
-                except (ValueError, TypeError):
+                d = to_date(card["fm"].get("last_updated"))
+                if d is None:
                     continue
                 age = (today - d).days
                 if age > window:
@@ -666,6 +682,7 @@ class HealthCheck:
             tracked |= set(spec.get("dates", []) or [])
             tracked |= set(spec.get("money", []) or [])
             tracked |= set((spec.get("relations", {}) or {}).keys())
+            tracked |= set(spec.get("tracked", []) or [])
             tracked |= set(self.settings.get("universal_required", []) or [])
             tracked -= set(spec.get("coverage_exclude", []) or [])
             counts = {}
@@ -785,6 +802,8 @@ def main():
     args = ap.parse_args()
 
     vault = Path(args.vault).resolve()
+    if not vault.is_dir():
+        config_error(f"vault is not a directory: {vault}")
     cfg_path = Path(args.config) if args.config else vault / "kb.yaml"
     if not cfg_path.is_file():
         config_error(f"config not found: {cfg_path}")

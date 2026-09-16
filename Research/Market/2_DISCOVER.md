@@ -53,7 +53,9 @@ source than the one after it:
   to `BACKLOG.md`. You are done for this loop.
 
   **Feed 3 - search.** Read the priority categories and target counts from
-  `MARKET_ANALYSIS.md`. Count how many `BACKLOG.md` entries (any status
+  `MARKET_ANALYSIS.md`. If that table is missing or empty, `1_ANALYZE` did
+  not finish: do **not** mark categories covered; search Companies with a
+  target of 20 and note the defect in `RESEARCH_LOG.md`. Otherwise count how many `BACKLOG.md` entries (any status
   except declined) fall under each. If every priority category has reached
   its target, append `## ALL_CATEGORIES_COVERED` to `BACKLOG.md` if it is
   not already there and mark this task complete. Otherwise pick the ONE

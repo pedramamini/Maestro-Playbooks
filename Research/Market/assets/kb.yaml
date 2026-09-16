@@ -82,6 +82,9 @@ enums:
 #   dates      fields validated as YYYY-MM-DD and not in the future
 #   money      fields validated as plain integers
 #   relations  field -> {to: <type>, kind: scalar|list, mirror: <field>, soft: bool}
+#   tracked    descriptive fields (not required, not enum/date/money/relation)
+#              that should still appear in the coverage table so sweeps
+#              target them: website, pricing range, check size, and so on
 #   coverage_exclude
 #              fields left OUT of the field-coverage table
 #
@@ -117,6 +120,7 @@ entities:
             acquisition_reported_date, last_updated]
     money: [total_funding, latest_round_size, acquisition_amount,
             acquisition_reported_price, market_cap, annual_revenue, revenue]
+    tracked: [headquarters, website, specialization]
     # Conditional by nature: only meaningful for acquired, public or
     # corporate-owned companies. Still validated when present; just never
     # treated as a coverage gap.
@@ -152,6 +156,7 @@ entities:
       pricing_model: pricing_model
       # segment: segment
     dates: [launch_date, last_updated]
+    tracked: [cost_range, deployment, product_link]
     relations:
       company: {to: company, kind: scalar, mirror: products}
       category: {to: category, kind: scalar}
@@ -159,10 +164,11 @@ entities:
   category:
     dir: Categories
     key: category
-    required: [definition]
+    required: [definition, maturity, buyer]
     enums:
       maturity: maturity
     dates: [last_updated]
+    tracked: [evaluation_criteria]
     relations:
       # Categories are authored on loop 1, before any company card exists,
       # so leaders and emerging MUST be soft or the first health check fails
@@ -176,6 +182,7 @@ entities:
     key: name
     required: [role]
     dates: [last_updated]
+    tracked: [previous_roles, specialization]
     relations:
       company: {to: company, kind: scalar}
 
@@ -187,6 +194,7 @@ entities:
       type: capital_type
     dates: [founded_date, last_updated]
     money: [aum]
+    tracked: [stage, check_size, sector_focus]
     relations:
       portfolio: {to: company, kind: list, mirror: all_investors, soft: true}
 
