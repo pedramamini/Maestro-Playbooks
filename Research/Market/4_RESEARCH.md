@@ -8,61 +8,97 @@
 
 ## Objective
 
-Advance the vault by one unit of work. That unit is either a **new entity**
-(depth) or a **column sweep** across every existing card (breadth), and picking
-correctly between them is what determines whether the finished vault can answer
-a comparative question.
+Advance the vault by one unit of work. That unit is a **repair** (fix what the
+validator flags), a **depth batch** (new entity cards), or a **column sweep**
+(one field across every existing card). Picking correctly between them is what
+determines whether the finished vault can answer a comparative question.
 
-## The Two Modes
+## The Three Modes
 
-A vault built only by researching one entity at a time ends up with the first
-twenty cards excellent, the next fifty adequate, and the rest stubs. You cannot
-compare across a corpus shaped like that, which was the point of building it.
+A vault built only by researching entities ends up with the first twenty cards
+excellent, the next fifty adequate, and the rest stubs, with every founder and
+investor a dangling name. You cannot compare across a corpus shaped like that,
+which was the point of building it.
 
-| | **Depth** (new entity) | **Breadth** (column sweep) |
-|---|---|---|
-| Unit of work | One entity, all fields | One field, all entities |
-| Produces | A new card | Uniform coverage of a field |
-| Gaps afterwards | Invisible | Literal empty fields you can count |
-| Cost per fact | Higher - context rebuilt per card | Lower - one context for N cards |
+| | **Repair** | **Depth** (new cards) | **Breadth** (column sweep) |
+|---|---|---|---|
+| Unit of work | Every CRITICAL issue | Up to `[DEPTH_BATCH]` entities, all fields | One field, all entities |
+| Produces | A vault that answers correctly | New cards | Uniform coverage of a field |
+| Gaps afterwards | None at CRITICAL | Invisible | Literal empty fields you can count |
 
 ### Choosing the mode this loop
 
-```text
-IF loop number <= [DEPTH_SWITCH_AT] AND PENDING CRITICAL/HIGH entities exist:
-    -> DEPTH. Research one new entity.
-
-ELSE IF health_check.py reports a field below 70% coverage:
-    -> BREADTH. Sweep that field across every card.
-
-ELSE IF PENDING CRITICAL/HIGH entities exist:
-    -> DEPTH.
-
-ELSE:
-    -> BREADTH on the lowest-coverage field, or mark complete if all are above 90%.
-```
-
-Run this to see the coverage table, which is also the sweep queue:
+Read the agent prompt for `[DEPTH_BATCH]`, `[SWEEP_EVERY]`, `[MAX_ENTITIES]`,
+`[COVERAGE_TARGET]` and `[OUTPUT_FOLDER]`, then run:
 
 ```bash
-cd [OUTPUT_FOLDER] && python3 Tools/health_check.py
+cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --json > /tmp/hc.json && python3 -c "import json;d=json.load(open('/tmp/hc.json'));print('critical',d['critical'],'budget_cards',d['budget_cards'],'lowest',d['lowest_coverage'])"
+```
+
+```text
+IF the validator exits 2:
+    -> Fix kb.yaml (the message names the problem). That is this loop's work.
+
+ELSE IF critical > 0:
+    -> REPAIR. Fix every CRITICAL issue. Nothing else this loop.
+
+ELSE IF {{LOOP_NUMBER}} is a multiple of [SWEEP_EVERY]:
+    -> BREADTH on the lowest-coverage field.
+
+ELSE IF budget_cards < [MAX_ENTITIES] AND BACKLOG.md has PENDING entries:
+    -> DEPTH. Research up to [DEPTH_BATCH] PENDING entities, highest importance first.
+
+ELSE IF lowest coverage < [COVERAGE_TARGET]:
+    -> BREADTH on the lowest-coverage field.
+
+ELSE:
+    -> Nothing to do. Mark complete without changes.
 ```
 
 ## Research Checklist
 
-- [ ] **Advance the vault by one unit (or skip if nothing to do)**: Determine
-      the mode using the rule above. In DEPTH mode, read
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, pick ONE PENDING entity
-      with CRITICAL or HIGH importance, research it, create the card with full
-      frontmatter, add typed relations, update `INDEX.md`, mark it RESEARCHED,
-      and log the work. In BREADTH mode, pick the lowest-coverage field, sweep
-      it across every card that lacks it, and report filled/unknown/gap counts.
-      If the plan does not exist or has no PENDING CRITICAL/HIGH entities and
-      every field is above 90% coverage, mark this task complete without changes.
+- [ ] **Advance the vault by one unit (or skip if nothing to do)**: Run the
+      health check and choose the mode with the rule above. In REPAIR mode,
+      work the CRITICAL list to zero and log what you fixed. In DEPTH mode,
+      read `{{AUTORUN_FOLDER}}/BACKLOG.md`, take up to `[DEPTH_BATCH]`
+      `PENDING` entries in importance order (CRITICAL, HIGH, MEDIUM, LOW; ties
+      by lower effort), and for each one: research it, write the card with
+      full frontmatter, record typed relations, log unresolved names to
+      `SWEEP_GAPS.md`, update `INDEX.md`, and set its backlog status to
+      `RESEARCHED`. Run the health check after each card. In BREADTH mode,
+      sweep the lowest-coverage field across every card that lacks it and
+      report filled / explicitly-unknown / gaps-logged counts. In every mode,
+      append an entry to `{{AUTORUN_FOLDER}}/RESEARCH_LOG.md`.
 
 ---
 
-## DEPTH Mode: Research One Entity
+## REPAIR Mode: Fix What the Validator Flags
+
+Work the CRITICAL list in this order. Fixing relations first prevents false
+orphan reports.
+
+1. `broken-relation` - a hard relation names a card that does not exist. Fix
+   the name if it is a spelling or suffix mismatch (`Acme` vs `Acme Inc`),
+   otherwise remove the relation and log the target in `SWEEP_GAPS.md`.
+   **Never create a stub card to satisfy a relation.**
+2. `duplicate-name` - two cards normalize to the same name. Merge into the one
+   with more content, redirect relations, delete the other.
+3. `missing-required`, `missing-key`, `no-frontmatter`, `yaml-parse` - complete
+   or repair the frontmatter.
+4. `ledger-state` - the event state machine is violated. Read the message; it
+   says which field to clear or set.
+5. `relevance-type`, `relevance-range` - fix the score.
+
+If a CRITICAL issue is genuinely unfixable (the validator is wrong, or the fix
+requires information that does not exist), record it under `## KNOWN_ISSUES`
+in `RESEARCH_LOG.md` with the exact issue text. `5_PROGRESS` stops gating on
+issues listed there, so the run cannot spin forever on one bad row.
+
+---
+
+## DEPTH Mode: Research Entities
+
+Work one entity at a time, start to finish, before beginning the next.
 
 ### Step 1 - Gather
 
@@ -80,7 +116,9 @@ they do not override them.
 **Go deep on products.** Companies routinely ship two to five times more than
 the homepage suggests. Check the product menu, docs, developer portal,
 marketplace listings and public repositories. An incomplete product list
-corrupts every category comparison downstream.
+corrupts every category comparison downstream. **Create the product cards in
+the same pass** - a company card whose `products:` names cards that do not
+exist is a CRITICAL broken relation.
 
 **Job postings are signal.** What a company hires for reveals roadmap and true
 headcount better than any marketing page.
@@ -102,10 +140,22 @@ asserts.** This is the rule that makes the vault queryable rather than merely
 readable: a field in frontmatter can be counted, rolled up, validated and
 graphed; the same fact in a body table can only be re-read.
 
-Relations must use canonical names matching existing card filenames. Check with
-Glob before writing one. Any entity you reference that has no card goes to
-`{{AUTORUN_FOLDER}}/SWEEP_GAPS.md` - **do not create a stub card for it.** A
-stub satisfies the validator while lying about coverage, which is worse than a
+**Filename is the canonical name.** `Companies/Acme.md` is the entity `Acme`,
+and every relation that points at it writes exactly `Acme`. Check existing
+filenames with `ls` before writing a relation.
+
+Relations come in two strengths, declared in `kb.yaml`:
+
+| | Hard | Soft |
+|---|---|---|
+| Examples | `product.company`, `product.category`, `person.company` | `founders`, `all_investors`, `leaders`, `acquired_by` |
+| Target missing | CRITICAL - fix now | MEDIUM - queue it |
+| What to do | Create the target in this pass (products) or fix the name | Write the name anyway, and add a line to `SWEEP_GAPS.md` |
+
+Soft relations are how the graph grows: you name the founder on the company
+card today, `2_DISCOVER` picks the name up from `SWEEP_GAPS.md`, and a later
+depth loop cards them. **Do not create a stub card for a soft target.** A stub
+satisfies the validator while lying about coverage, which is worse than a
 missing card, because a missing card is visible.
 
 ### Company Card
@@ -133,7 +183,7 @@ board_members: [Person Name]
 
 specialization: "One line on what they actually do."
 relevance: 95
-relevance_notes: "[From the plan, verbatim.]"
+relevance_notes: "[From the backlog evaluation, verbatim.]"
 last_updated: {{DATE}}
 ---
 
@@ -165,10 +215,9 @@ last_updated: {{DATE}}
 1. [Title](URL) - accessed [date]
 ```
 
-**Acquisition state.** If the market tracks consolidation, the distinction
-between a closed deal and a reported one is not pedantry - getting it wrong
-inflates every consolidation figure the vault ever reports, and nobody notices
-until someone checks one specific row.
+**Event state.** If `kb.yaml` declares a ledger, the distinction between a
+final event and a reported one is not pedantry - getting it wrong inflates
+every rollup the vault ever reports. For the shipped M&A ledger:
 
 ```yaml
 # Deal CLOSED
@@ -187,15 +236,15 @@ acquisition_reported_price: 300000000
 acquisition_reported_date: 2026-08-02
 ```
 
-`acquired_by` means the deal closed. `health_check.py` enforces this.
+`health_check.py` enforces whichever state machine `kb.yaml` declares.
 
 ### Product Card
 
 ```markdown
 ---
 product: [Name]
-company: [Company]             # must resolve to a Companies/ card
-category: [Category]           # must resolve to a Categories/ card
+company: [Company]             # HARD - must resolve to a Companies/ card
+category: [Category]           # HARD - must resolve to a Categories/ card
 description: "One line, factual, no adjectives."
 launch_date: 2023-04-01
 pricing_model: Subscription    # see kb.yaml enum
@@ -219,7 +268,8 @@ last_updated: {{DATE}}
 
 `Not disclosed` is a correct and common answer for pricing. An empty field is
 not - it means nobody looked, which is a different thing and should stay
-distinguishable.
+distinguishable. If a product fits no existing category, author the category
+card in the same pass rather than forcing a fit.
 
 ### Person Card
 
@@ -227,7 +277,7 @@ distinguishable.
 ---
 name: [Full Name]
 role: [Current role]
-company: [Company]             # must resolve to a Companies/ card
+company: [Company]             # HARD - must resolve to a Companies/ card
 previous_roles:
   - "VP Engineering at Prior Co (2019-2023)"
 specialization: "Short phrase."
@@ -239,7 +289,9 @@ last_updated: {{DATE}}
 
 The value is the **talent-flow edge**, not the biography. Prior roles with dates
 and company names matter; education rarely does. Public professional information
-only - never personal contact details or home location.
+only - never personal contact details or home location. When you card a person,
+confirm the company card's `founders:` or `board_members:` names them with the
+exact filename.
 
 ### Capital Card
 
@@ -258,9 +310,10 @@ last_updated: {{DATE}}
 ---
 ```
 
-`portfolio` holds the in-scope subset only. A generalist fund has hundreds of
-positions and almost none are this market; recording them all destroys the
-co-investment signal the field exists to provide.
+`portfolio` holds the in-scope subset only. Build it by grepping
+`Companies/*.md` for this fund in `all_investors` and `lead_investors`. A
+generalist fund has hundreds of positions and almost none are this market;
+recording them all destroys the co-investment signal the field exists to provide.
 
 ### Unverified Claims
 
@@ -284,23 +337,29 @@ precise question about the graph stops being answerable.
 Update the mirror side where one exists: `products` on a company mirrors
 `company` on the product; `all_investors` mirrors `portfolio`.
 
+Log every soft target that has no card to `{{AUTORUN_FOLDER}}/SWEEP_GAPS.md`:
+
+```markdown
+- [ ] [Entity Name] - [Type] - named by [[Card]] in `[field]`
+```
+
 ### Step 5 - Update and validate
+
+After each card:
 
 ```bash
 cd [OUTPUT_FOLDER] && python3 Tools/health_check.py
 ```
 
-Fix anything CRITICAL before finishing the loop. Work the output in this order:
-broken relations, then orphans, then missing required fields, then enum and
-format, then event state, then duplicates. Fixing relations first prevents false
-orphan reports.
+Fix anything CRITICAL before starting the next entity. Update `INDEX.md` and
+set the backlog entry to `RESEARCHED` with the card path.
 
 ---
 
 ## BREADTH Mode: Sweep One Column
 
-Pick the lowest-coverage field from the health check table and fill it across
-every card that lacks it.
+Pick the lowest-coverage field from the health check and fill it across every
+card of that type that lacks it.
 
 ### Anatomy of a sweep
 
@@ -308,12 +367,13 @@ every card that lacks it.
 For each [entity type] in [folder]/*.md:
 
   1. Determine [field] from [named source priority].
-  2. If it cannot be determined from those sources, write "[explicit unknown]".
+  2. If it cannot be determined from those sources, write the explicit
+     unknown for that field ("Not disclosed", "unknown", or [] for a list).
      Do not guess and do not infer from adjacent facts.
   3. Record it in frontmatter as `[field]:`.
-  4. Add a prose paragraph to the body explaining what you found and where.
-  5. If this reveals a relation to an entity with no card, note it in
-     SWEEP_GAPS.md rather than creating the card inline.
+  4. Add a prose line to the body explaining what you found and where.
+  5. If this reveals a soft relation to an entity with no card, write the
+     name and add it to SWEEP_GAPS.md rather than creating the card inline.
 
 Process every file. Report counts: filled, explicitly-unknown, gaps logged.
 ```
@@ -330,31 +390,20 @@ an ordinary research pass:
 5. **A count at the end** - it is how you know the sweep processed everything
    rather than the first thirty files before context filled
 
-### Sweep order
+### When the lowest field is a relation
 
-Each makes the next cheaper, because the vault knows more.
-
-| # | Sweep | Why here |
-|---|-------|----------|
-| 1 | **Product completeness** - all products per company, not just the headline one | Everything downstream is wrong if the product set is wrong |
-| 2 | **Category assignment** - every product to a category; author new ones as needed | The comparison spine must precede any analysis |
-| 3 | **Relevance scoring** - score and justify every card | Set the boundary before the corpus outgrows review |
-| 4 | **Relations** - founders, investors, parent companies | Turns the folder into a graph |
-| 5 | **Funding** - rounds, dates, leads, totals | High value, well sourced, mostly public |
-| 6 | **Pricing** - model and range | Highest value and hardest. Expect 40-60% `Not disclosed` - that is a finding |
-| 7 | **People** - cards for founders surfaced in sweep 4 | Depends on relations existing |
-| 8 | **Capital** - cards for investors surfaced in sweep 4 | Same |
-| 9 | **Links** - website, docs, repo | Cheap and mechanical, do it last |
-
-Sweeps 1 and 2 are the ones most often skipped, and skipping them is why a
-market vault ends up unable to answer a comparative question.
+If the lowest-coverage field is `founders`, `all_investors`, `leaders` or
+another soft relation, the sweep is: for every card lacking it, find the names,
+write them, and log each to `SWEEP_GAPS.md`. The **cards** for those people and
+funds are created by later depth loops, fed by `2_DISCOVER`. That is the
+intended two-step, not a shortcut.
 
 ### Log the sweep
 
-Append to `{{AUTORUN_FOLDER}}/RESEARCH_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
+Append to `{{AUTORUN_FOLDER}}/RESEARCH_LOG.md`:
 
 ```markdown
-## Sweep: [field] - {{DATE}}
+## Loop {{LOOP_NUMBER}} - BREADTH: [type].[field] - {{DATE}}
 - **Scope:** [N] cards in [folder]
 - **Filled:** [N]   **Explicit unknown:** [N]   **Gaps logged:** [N]
 - **Source priority used:** [...]
@@ -363,9 +412,22 @@ Append to `{{AUTORUN_FOLDER}}/RESEARCH_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
 
 ---
 
+## Log Format
+
+Every mode appends to `{{AUTORUN_FOLDER}}/RESEARCH_LOG.md`. Depth entries:
+
+```markdown
+## Loop {{LOOP_NUMBER}} - DEPTH - {{DATE}}
+- **Researched:** [[Entity A]] (Companies), [[Entity B]] (Companies), [[Product X]] (Products)
+- **Products created alongside:** [N]
+- **Gaps logged:** [N] ([names])
+- **Health check after:** CRITICAL [N], MEDIUM [N]
+- **Notable:** [one line]
+```
+
 ## Guidelines
 
-- **One unit of work per loop** - one entity, or one field
+- **One unit of work per loop** - a repair pass, a depth batch, or one field
 - **Frontmatter first** - if a fact belongs in a rollup, it belongs in frontmatter
 - **Never stub** - log to `SWEEP_GAPS.md` instead
 - **Validate before finishing** - a loop that ends with broken relations has
@@ -374,12 +436,15 @@ Append to `{{AUTORUN_FOLDER}}/RESEARCH_LOG_{{AGENT_NAME}}_{{DATE}}.md`:
 
 ## How to Know You're Done
 
-**DEPTH:** one entity researched, card created with full frontmatter and
-resolving typed relations, `INDEX.md` updated, status set to RESEARCHED, health
-check clean of CRITICAL issues.
+**REPAIR:** health check reports zero CRITICAL, or every remaining one is
+recorded under `## KNOWN_ISSUES` with a reason.
 
-**BREADTH:** one field swept across every card that lacked it, counts reported,
-gaps logged, health check clean of CRITICAL issues.
+**DEPTH:** up to `[DEPTH_BATCH]` entities researched, each with a card with
+full frontmatter, hard relations resolving, soft targets logged, `INDEX.md`
+updated, backlog status `RESEARCHED`, health check clean of CRITICAL.
 
-**Nothing to do:** no PENDING CRITICAL/HIGH entities and every field above 90%
-coverage. Mark complete without changes.
+**BREADTH:** one field swept across every card that lacked it, counts
+reported, gaps logged, health check clean of CRITICAL.
+
+**Nothing to do:** no CRITICAL, no PENDING entries (or budget spent), and every
+field at or above `[COVERAGE_TARGET]`. Mark complete without changes.

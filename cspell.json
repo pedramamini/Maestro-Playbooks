@@ -82,6 +82,11 @@
         "zoneinfo",
         "zprofile",
         "zshenv",
-        "zshrc"
+        "zshrc",
+        "etype",
+        "myvault",
+        "rollup",
+        "tcard",
+        "tdir"
     ]
 }

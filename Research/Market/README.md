@@ -9,10 +9,10 @@ This playbook creates an automated pipeline that:
 
 1. **Configures** and validates the target market, and establishes a scope boundary
 2. **Initializes** the vault with folder structure, agents, commands and a validator
-3. **Analyzes** the market to fix the schema and author the taxonomy spine
-4. **Discovers** entities, applying the scope test before any candidate is recorded
-5. **Evaluates** each entity on two independent axes: membership and priority
-6. **Researches** entities, alternating between depth and breadth
+3. **Analyzes** the market once, fixes the schema and authors the taxonomy spine
+4. **Discovers** entities from three feeds, applying the scope test before any candidate is recorded
+5. **Evaluates** every waiting entity on two independent axes: membership and priority
+6. **Researches** in batches, alternating depth (new cards) with breadth (one field across all cards)
 7. **Loops** until the work is done, the budget is spent, or the corpus needs repair
 
 The output is an **Obsidian-compatible vault** where YAML frontmatter is the
@@ -20,7 +20,7 @@ database and the markdown body is the argument for what the frontmatter asserts.
 
 ## What makes this different from a folder of research documents
 
-Two design choices do most of the work:
+Three design choices do most of the work:
 
 **A scope boundary, stated as an antonym pair.** Every market has a confusable
 adjacent market that shares its vocabulary. Over twenty or thirty research loops,
@@ -37,33 +37,25 @@ with a HIGH rating attached. With two, the boundary becomes auditable, borderlin
 entities can stay in at 50-69 rather than forcing a keep-or-kill decision, and
 scope drift becomes a measurable number rather than a feeling.
 
-## Requirements
+**The graph grows from its own edges.** A company card names its founders and
+investors before they have cards. Those names land in `SWEEP_GAPS.md`, discovery
+drains that file before it searches the web, and the next depth loop cards them.
+Every person and fund in the finished vault is there because something already
+in the vault pointed at it. That is what makes it interconnected rather than
+merely large.
 
-### Custom Agent Prompt Required
+## How to run it
 
-**This playbook requires a custom agent prompt.** Configure `Agent-Prompt.md` and
-set your Maestro agent to use its contents.
+### 1. Install
 
-`0_CONFIGURE.md` refuses to run while `MARKET_TOPIC` is still at its `<UNSET>`
-default, so a forgotten configuration costs you nothing rather than thirty loops
-of research into the wrong subject.
+From the Playbook Exchange inside Maestro, or copy `Research/Market/` (including
+`assets/`) into your agent's Auto Run folder.
 
-### Web Search Access
+### 2. Tell it the market
 
-This playbook relies heavily on web search. Ensure your agent has it enabled.
-
-### Python 3 with PyYAML
-
-Needed by `Tools/health_check.py`. If it is missing the research still runs; it
-just runs unvalidated, and `0_CONFIGURE` records that as a degradation.
-
-```bash
-pip install pyyaml
-```
-
-## Configuration
-
-Everything the playbook needs is set in `Agent-Prompt.md`:
+**All configuration lives in the Auto Run prompt** - the text box in the Auto
+Run panel, which the Exchange pre-fills with `Agent-Prompt.md`. Nothing in the
+numbered documents needs editing. Replace every `<UNSET ...>` value:
 
 | Value | Required | Purpose |
 |-------|----------|---------|
@@ -72,14 +64,49 @@ Everything the playbook needs is set in `Agent-Prompt.md`:
 | `SCOPE_OUT` | recommended | One sentence: the adjacent market that does not |
 | `DOMAIN_ENTITY` | optional | The market-specific entity type, if it has one |
 | `SEED_SOURCE` | optional | A curated artifact to start from |
-| `OUTPUT_FOLDER` | yes | Where the vault is written |
-| `MAX_ENTITIES` | yes | Run budget. Defaults to 60 |
-| `DEPTH_SWITCH_AT` | yes | Loop at which breadth starts. Defaults to 25 |
+| `OUTPUT_FOLDER` | yes | Where the vault is written. Defaults into the Auto Run folder |
+| `MAX_ENTITIES` | yes | Run budget, counted from the vault. Default 60 |
+| `DEPTH_BATCH` | yes | Entities per depth loop. Default 3 |
+| `SWEEP_EVERY` | yes | Every Nth loop is a breadth sweep. Default 4 |
+| `COVERAGE_TARGET` | yes | Field coverage percentage required to exit. Default 90 |
+
+If you are launching from the CLI instead of the panel, pass the edited prompt
+with `--prompt "$(cat Agent-Prompt.md)"`.
+
+`0_CONFIGURE.md` refuses to run while `MARKET_TOPIC` is still `<UNSET>`, so a
+forgotten configuration costs you nothing rather than thirty loops of research
+into the wrong subject.
 
 Leaving `SCOPE_IN` and `SCOPE_OUT` unset is allowed: `0_CONFIGURE` proposes a
-pair from its own market survey, writes it to `SCOPE.md` marked
+pair from a short market survey, writes it to `SCOPE.md` marked
 `status: agent-proposed`, and tells you it did so. Setting them yourself is
 better, because the boundary is a judgment about what you want to know.
+
+### 3. Set the loop
+
+```text
+Loop Mode: ON
+Max Loops: 30
+Documents:
+  0_CONFIGURE.md  [Reset: OFF]  <- validates config, halts if unconfigured
+  0_INITIALIZE.md [Reset: OFF]  <- runs once
+  1_ANALYZE.md    [Reset: OFF]  <- real work once, two file checks after
+  2_DISCOVER.md   [Reset: OFF]
+  3_EVALUATE.md   [Reset: OFF]
+  4_RESEARCH.md   [Reset: OFF]
+  5_PROGRESS.md   [Reset: ON]   <- resets 1-4 only
+```
+
+With the defaults, 30 loops is roughly 22 depth loops (up to 66 cards, capped
+at 60) and 8 or more sweeps. The run exits on its own when the backlog is empty
+or the budget is spent **and** every tracked field meets `COVERAGE_TARGET`
+**and** the validator reports zero CRITICAL issues.
+
+### 4. Review after the first loop
+
+`0_CONFIGURE` prints the boundary before any card exists. That is the cheap
+moment to correct it. `MARKET_ANALYSIS.md` and the first Category cards are the
+second checkpoint.
 
 ### Writing a good antonym pair
 
@@ -97,18 +124,42 @@ If your "out" sentence describes something obviously irrelevant, you have not
 found the real boundary yet. The test is usually which party is the beneficiary,
 or which asset is the one being served - never which words appear on the homepage.
 
+## Requirements
+
+- **Web search** enabled on the agent. The playbook is nothing without it.
+- **Python 3 with PyYAML** for `Tools/health_check.py`. `0_CONFIGURE` tries
+  `pip3 install pyyaml` once; if that fails the research still runs, unvalidated,
+  and the degradation is recorded.
+
 ## Document Chain
 
-| Document | Purpose | Reset on Completion? |
-|----------|---------|---------------------|
-| `Agent-Prompt.md` | Configuration | N/A |
-| `0_CONFIGURE.md` | Validate config, establish scope, install tooling | No |
-| `0_INITIALIZE.md` | Create vault structure, agents, commands | No |
-| `1_ANALYZE.md` | Survey market, fix schema, author Categories | No |
-| `2_DISCOVER.md` | Find entities, apply the scope test | No |
-| `3_EVALUATE.md` | Score relevance, importance and effort | No |
-| `4_RESEARCH.md` | Advance the vault: one entity, or one column sweep | No |
-| `5_PROGRESS.md` | Gate: continue, repair, or exit | **Yes** |
+| Document | Purpose | Runs | Reset on Completion? |
+|----------|---------|------|---------------------|
+| `Agent-Prompt.md` | Configuration (the Auto Run prompt) | - | N/A |
+| `0_CONFIGURE.md` | Validate config, establish scope, install tooling | Once | No |
+| `0_INITIALIZE.md` | Create vault structure, agents, commands | Once | No |
+| `1_ANALYZE.md` | Survey market, fix schema, author Categories | Once (self-skips after) | No |
+| `2_DISCOVER.md` | Drain gaps, mine the seed, or search one category | Every loop | No |
+| `3_EVALUATE.md` | Score every waiting entity: relevance, importance, effort | Every loop | No |
+| `4_RESEARCH.md` | Repair, depth batch, or column sweep | Every loop | No |
+| `5_PROGRESS.md` | Gate: continue, repair, or exit | Every loop | **Yes** |
+
+## Durable State
+
+Nothing is carried in memory between tasks. Every document reads these first
+and appends to them after. All live in the Auto Run folder unless noted.
+
+| File | Holds |
+|------|-------|
+| `MARKET_CONFIG.md` | Resolved configuration, written once |
+| `MARKET_ANALYSIS.md` | Market survey, targets per entity type, schema decisions |
+| `BACKLOG.md` | Every entity ever discovered: `DISCOVERED` → `PENDING` / `SKIP` → `RESEARCHED` |
+| `SWEEP_GAPS.md` | Names a card references that have no card yet. Discovery feed #1 |
+| `RESEARCH_LOG.md` | What each loop did, plus `KNOWN_ISSUES` the validator cannot resolve |
+| `PROGRESS_LOG.md` | One row per loop: counts, coverage, mean relevance, decision |
+| `SCOPE.md` (vault) | The boundary |
+| `REJECTIONS.md` (vault) | Clusters declined, with reasons, so they are declined for free next time |
+| `kb.yaml` (vault) | Schema driving the validator |
 
 ## Generated Vault Structure
 
@@ -127,7 +178,7 @@ vault/
 ├── People/
 ├── Capital/
 ├── [DomainEntity]/              # If the market has one
-├── Resources/                   # Reports, trends, technologies
+├── Resources/                   # Trends/, health check reports, Market Map, ledger
 ├── SCOPE.md                     # The boundary
 ├── REJECTIONS.md                # Declined clusters, with rationale
 ├── kb.yaml                      # Schema driving the validator
@@ -153,6 +204,9 @@ template: a `Clearance` for medical devices, a `Charter` for regulated finance, 
 `Trial` for pharma, a `Standard` for industrial, a `Contract Vehicle` for public
 sector. `none` is a valid answer.
 
+Trends are **documents**, not entities. They live in `Resources/Trends/` with
+`[[wikilinks]]` to the cards they discuss, and the validator ignores them.
+
 ## Generated Agents
 
 | Agent | Purpose |
@@ -163,7 +217,7 @@ sector. `none` is a valid answer.
 | `person-researcher` | Key people |
 | `capital-researcher` | Investors, in-scope portfolio only |
 | `scope-validator` | Audit the corpus against the boundary and re-score |
-| `trend-researcher` | Market trend analyzes |
+| `trend-researcher` | Dated trend analyses in `Resources/Trends/` |
 
 ## Assets
 
@@ -171,30 +225,50 @@ The `assets/` folder bundles two files that `0_CONFIGURE` copies into the vault:
 
 | Asset | Purpose |
 |-------|---------|
-| `assets/health_check.py` | Config-driven corpus validator. No market-specific logic |
+| `assets/health_check.py` | Config-driven corpus validator |
 | `assets/kb.yaml` | Schema template. `1_ANALYZE` fills it in for the market |
 
-`health_check.py` enforces fifteen rules: required and universal fields, relevance
-type and range, enum membership, date format and future dates, integer currency,
-typed-relation resolution, bidirectional mirror agreement, event-state
-consistency, funding consistency, orphan detection, normalized duplicate-name
-detection, and staleness. It reports a **relevance distribution** (the scope-drift
-signal) and a **field-coverage table** (the sweep queue).
+`health_check.py` enforces: required and universal fields, relevance type and
+range, enum membership, date format and future dates, integer currency,
+typed-relation resolution (hard relations CRITICAL, soft relations MEDIUM),
+bidirectional mirror agreement, event-state consistency for whatever ledger
+`kb.yaml` declares, funding consistency, orphan detection, normalized
+duplicate-name detection, and staleness. It reports a **relevance
+distribution** (the scope-drift signal), a **field-coverage table** (the sweep
+queue), and a **budget count** (cards that count against `MAX_ENTITIES`).
 
 ```bash
-python3 Tools/health_check.py                 # summary
-python3 Tools/health_check.py --report Resources/
-python3 Tools/health_check.py --json
-python3 Tools/health_check.py --dedup         # near-duplicate names only
+python3 Tools/health_check.py                      # summary
+python3 Tools/health_check.py --report Resources/  # dated markdown report
+python3 Tools/health_check.py --json               # machine-readable
+python3 Tools/health_check.py --dedup              # near-duplicate names only
 python3 Tools/health_check.py --fail-on critical   # non-zero exit
 ```
+
+Exit codes: 0 clean, 1 issues at or above `--fail-on`, 2 configuration error
+(missing PyYAML, invalid `kb.yaml`, a relation targeting a type you removed).
+The validator has no market-specific logic; the ledger's field names and state
+values all come from `kb.yaml`, so a pharma approvals ledger or a licensing
+ledger validates the same way the shipped M&A one does.
+
+### Hard and soft relations
+
+| | Hard | Soft |
+|---|---|---|
+| Examples | product → company, product → category, person → company | founders, investors, category leaders, acquirer |
+| Target has no card | CRITICAL, fixed this loop | MEDIUM, logged to `SWEEP_GAPS.md` |
+| Why | The card is meaningless without it | The name is how the target gets discovered |
+
+Soft relations are declared with `soft: true` in `kb.yaml`. They are the reason
+the run can name a founder on loop 3 and card them on loop 7 without ever
+writing a stub.
 
 ## The Two Scores
 
 | Score | Question | Lives | Range |
 |-------|----------|-------|-------|
 | `relevance` | Does this **belong**? | On the card, permanently | 0-100 |
-| `importance` | Spend effort here **next**? | In the run plan, discarded after | CRITICAL..LOW |
+| `importance` | Spend effort here **next**? | In `BACKLOG.md`, discarded after | CRITICAL..LOW |
 
 ### Relevance bands
 
@@ -210,35 +284,44 @@ Every score requires a written justification in `relevance_notes`. A bare score
 is worthless three weeks later, when nobody can reconstruct whether 65 meant
 "borderline but leaning in" or "we had no information".
 
-## Depth and Breadth
+## Depth, Breadth and Repair
 
-`4_RESEARCH` alternates between two modes, and the alternation is the point.
+`4_RESEARCH` picks one of three modes each loop:
 
-A vault built only by researching one entity at a time ends up with the first
-twenty cards excellent, the next fifty adequate, and the rest stubs. You cannot
-compare across a corpus shaped like that.
+```text
+IF validator reports CRITICAL           -> REPAIR  (fix everything flagged)
+ELSE IF loop is a multiple of SWEEP_EVERY -> BREADTH (lowest-coverage field, all cards)
+ELSE IF budget left AND backlog has PENDING -> DEPTH  (up to DEPTH_BATCH new cards)
+ELSE IF coverage below target           -> BREADTH
+ELSE                                    -> nothing to do
+```
+
+A vault built only by researching entities ends up with the first twenty cards
+excellent, the next fifty adequate, and the rest stubs, with every founder a
+dangling name. Sweeps fix the columns; the gap feed fixes the names.
 
 | | Depth | Breadth |
 |---|-------|---------|
-| Unit | One entity, all fields | One field, all entities |
-| Produces | A new card | Uniform coverage |
+| Unit | Up to `DEPTH_BATCH` entities, all fields | One field, all entities |
+| Produces | New cards, and new names in `SWEEP_GAPS.md` | Uniform coverage |
 | Gaps after | Invisible | Countable empty fields |
-
-`DEPTH_SWITCH_AT` sets when breadth starts. After that, `4_RESEARCH` reads the
-field-coverage table from `health_check.py` and sweeps the lowest-coverage field.
 
 ## Loop Control
 
-`5_PROGRESS` gates on three things rather than one:
+`5_PROGRESS` gates on integrity, then work, then budget:
 
 ```text
-IF health_check reports CRITICAL issues      -> CONTINUE (repair before growing)
-ELSE IF researched >= MAX_ENTITIES           -> EXIT (budget spent)
-ELSE IF PENDING CRITICAL/HIGH entities       -> CONTINUE (research)
-ELSE IF any field below 90% coverage         -> CONTINUE (sweep)
-ELSE IF categories not all covered           -> CONTINUE (discover)
-ELSE                                         -> EXIT (done)
+IF validator exit 2 (config error)            -> CONTINUE (repair kb.yaml)
+ELSE IF CRITICAL issues (minus KNOWN_ISSUES)  -> CONTINUE (repair)
+ELSE IF budget left AND anything waiting      -> CONTINUE (research)
+     (PENDING, DISCOVERED, unqueued gaps, or categories not yet covered)
+ELSE IF any field below COVERAGE_TARGET       -> CONTINUE (sweep)
+ELSE                                          -> EXIT (finalize)
 ```
+
+Two guards stop it spinning: a CRITICAL issue that survives three repair loops
+is recorded under `KNOWN_ISSUES` and no longer gates; a field stuck at the same
+coverage for three loops is moved to `coverage_exclude`.
 
 **Why a budget.** Market research has no natural completion state - discovery
 always surfaces one more medium-importance company. Without a ceiling the
@@ -249,49 +332,34 @@ Max Loops happens to stop it.
 smaller vault, it is a vault that returns wrong answers. Repair outranks growth,
 and it outranks the budget.
 
-## Recommended Setup
+## What you get on exit
 
-### In Maestro Batch Runner
+- `INDEX.md` with every card linked and a research summary
+- `Resources/Market Map.md` - every category with its products and their companies
+- `Resources/[Event] Ledger.md` - time-ordered events, final separated from reported
+- `Resources/Relevance Review.md` - cards below 30, for a human decision
+- `Resources/health_check_YYYY-MM-DD.md` - the final integrity report
 
-```text
-Loop Mode: ON
-Max Loops: 20-30
-Documents:
-  0_CONFIGURE.md  [Reset: OFF]  <- validates config, halts if unconfigured
-  0_INITIALIZE.md [Reset: OFF]  <- runs once
-  1_ANALYZE.md    [Reset: OFF]
-  2_DISCOVER.md   [Reset: OFF]
-  3_EVALUATE.md   [Reset: OFF]
-  4_RESEARCH.md   [Reset: OFF]
-  5_PROGRESS.md   [Reset: ON]   <- resets 1-4 only
-```
+## After the run
 
-### Agent Prompt Configuration
-
-**Critical**: set your Maestro agent to use the contents of `Agent-Prompt.md` as
-its system prompt, after configuring the values in it.
-
-## Working Documents (per loop)
-
-- `MARKET_CONFIG.md` - resolved configuration, written once by `0_CONFIGURE`
-- `LOOP_N_MARKET_ANALYSIS.md` - market overview and schema decisions
-- `LOOP_N_ENTITIES.md` - discovered entities, and declined candidates with reasons
-- `LOOP_N_PLAN.md` - scored research targets
-- `SWEEP_GAPS.md` - entities surfaced mid-sweep that need cards
-- `RESEARCH_LOG_{{AGENT_NAME}}_{{DATE}}.md` - cumulative log
+The vault is maintained, not just built. `/health-check` prints the work queue;
+`/scope-audit` spawns the `scope-validator` agent to re-score cards against the
+boundary, because companies reposition and nothing else notices. `/research
+<entity>` adds one card by hand through the same agents the playbook used.
 
 ## Entity Status Values
 
 | Status | Meaning |
 |--------|---------|
-| `PENDING` | In scope, awaiting research |
-| `RESEARCHED` | Full profile created |
+| `DISCOVERED` | In scope, not yet scored |
+| `PENDING` | Scored, worth researching, awaiting a depth loop |
+| `RESEARCHED` | Card exists in the vault |
 | `SKIP` | In scope but not worth the effort |
 | `DUPLICATE` | Covered under another entity |
 
-Out-of-scope is **not** a status. Those candidates never enter the list - they go
-in the `Declined` section of `LOOP_N_ENTITIES.md` with a reason, and once three
-share a reason they become a cluster entry in `REJECTIONS.md`.
+Out-of-scope is **not** a status. Those candidates never enter the backlog - they
+go in the `Declined` section with a reason, and once three share a reason they
+become a cluster entry in `REJECTIONS.md`.
 
 ## Example Markets
 
@@ -308,11 +376,11 @@ Platforms" produces a sharper corpus than "Cloud Infrastructure".
 
 1. **Write the scope pair yourself.** It is the highest-leverage ten minutes in
    the whole run.
-2. **Give it a seed source.** Starting from a curated artifact beats starting cold.
+2. **Give it a seed source.** Starting from a curated artifact beats starting cold,
+   and the seed loop is the one place a large discovery batch is correct.
 3. **Review after `0_CONFIGURE`.** It prints the boundary before any card exists.
-   That is the cheap moment to correct it.
-4. **Check `LOOP_1_MARKET_ANALYSIS.md`** before letting the loop run long.
-5. **Watch the mean relevance** across loops. Falling means the boundary is eroding.
+4. **Check `MARKET_ANALYSIS.md`** and the Category cards before letting the loop run long.
+5. **Watch the mean relevance** in `PROGRESS_LOG.md`. Falling means the boundary is eroding.
 6. **Run `/health-check` yourself** at any point. The field-coverage table tells
    you what the vault does not yet know.
 7. **Low scores are a queue, not a verdict.** Cards below 30 are an agenda item.
@@ -321,19 +389,21 @@ Platforms" produces a sharper corpus than "Cloud Infrastructure".
 
 ### Changing entity types
 
-Edit the `entities` block in `assets/kb.yaml`. The validator has no hardcoded
-types, so adding one there is enough for it to be checked.
+Edit the `entities` block in `kb.yaml`. The validator has no hardcoded types.
+If you remove a type, remove the relations that target it too - the validator
+tells you which ones.
 
 ### Changing the event ledger
 
 Set the `ledger` block in `kb.yaml` to the event class that drives your market:
-approvals, licenses, contract awards, certifications. Delete the block if none
-applies.
+approvals, licenses, contract awards, certifications. Every field name and
+state value is configurable; the comment above the block shows a pharma
+example. Delete the block if none applies.
 
-### Adjusting coverage targets
+### Adjusting pace and budget
 
-Set target counts in the market analysis output, and `MAX_ENTITIES` in the agent
-prompt.
+`MAX_ENTITIES`, `DEPTH_BATCH`, `SWEEP_EVERY` and `COVERAGE_TARGET` in the agent
+prompt; target counts per entity type in `MARKET_ANALYSIS.md`.
 
 ### Adding custom agents
 

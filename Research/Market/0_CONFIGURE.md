@@ -36,8 +36,10 @@ This document runs once. If `MARKET_CONFIG.md` already exists and records
 
 - [ ] **Read the agent prompt** and record the configured values for
       `MARKET_TOPIC`, `SCOPE_IN`, `SCOPE_OUT`, `DOMAIN_ENTITY`, `SEED_SOURCE`,
-      `OUTPUT_FOLDER`, `MAX_ENTITIES` and `DEPTH_SWITCH_AT`. Quote each value
-      verbatim - do not normalize or interpret yet.
+      `OUTPUT_FOLDER`, `MAX_ENTITIES`, `DEPTH_BATCH`, `SWEEP_EVERY` and
+      `COVERAGE_TARGET`. Quote each value verbatim - do not normalize or
+      interpret yet. If a numeric value is missing, use the defaults 60, 3, 4
+      and 90 respectively and record that you did.
 
 ### Task 3: Halt on an unconfigured market
 
@@ -187,19 +189,26 @@ This document runs once. If `MARKET_CONFIG.md` already exists and records
       cp {{AUTORUN_FOLDER}}/assets/kb.yaml [OUTPUT_FOLDER]/kb.yaml
       ```
 
+      Then fill in the identity block at the top of `[OUTPUT_FOLDER]/kb.yaml`:
+      replace `<MARKET_TOPIC>` with the market, and `<SCOPE_IN>` / `<SCOPE_OUT>`
+      with the pair from Task 4. Keep the values quoted.
+
       Then confirm the validator runs at all:
 
       ```bash
-      python3 -c "import yaml" 2>/dev/null && echo "pyyaml: ok" || echo "pyyaml: MISSING"
+      cd [OUTPUT_FOLDER] && python3 Tools/health_check.py; echo "exit=$?"
       ```
 
-      If PyYAML is missing, record it as a degradation and note that
-      `health_check.py` cannot run until `pip install pyyaml`. Do not halt -
+      Exit 0 with a `0 cards` summary is the expected first run. Exit 2 with
+      `CONFIG ERROR: PyYAML required` means PyYAML is missing: try
+      `pip3 install pyyaml` (or `python3 -m pip install --user pyyaml`) once,
+      re-run, and if it still fails record it as a degradation and note that
+      `health_check.py` cannot run until PyYAML is installed. Do not halt -
       research still works without the validator, it just goes unchecked.
 
-      `kb.yaml` is a template at this point. `1_ANALYZE` fills in the entity
-      types and enumerations once the market survey says what this market
-      actually needs.
+      `kb.yaml` is otherwise a template at this point. `1_ANALYZE` fills in
+      the entity types and enumerations once the market survey says what this
+      market actually needs.
 
 ### Task 8: Write the config record
 
@@ -207,6 +216,14 @@ This document runs once. If `MARKET_CONFIG.md` already exists and records
       value, whether the scope pair was user-configured or agent-proposed, the
       resolved domain entity, the seed source status, any degradations, and a
       final line reading exactly `STATUS: READY`.
+
+- [ ] **Seed the durable state files**: create these in `{{AUTORUN_FOLDER}}`
+      if they do not exist, each with a one-line header describing its role:
+      `BACKLOG.md` (see `2_DISCOVER.md` for the header), `SWEEP_GAPS.md`
+      ("Entities named by a card that have no card yet. One `- [ ]` line each;
+      mark `queued` when 2_DISCOVER picks it up."), `RESEARCH_LOG.md` ("What
+      each loop did."), and `PROGRESS_LOG.md` (the table header from
+      `5_PROGRESS.md`).
 
 - [ ] **Tell the user what is about to happen**: state, in four lines, the
       market, the scope pair, the domain entity and the run budget. Flag
@@ -216,8 +233,9 @@ This document runs once. If `MARKET_CONFIG.md` already exists and records
 
 ## How to Know You're Done
 
-`MARKET_CONFIG.md` exists with `STATUS: READY`, `SCOPE.md` and `REJECTIONS.md`
-exist in the output folder, and the user has been told the boundary the run is
-about to operate under.
+`MARKET_CONFIG.md` exists with `STATUS: READY`, `SCOPE.md`, `REJECTIONS.md`,
+`kb.yaml` (identity block filled) and `Tools/health_check.py` exist in the
+output folder, the four durable state files exist in the Auto Run folder, and
+the user has been told the boundary the run is about to operate under.
 
 If Task 3 halted, none of the above is true and that is the correct outcome.

@@ -334,55 +334,21 @@ else in the pipeline would ever notice.
     - Mean relevance: [N] (previous audit: [N])
 ```
 
-### technology-researcher.md
-```markdown
----
-name: technology-researcher
-description: Researches a technology/standard and creates a structured profile for the [MARKET_TOPIC] knowledge vault.
-model: inherit
----
-
-# Technology Researcher Agent
-
-**Purpose:** Research a specific technology, platform, or standard in the [MARKET_TOPIC] market.
-
-## Input
-- Technology name
-- Category (protocol, platform, framework, etc.)
-
-## Process
-1. **Web Search** - Gather information about the technology:
-   - Official documentation
-   - Technical specifications
-   - Adoption statistics
-   - Companies using it
-   - Comparison with alternatives
-
-2. **Create Profile** - Write markdown file in `Technologies/[Technology-Name].md`:
-   - Use the technology template from market analysis
-   - Include technical details, use cases, adoption
-   - Add [[wiki-links]] to companies and products using it
-   - Note any information gaps
-
-3. **Update INDEX.md** - Add link under Technologies section
-
-## Output
-- Technology markdown file in `Technologies/`
-- Updated INDEX.md
-- Research notes in log file
-```
-
 ### trend-researcher.md
 ```markdown
 ---
 name: trend-researcher
-description: Researches a market trend and creates a structured analysis for the [MARKET_TOPIC] knowledge vault.
+description: Researches a market trend and writes a dated analysis into Resources/Trends/ for the [MARKET_TOPIC] knowledge vault. Trends are documents, not entities.
 model: inherit
 ---
 
 # Trend Researcher Agent
 
 **Purpose:** Research and analyze a specific trend in the [MARKET_TOPIC] market.
+
+A trend is a dated analysis, not an entity: it has no lifecycle and no typed
+relations, so it lives in `Resources/Trends/` and is excluded from the
+validator. Link to the entity cards it discusses with `[[wikilinks]]`.
 
 ## Input
 - Trend name/description
@@ -396,18 +362,17 @@ model: inherit
    - Data and statistics
    - Companies driving or affected by trend
 
-2. **Create Profile** - Write markdown file in `Trends/[Trend-Name].md`:
-   - Use the trend template from market analysis
-   - Include drivers, implications, timeline
-   - Add [[wiki-links]] to related companies and technologies
-   - Include quantitative data where available
+2. **Write the analysis** - `Resources/Trends/[YYYY-MM] [Trend Name].md` with
+   frontmatter `type: trend`, `date`, `entities: [names discussed]`:
+   - Drivers, implications, timeline
+   - `[[wikilinks]]` to every company, product and category discussed
+   - Quantitative data with sources where available
 
-3. **Update INDEX.md** - Add link under Trends section
+3. **Update INDEX.md** - Add link under a `### Trends` heading in Resources
 
 ## Output
-- Trend markdown file in `Trends/`
+- Trend document in `Resources/Trends/`
 - Updated INDEX.md
-- Research notes in log file
 ```
 
 ## Research Command Template
@@ -423,22 +388,76 @@ Research a specific entity and add it to the [MARKET_TOPIC] knowledge vault.
 Provide the entity type and name to research.
 
 ## Process
-1. Identify the appropriate agent for the entity type:
-   - Company → use company-researcher agent
-   - Product → use product-researcher agent
-   - Person → use person-researcher agent
-   - Technology → use technology-researcher agent
-   - Trend → use trend-researcher agent
+1. Read `SCOPE.md` and confirm the entity passes the boundary. If it does
+   not, say so and stop - do not create a card for context.
 
-2. Spawn the agent with the Task tool to research the entity
+2. Identify the appropriate agent for the entity type:
+   - Company → company-researcher
+   - Product → product-researcher
+   - Category → category-researcher
+   - Person → person-researcher
+   - Capital / investor → capital-researcher
+   - Trend → trend-researcher (writes a document, not a card)
 
-3. Verify the profile was created and INDEX.md was updated
+3. Spawn the agent with the Task tool to research the entity
+
+4. Run `python3 Tools/health_check.py` and fix anything CRITICAL the new card
+   introduced. Verify INDEX.md was updated.
 
 ## Example
 "Research the company Acme Corp"
 → Spawns company-researcher agent
 → Creates Companies/Acme-Corp.md
 → Updates INDEX.md
+```
+
+## Health Check Command Template
+
+Create in `[OUTPUT_FOLDER]/Commands/health-check.md`:
+
+```markdown
+# Health Check
+
+Validate the vault and work the queue it prints.
+
+## Process
+1. Run `python3 Tools/health_check.py --report Resources/` from the vault root.
+2. Read the report it wrote. Work issues in this order: broken relations,
+   duplicates, missing required fields, enum and date format, ledger state,
+   orphans, then the relevance review queue.
+3. Never create a stub card to satisfy a relation. Fix the name or remove the
+   relation and note the missing entity.
+4. Re-run until CRITICAL is zero. Report the before/after counts and the
+   lowest-coverage field, which is the next column worth sweeping.
+
+## Flags
+- `--json` for machine-readable output
+- `--dedup` for near-duplicate names only
+- `--fail-on critical` for a non-zero exit in scripts
+```
+
+## Scope Audit Command Template
+
+Create in `[OUTPUT_FOLDER]/Commands/scope-audit.md`:
+
+```markdown
+# Scope Audit
+
+Re-score the corpus against the boundary. Run this periodically after the
+playbook finishes - companies reposition, and nothing else notices.
+
+## Usage
+Optionally name a folder or a list of cards. Default: every card whose
+`last_updated` is older than 90 days, plus every card scoring below 50.
+
+## Process
+1. Spawn the scope-validator agent with the card list.
+2. It re-applies the antonym pair in `SCOPE.md` to each card's current
+   positioning, re-scores `relevance`, and rewrites `relevance_notes` with the
+   date and reason whenever a score moves.
+3. It never deletes. Cards below 30 are listed for a human decision.
+4. Report the distribution, the mean, and how the mean compares to the last
+   entry in `Resources/health_check_*.md`.
 ```
 
 ## Vault CLAUDE.md Template
@@ -468,7 +487,7 @@ Read `SCOPE.md` before creating or scoring anything, and check `REJECTIONS.md` b
 - **Categories/** - The taxonomy spine
 - **People/** - Key people in the market
 - **Capital/** - Investor profiles
-- **Resources/** - Reports, trends, technologies, data sources
+- **Resources/** - Reports, `Trends/`, data sources, health check reports
 - **Tools/** - `health_check.py`, the corpus validator
 - **Agents/** - Research agents for each entity type
 - **Commands/** - Slash commands for common operations
@@ -603,15 +622,19 @@ See [[SCOPE]] for edge rules and [[REJECTIONS]] for clusters already declined.
 This task is complete when:
 1. All folders exist (Companies/, Products/, Categories/, People/, Capital/, Resources/, Tools/, Agents/, Commands/, plus the DomainEntity folder if one was resolved)
 2. `.claude/` folder exists with working symlinks to Agents/ and Commands/
-3. All seven agents are created in Agents/
-4. All three commands are created in Commands/
+3. All seven agents are created in Agents/ (company, product, category,
+   person, capital, scope-validator, trend)
+4. All three commands are created in Commands/ (research, health-check,
+   scope-audit)
 5. INDEX.md exists with the market topic and the scope pair
 6. CLAUDE.md exists with vault documentation
-7. `python3 Tools/health_check.py` runs and reports on an empty vault without erroring
+7. `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py` exits 0 with a
+   `0 cards` summary (or exits 2 naming PyYAML, if `0_CONFIGURE` recorded that
+   degradation)
 
 Step 7 matters: it proves the schema in `kb.yaml` is loadable before any research
-depends on it. On an empty vault the expected output is a list of folders with
-zero cards, not a traceback.
+depends on it. A traceback is a defect; exit 2 with a `CONFIG ERROR` line is a
+kb.yaml problem to fix now.
 
 ## Notes
 

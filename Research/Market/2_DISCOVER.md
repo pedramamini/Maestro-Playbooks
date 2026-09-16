@@ -8,31 +8,58 @@
 
 ## Objective
 
-Discover specific entities worth researching. Every candidate passes the scope
-boundary **before** it enters the list, so that out-of-scope entities are
-declined once rather than researched and then regretted.
+Add entities worth researching to the durable backlog. Every candidate passes
+the scope boundary **before** it enters the list, so that out-of-scope entities
+are declined once rather than researched and then regretted.
+
+Discovery has three feeds, worked in this order because each is a better
+source than the one after it:
+
+1. **`SWEEP_GAPS.md`** - entities that existing cards already name (a founder,
+   an investor, a category leader, an acquirer). These are the highest-value
+   candidates in the run: carding them turns a dangling name into an edge.
+2. **`SEED_SOURCE`** - the curated artifact from the configuration, on the
+   first loop it is available.
+3. **Web search** on one under-covered category.
 
 ## Instructions
 
-1. **Read `[OUTPUT_FOLDER]/SCOPE.md`** - the boundary
-2. **Read `[OUTPUT_FOLDER]/REJECTIONS.md`** - clusters already declined
-3. **Read the market analysis** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
-4. **Read existing entities** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`
-5. **Focus on ONE entity category** that needs more discovery
-6. **Apply the scope test to each candidate** before recording it
-7. **Document discoveries** in `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`
+1. **Read the agent prompt** for `[SEED_SOURCE]` and `[OUTPUT_FOLDER]`
+2. **Read `[OUTPUT_FOLDER]/SCOPE.md`** - the boundary
+3. **Read `[OUTPUT_FOLDER]/REJECTIONS.md`** - clusters already declined
+4. **Read `{{AUTORUN_FOLDER}}/MARKET_ANALYSIS.md`** - priority categories and targets
+5. **Read `{{AUTORUN_FOLDER}}/BACKLOG.md`** - everything already discovered
+6. **List existing cards**: `ls [OUTPUT_FOLDER]/Companies [OUTPUT_FOLDER]/Products [OUTPUT_FOLDER]/People [OUTPUT_FOLDER]/Capital`
+7. **Work the feeds in order** and apply the scope test to each candidate
+8. **Append survivors to `BACKLOG.md`** with `Status: DISCOVERED`
 
 ## Discovery Checklist
 
-- [ ] **Discover entities (or mark all covered)**: Read `SCOPE.md` and
-      `REJECTIONS.md` first. Read the market analysis for priority categories
-      and the existing entity list. If ALL priority categories already have 3+
-      entities discovered, append `## ALL_CATEGORIES_COVERED` to
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` and mark this task
-      complete. Otherwise pick ONE category needing more entities, use web
-      search to find 3-5 candidates, apply the scope test to each, and append
-      the survivors with their basic info and discovery source. Record declined
-      candidates too, with the reason.
+- [ ] **Discover entities (or mark all covered)**: Read the files above. Build
+  the set of names already known: every entry in `BACKLOG.md` plus every
+  card filename in the vault. Then:
+
+  **Feed 1 - gaps.** If `{{AUTORUN_FOLDER}}/SWEEP_GAPS.md` has entries not
+  marked `queued`, take up to 5 of them, apply the scope test, append the
+  survivors to `BACKLOG.md` as `DISCOVERED`, and mark each gap line
+  `queued` (or `declined - reason`). If this yields 3 or more survivors,
+  you are done for this loop.
+
+  **Feed 2 - seed.** If `[SEED_SOURCE]` is configured and `BACKLOG.md`
+  does not yet contain the line `<!-- seed mined -->`, read or fetch the
+  seed source, extract every entity name it contains, apply the scope test
+  to each, append survivors (there may be many - that is fine, this is the
+  one loop where a large batch is correct), and append `<!-- seed mined -->`
+  to `BACKLOG.md`. You are done for this loop.
+
+  **Feed 3 - search.** Read the priority categories and target counts from
+  `MARKET_ANALYSIS.md`. Count how many `BACKLOG.md` entries (any status
+  except declined) fall under each. If every priority category has reached
+  its target, append `## ALL_CATEGORIES_COVERED` to `BACKLOG.md` if it is
+  not already there and mark this task complete. Otherwise pick the ONE
+  category furthest below target, use web search to find 5-8 candidates
+  that are not already known, apply the scope test to each, and append
+  survivors and declines.
 
 ## The Scope Test
 
@@ -87,10 +114,6 @@ These recur in every market and each one has produced bad entries:
 - Check: review sites, marketplace listings, company websites, docs sites
 - Look for: comparisons, feature lists, pricing pages
 
-### Categories
-- Search: "[market] landscape", "[market] buyer's guide", "[market] segments"
-- Look for: how *buyers* name the segments, which rarely matches vendor marketing
-
 ### People
 - Search: "[market] CEO", "[market] founder", conference speaker lists
 - Look for: founders, repeat operators, people who move between tracked companies
@@ -105,21 +128,31 @@ These recur in every market and each one has produced bad entries:
 
 ## Output Format
 
-Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`:
+Append to `{{AUTORUN_FOLDER}}/BACKLOG.md`. Create the file with the header
+below if it does not exist.
 
 ```markdown
+# Research Backlog
+
+Every entity ever surfaced for this vault, with its current status. Entries are
+never deleted; their status changes. One entry per entity, keyed on the
+canonical name that will become the card filename.
+
+<!-- status flow: DISCOVERED -> PENDING | SKIP -> RESEARCHED -->
+
 ---
 
-## [Category Name] - Discovered [YYYY-MM-DD]
+## [Feed or Category] - Discovered [YYYY-MM-DD], loop [N]
 
 ### [Entity Name 1]
-- **Type:** [Company | Product | Category | Person | Capital | DomainEntity]
+- **Type:** [Company | Product | Person | Capital | DomainEntity]
+- **Category:** [category from MARKET_ANALYSIS.md, if known]
 - **Brief:** [one sentence]
 - **Why Notable:** [why it matters in this market]
 - **Scope:** in | borderline
 - **Scope Note:** [required when borderline: which part is in, which is out]
-- **Discovery Source:** [URL]
-- **Status:** PENDING
+- **Discovery Source:** [URL, "seed", or "gap: named by [[Card]]"]
+- **Status:** DISCOVERED
 
 ### Declined
 
@@ -128,7 +161,8 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`:
 - **Cluster:** [name, if this is the 3rd+ of a pattern - then log it in REJECTIONS.md]
 
 ### Discovery Summary
-- **Category:** [category researched]
+- **Feed:** gaps | seed | search
+- **Category:** [category researched, if search]
 - **Found:** [count]   **Declined:** [count]
 - **Search Queries Used:**
   - "[query 1]"
@@ -137,12 +171,13 @@ Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`:
 
 ## Entity Status Values
 
-| Status | Meaning |
-|--------|---------|
-| `PENDING` | Discovered and in scope, not yet researched |
-| `RESEARCHED` | Full profile created in the vault |
-| `SKIP` | In scope but not worth the research effort |
-| `DUPLICATE` | Already covered under another entity |
+| Status | Set by | Meaning |
+|--------|--------|---------|
+| `DISCOVERED` | 2_DISCOVER | In scope, not yet scored |
+| `PENDING` | 3_EVALUATE | Scored, worth researching, awaiting a depth loop |
+| `SKIP` | 3_EVALUATE | In scope but not worth the research effort |
+| `RESEARCHED` | 4_RESEARCH | Card exists in the vault |
+| `DUPLICATE` | any | Already covered under another entity |
 
 Note that **out of scope is not a status.** Those candidates never enter the
 list; they go in the `Declined` section. Status is about research effort, scope
@@ -150,18 +185,21 @@ is about membership, and keeping them separate is what stops the vault drifting.
 
 ## Guidelines
 
-- **One category per run** - focused discovery beats scattered discovery
-- **Quality over quantity** - 3-5 well-chosen entities beat 20 marginal ones
+- **Gaps before search** - an entity an existing card already names is worth
+  more than a new stranger, because carding it creates an edge
+- **Never re-add a known name** - check the backlog and the vault filenames,
+  including near-duplicates ("Acme" vs "Acme Inc")
 - **Record the declines** - a decline with a reason is reusable; a silent skip
   gets rediscovered next loop
 - **Include the discovery source** - enables verification later
-- **Check for duplicates** - including near-duplicate names of existing cards
 - **Diversify within the category** - leaders, challengers and emerging players
 
 ## How to Know You're Done
 
-**Option A - Discovered entities:** you picked one category, searched it, applied
-the scope test to each candidate, and appended survivors and declines.
+**Option A - Discovered entities:** you worked the first feed that had
+something in it, applied the scope test to each candidate, and appended
+survivors and declines to `BACKLOG.md`.
 
-**Option B - All categories covered:** every priority category has 3+ entities,
-and you appended `## ALL_CATEGORIES_COVERED`.
+**Option B - All categories covered:** the gap file is drained, the seed is
+mined, every priority category has reached its target, and
+`## ALL_CATEGORIES_COVERED` is present in `BACKLOG.md`.

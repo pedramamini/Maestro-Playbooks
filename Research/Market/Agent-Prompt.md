@@ -38,8 +38,9 @@ sounds like yours - if it reads as obviously irrelevant, you have not found the
 actual boundary yet.
 
 <!-- CONFIGURE (optional but strongly recommended): if you leave these unset,
-     1_ANALYZE proposes a pair from its market survey and writes it to
-     SCOPE.md for you to review. Setting them yourself is better. -->
+     0_CONFIGURE proposes a pair from a short market survey and writes it to
+     SCOPE.md marked agent-proposed, for you to review. Setting them yourself
+     is better. -->
 **SCOPE_IN:** `<UNSET - one sentence: what belongs in this vault>`
 **SCOPE_OUT:** `<UNSET - one sentence: the adjacent market that does not>`
 
@@ -73,14 +74,15 @@ Person, Capital. Most markets also have one object that people in that market
 talk about constantly and that fits none of the five. Naming it is what turns a
 copied template into a modeled market.
 
-<!-- CONFIGURE (optional): leave unset and 1_ANALYZE proposes one. -->
+<!-- CONFIGURE (optional): leave unset and 0_CONFIGURE proposes one, or
+     records `none`. -->
 **DOMAIN_ENTITY:** `<UNSET - e.g. Regulation, Standard, Trial, Clearance, Contract, Project, Channel>`
 
 <!-- Examples by market:
 - Regulated finance ....... Charter / Regulator
 - Medical devices ......... Clearance
 - Pharma .................. Trial / Molecule
-- Industrial ............., Standard
+- Industrial .............. Standard
 - Public sector ........... Contract Vehicle
 - Open source infra ....... Project
 - Consumer ................ Distribution Channel
@@ -100,21 +102,38 @@ current facts.
 
 ### Output Location
 
-<!-- CONFIGURE: where the vault is written. -->
+<!-- CONFIGURE: where the vault is written. Point this at a folder Obsidian
+     can open as a vault. -->
 **OUTPUT_FOLDER:** `{{AUTORUN_FOLDER}}/vault`
 
-### Run Budget
+### Run Budget and Pacing
 
 Market research has no natural completion state - discovery always surfaces one
 more medium-importance company - so the run needs a ceiling or the priority
 ranking never actually constrains anything.
 
-<!-- CONFIGURE: maximum entity profiles this run may create. -->
+<!-- CONFIGURE: maximum entity cards this run may create. Categories do not
+     count. Counted from the vault, not from the plan. -->
 **MAX_ENTITIES:** `60`
 
-<!-- CONFIGURE: how many loops of pure breadth before the run switches to
-     filling gaps across existing cards instead of adding new ones. -->
-**DEPTH_SWITCH_AT:** `25`
+<!-- CONFIGURE: entities researched per depth loop. 3 is a good default; a
+     loop is five documents, so one entity per loop starves the vault. -->
+**DEPTH_BATCH:** `3`
+
+<!-- CONFIGURE: every Nth loop is a breadth sweep (one field across every
+     card) instead of a depth loop (new cards). 4 means loops 4, 8, 12...
+     sweep. Once the budget is spent or the backlog is empty, every loop
+     sweeps until coverage is met. -->
+**SWEEP_EVERY:** `4`
+
+<!-- CONFIGURE: percentage of cards that must carry each tracked field
+     before the run may exit. An explicit "Not disclosed" counts as filled;
+     an empty field does not. -->
+**COVERAGE_TARGET:** `90`
+
+With the defaults and Max Loops set to 30: roughly 22 depth loops produce up to
+66 cards (capped at 60), and 8 or more sweeps fill columns and resolve the
+people and investors those cards name.
 
 ---
 
@@ -132,6 +151,23 @@ body is the argument for what the frontmatter asserts.
 - **Knowledge Linking**: typed relations in frontmatter, `[[mentions]]` in prose
 - **Incremental Building**: each loop advances the corpus by one unit of work
 
+### Durable State
+
+Everything the pipeline knows lives in files, never in memory. Every document
+reads these before acting and appends to them after:
+
+| File | Lives in | Holds |
+|---|---|---|
+| `MARKET_CONFIG.md` | Auto Run folder | Resolved configuration, written once |
+| `MARKET_ANALYSIS.md` | Auto Run folder | Market survey and schema decisions, written once |
+| `BACKLOG.md` | Auto Run folder | Every entity ever discovered, with its status |
+| `SWEEP_GAPS.md` | Auto Run folder | Entities named by a card that have no card yet |
+| `RESEARCH_LOG.md` | Auto Run folder | What each loop did |
+| `PROGRESS_LOG.md` | Auto Run folder | Per-loop metrics and the continue/exit decision |
+| `SCOPE.md` | vault | The boundary |
+| `REJECTIONS.md` | vault | Clusters declined, with reasons |
+| `kb.yaml` | vault | Schema driving the validator |
+
 ### The Two Scores
 
 Every entity carries two independent ratings. Conflating them is the most
@@ -140,7 +176,7 @@ common way a research vault goes wrong.
 | Score | Question | Lives | Set by |
 |---|---|---|---|
 | `relevance` (0-100) | Does this **belong** in the vault? | On the card, forever | `3_EVALUATE` |
-| `importance` (CRITICAL..LOW) | Should I **spend effort** here next? | In the run plan, dies with the run | `3_EVALUATE` |
+| `importance` (CRITICAL..LOW) | Should I **spend effort** here next? | In `BACKLOG.md`, dies with the run | `3_EVALUATE` |
 
 An out-of-scope company can be genuinely CRITICAL to its own market. Without a
 separate membership score, nothing stops it being researched into your vault
@@ -190,7 +226,7 @@ at `.claude/agents`):
 | `person-researcher` | Research and create key people profiles |
 | `capital-researcher` | Research investors, in-scope portfolio only |
 | `scope-validator` | Audit existing cards against the boundary and re-score |
-| `trend-researcher` | Research and analyze market trends |
+| `trend-researcher` | Write dated trend analyses into `Resources/Trends/` |
 
 Spawn them with the Task tool:
 
@@ -217,6 +253,8 @@ Agent: company-researcher
 - **Respect the boundary** - read `SCOPE.md` before creating or scoring anything
 - **Check the rejection log** - `REJECTIONS.md` exists so an already-rejected
   cluster costs nothing to decline the second time
-- **Sweep by column, not by row** - filling one field across every card beats
-  researching one card exhaustively
+- **Depth builds cards, breadth connects them** - both are needed; the loop
+  alternates on purpose
+- **Never stub** - an entity you reference but have not researched goes in
+  `SWEEP_GAPS.md`, not in a two-line card
 - **Validate before you finish** - `python3 Tools/health_check.py`

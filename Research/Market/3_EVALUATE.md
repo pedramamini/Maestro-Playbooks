@@ -8,36 +8,42 @@
 
 ## Objective
 
-Score one entity on **two independent axes** and add it to the research plan.
+Score every `DISCOVERED` entity in the backlog on **two independent axes** and
+promote it to `PENDING` or `SKIP`.
 
 | Axis | Question | Where it lives |
 |---|---|---|
 | **Relevance** (0-100) | Does this **belong** in the vault? | On the card, permanently |
-| **Importance** (CRITICAL..LOW) | Should effort go here **next**? | In the run plan, discarded after |
+| **Importance** (CRITICAL..LOW) | Should effort go here **next**? | In `BACKLOG.md`, discarded after |
 
 These are orthogonal and conflating them is the most common way a research vault
 goes wrong. An out-of-scope company can be genuinely CRITICAL to its own market;
 without a separate membership score, nothing prevents it being researched into
 your vault with a HIGH rating attached and never questioned again.
 
+Scoring is cheap compared to research - a couple of searches per entity, no
+card written - so this document scores **everything that is waiting**, not one
+entity. Discovery adds three to eight names per loop and the seed feed may add
+dozens; a one-per-loop evaluator would leave most of them unscored forever.
+
 ## Instructions
 
-1. **Read `[OUTPUT_FOLDER]/SCOPE.md`** - the boundary
-2. **Read discovered entities** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`
-3. **Read the research plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
-4. **Select ONE unevaluated entity**
-5. **Score relevance, then importance, then effort**
-6. **Append to the research plan**
+1. **Read the agent prompt** for `[OUTPUT_FOLDER]`
+2. **Read `[OUTPUT_FOLDER]/SCOPE.md`** - the boundary
+3. **Read `{{AUTORUN_FOLDER}}/BACKLOG.md`** and collect every entry with `Status: DISCOVERED`
+4. **Score each one: relevance, then importance, then effort**
+5. **Rewrite each entry in place** with the scores and the new status
 
 ## Evaluation Checklist
 
-- [ ] **Evaluate one entity (or skip if empty)**: Read
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md` for PENDING
-      entities. If the file has no entities, or all are already evaluated in
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`, mark this task complete
-      without changes. Otherwise pick ONE unevaluated entity. Score its
-      relevance against `SCOPE.md`, then assess importance and research effort.
-      Append the evaluation to the plan with the status from the decision matrix.
+- [ ] **Evaluate all DISCOVERED entities (or skip if none)**: Read
+      `{{AUTORUN_FOLDER}}/BACKLOG.md`. If no entry has `Status: DISCOVERED`,
+      mark this task complete without changes. Otherwise, for each such entry
+      (cap at 25 per loop; leave the rest `DISCOVERED` for next loop): score
+      relevance against `SCOPE.md` with a written justification, assess
+      importance and research effort, apply the decision matrix, and edit the
+      entry in place to add the `Evaluation` block and set the status to
+      `PENDING` or `SKIP`. Keep the entry's original discovery fields intact.
 
 ## Axis 1: Relevance (scope membership)
 
@@ -101,7 +107,9 @@ relevance_notes: "Uses in-scope vocabulary in marketing but the product serves
 | **LOW** | Completeness only. |
 
 Factors: market share or influence, innovation leadership, growth trajectory,
-analyst attention, interconnectedness with other entities.
+analyst attention, interconnectedness with other entities. **An entity that
+arrived via `SWEEP_GAPS.md` is already connected** - it is named by a card in
+the vault - so it starts at MEDIUM and goes up from there, never down to LOW.
 
 ## Axis 3: Research Effort
 
@@ -117,45 +125,25 @@ and docs, press coverage, executive visibility, complexity of the entity.
 
 ## Output Format
 
-Append to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`:
+Edit the entity's existing entry in `{{AUTORUN_FOLDER}}/BACKLOG.md`: change the
+`Status` line and append this block beneath the discovery fields.
 
 ```markdown
----
+- **Status:** PENDING
 
-## [Entity Name] - Evaluated [YYYY-MM-DD]
-
-**Source:** [reference to the ENTITIES.md entry]
-**Type:** [Company | Product | Category | Person | Capital | DomainEntity]
-**Category:** [which category from the market analysis]
-
-### Quick Profile
-[2-3 sentences on what this entity is and does]
-
-### Relevance (scope membership)
-- **Score:** [0-100]
-- **Notes:** [the justification that will go on the card verbatim]
-
-### Importance Assessment
-- **Rating:** [CRITICAL | HIGH | MEDIUM | LOW]
-- **Justification:** [why]
-- **Key Questions to Answer:**
+#### Evaluation - [YYYY-MM-DD], loop [N]
+- **Relevance:** [0-100]
+- **Relevance Notes:** [the justification that will go on the card verbatim]
+- **Importance:** [CRITICAL | HIGH | MEDIUM | LOW] - [one line why]
+- **Effort:** [EASY | MEDIUM | HARD | VERY HARD] - [one line why]
+- **Key Questions:**
   1. [question the research should answer]
   2. [question]
-
-### Research Effort Assessment
-- **Rating:** [EASY | MEDIUM | HARD | VERY HARD]
-- **Justification:** [why]
-- **Primary Sources Available:**
-  - [source 1]
-  - [source 2]
-
-### Expected Connections
-Typed relations this card will carry:
-- `[field]:` [[Entity A]] - [relation meaning]
-- `[field]:` [[Entity B]] - [relation meaning]
-
-### Status: [PENDING | SKIP - reason]
+- **Expected Relations:** `[field]:` [[Entity A]]; `[field]:` [[Entity B]]
+- **Decision:** [matrix row, e.g. ">= 50 / HIGH / MEDIUM -> PENDING"]
 ```
+
+For `SKIP`, the same block with `- **Status:** SKIP - [reason]`.
 
 ## Status Decision Matrix
 
@@ -168,31 +156,30 @@ important it is to somebody else's market.
 | 30-49 | CRITICAL/HIGH | EASY | `PENDING` - context only, keep it brief |
 | 30-49 | anything else | any | `SKIP - adjacent, effort exceeds value` |
 | >= 50 | CRITICAL | any | `PENDING` - must research |
-| >= 50 | HIGH | EASY/MEDIUM | `PENDING` - high value, reasonable effort |
-| >= 50 | HIGH | HARD | `PENDING` - worth the effort |
+| >= 50 | HIGH | EASY/MEDIUM/HARD | `PENDING` - worth the effort |
 | >= 50 | HIGH | VERY HARD | `PENDING - MANUAL REVIEW` - may need human help |
-| >= 50 | MEDIUM | EASY | `PENDING` - quick win |
-| >= 50 | MEDIUM | MEDIUM | `PENDING` - good value |
+| >= 50 | MEDIUM | EASY/MEDIUM | `PENDING` - good value |
 | >= 50 | MEDIUM | HARD/VERY HARD | `SKIP - effort exceeds value` |
 | >= 50 | LOW | EASY | `PENDING` - if budget permits |
 | >= 50 | LOW | MEDIUM+ | `SKIP - low priority` |
 
+`4_RESEARCH` works `PENDING` entries in importance order, so a LOW entity is
+only researched once nothing above it is waiting.
+
 ## Guidelines
 
-- **One entity per run** - thorough evaluation beats rushed assessment
 - **Score relevance first** - it gates everything else
 - **Be honest about effort** - do not underestimate research difficulty
 - **Think about connections** - highly connected entities add more value
 - **Note key questions** - they guide the research phase
 - **Identify sources upfront** - saves time later
+- **Do not research** - two or three searches to score is the ceiling. The card
+  is written in `4_RESEARCH`
 
 ## How to Know You're Done
 
-**Option A - Evaluated an entity:** exactly one entity scored on all three axes,
-appended to the plan, with a status from the matrix.
+**Option A - Evaluated:** every `DISCOVERED` entry (up to the cap) now reads
+`PENDING` or `SKIP` with an `Evaluation` block.
 
-**Option B - Nothing to evaluate:** `LOOP_{{LOOP_NUMBER}}_ENTITIES.md` has no
-entities, or all are already in the plan. Mark complete without changes.
-
-This graceful handling of empty states prevents the pipeline stalling when
-discovery yields nothing.
+**Option B - Nothing to evaluate:** `BACKLOG.md` has no `DISCOVERED` entries.
+Mark complete without changes.

@@ -2,10 +2,12 @@
 """
 health_check.py -- validator for a market research vault.
 
-Config-driven: everything it knows about a particular market comes from
-kb.yaml, which 1_ANALYZE writes once the market survey says which entity
-types and enumerations that market actually needs. There is no
-market-specific logic in this file.
+Config-driven: entity types, folders, required fields, enumerations, typed
+relations and the event ledger all come from kb.yaml, which 1_ANALYZE fills
+in once the market survey says what that market needs. The one convention
+baked into this file is the funding-consistency check, which looks for the
+standard company fields (total_funding, latest_round_size, all_investors)
+and skips itself when they are not declared.
 
 A vault of markdown cards has no schema enforcement of its own, so integrity
 has to be asserted from outside. This is that assertion. Two failures in
@@ -26,7 +28,9 @@ Usage:
     python3 health_check.py --fail-on critical   # non-zero exit for CI
 
 Exit codes: 0 clean (or only issues below --fail-on), 1 issues at/above
---fail-on, 2 configuration or vault error.
+--fail-on, 2 configuration or vault error (kb.yaml missing or invalid,
+PyYAML not installed, a relation targeting an undeclared entity type).
+5_PROGRESS treats exit 2 as "integrity unknown", never as "clean".
 """
 
 from __future__ import annotations
@@ -42,7 +46,13 @@ from pathlib import Path
 try:
     import yaml
 except ImportError:
-    sys.exit("PyYAML required:  pip install pyyaml")
+    print("CONFIG ERROR: PyYAML required:  pip install pyyaml", file=sys.stderr)
+    sys.exit(2)
+
+
+def config_error(msg: str):
+    print(f"CONFIG ERROR: {msg}", file=sys.stderr)
+    sys.exit(2)
 
 
 # --------------------------------------------------------------------------
@@ -155,6 +165,50 @@ class HealthCheck:
         self.edges_out: dict[tuple, int] = defaultdict(int)
         self.edges_in: dict[tuple, int] = defaultdict(int)
         self.stats: dict[str, int] = {}
+        self.validate_config()
+
+    # ---- config sanity ----
+    def validate_config(self):
+        """
+        kb.yaml is hand-edited by 1_ANALYZE, which is told to prune entity
+        types the market does not need. A relation left pointing at a pruned
+        type used to crash the relation pass with a KeyError; now it is a
+        configuration error with the fix spelled out.
+        """
+        problems = []
+        for etype, spec in self.entities.items():
+            if not isinstance(spec, dict) or not spec.get("dir") or not spec.get("key"):
+                problems.append(f"entity '{etype}' must declare 'dir' and 'key'.")
+                continue
+            for field, rspec in (spec.get("relations", {}) or {}).items():
+                target = (rspec or {}).get("to")
+                if target not in self.entities:
+                    problems.append(
+                        f"relation {etype}.{field} targets undeclared entity type "
+                        f"'{target}'. Declare the type under entities: or remove "
+                        f"the relation.")
+                mirror = (rspec or {}).get("mirror")
+                if mirror and target in self.entities:
+                    if mirror not in (self.entities[target].get("relations", {}) or {}):
+                        problems.append(
+                            f"relation {etype}.{field} declares mirror '{mirror}' "
+                            f"but {target} has no relation named '{mirror}'.")
+            for field, enum_name in (spec.get("enums", {}) or {}).items():
+                if enum_name not in self.enums:
+                    problems.append(
+                        f"{etype}.{field} references enum '{enum_name}' which is "
+                        f"not defined under enums:.")
+        led = self.cfg.get("ledger")
+        if led:
+            if led.get("entity") not in self.entities:
+                problems.append(
+                    f"ledger.entity '{led.get('entity')}' is not a declared entity type.")
+            for k in ("state_field", "terminal_state", "date_field",
+                      "counterparty_closed", "counterparty_open"):
+                if not led.get(k):
+                    problems.append(f"ledger.{k} is required when a ledger block is present.")
+        if problems:
+            config_error("kb.yaml has problems:\n  - " + "\n  - ".join(problems))
 
     # ---- reporting ----
     def add(self, severity, kind, card, detail):
@@ -305,6 +359,7 @@ class HealthCheck:
                         continue
                     target_type = rspec.get("to")
                     kind = rspec.get("kind", "list")
+                    soft = bool(rspec.get("soft", False))
                     values = as_list(fm[field])
 
                     if kind == "scalar" and len(values) > 1:
@@ -320,11 +375,21 @@ class HealthCheck:
                             self.edges_out[src] += 1
                             self.edges_in[(target_type, target)] += 1
                         else:
-                            self.add(CRITICAL, "broken-relation", rel,
-                                     f"{field} -> '{target}' has no card in "
-                                     f"{self.entities[target_type]['dir']}/. "
-                                     f"Create it, fix the name, or remove the "
-                                     f"relation.")
+                            tdir = self.entities.get(target_type, {}).get("dir", target_type)
+                            if soft:
+                                # A soft relation may name an entity that has no
+                                # card yet. It is a queue item for discovery, not
+                                # a broken graph: the People and Capital sweeps
+                                # exist to resolve exactly these.
+                                self.add(MEDIUM, "unresolved-relation", rel,
+                                         f"{field} -> '{target}' has no card in "
+                                         f"{tdir}/ yet. Log it in SWEEP_GAPS.md so "
+                                         f"discovery picks it up.")
+                            else:
+                                self.add(CRITICAL, "broken-relation", rel,
+                                         f"{field} -> '{target}' has no card in "
+                                         f"{tdir}/. Create it, fix the name, or "
+                                         f"remove the relation.")
 
     def check_mirrors(self):
         """
@@ -376,6 +441,13 @@ class HealthCheck:
         closed_f = led.get("counterparty_closed")
         open_f = led.get("counterparty_open")
         status_terminal = terminal  # e.g. "closed"
+        # Optional coupling to the card's lifecycle field. For M&A that is
+        # status: acquired; for a licensing market it might be status: licensed.
+        # Omit status_field in kb.yaml and these checks are skipped.
+        lifecycle_f = led.get("status_field")
+        lifecycle_terminal = led.get("status_terminal_value")
+        open_states = set(as_list(led.get("open_states")) or [])
+        reported_f = led.get("reported_date_field")
 
         for name, card in self.cards[etype].items():
             fm, rel = card["fm"], card["path"]
@@ -383,7 +455,7 @@ class HealthCheck:
             has_closed = fm.get(closed_f) is not None
             has_open = fm.get(open_f) is not None
             has_date = fm.get(date_f) is not None
-            status = fm.get("status")
+            status = fm.get(lifecycle_f) if lifecycle_f else None
 
             if has_closed and state != status_terminal:
                 self.add(CRITICAL, "ledger-state", rel,
@@ -404,26 +476,29 @@ class HealthCheck:
                     self.add(CRITICAL, "ledger-state", rel,
                              f"{state_f}='{terminal}' but '{date_f}' (the close "
                              f"date) is missing.")
-                if status is not None and status != "acquired":
+                if (lifecycle_f and lifecycle_terminal and status is not None
+                        and status != lifecycle_terminal):
                     self.add(CRITICAL, "ledger-state", rel,
-                             f"{state_f}='{terminal}' but status='{status}'. "
-                             f"A closed deal means status: acquired.")
+                             f"{state_f}='{terminal}' but {lifecycle_f}='{status}'. "
+                             f"A terminal event means {lifecycle_f}: "
+                             f"{lifecycle_terminal}.")
 
-            if state in ("pending_close", "rumored"):
+            if state in open_states:
                 if has_date:
                     self.add(CRITICAL, "ledger-state", rel,
                              f"{state_f}='{state}' but '{date_f}' is set. That "
-                             f"field means the close date; leave it empty until "
-                             f"close.")
-                if status == "acquired":
+                             f"field means the terminal date; leave it empty "
+                             f"until the event is final.")
+                if lifecycle_f and lifecycle_terminal and status == lifecycle_terminal:
                     self.add(CRITICAL, "ledger-state", rel,
-                             f"{state_f}='{state}' but status='acquired'. Never "
-                             f"set status: acquired without a confirmed close.")
+                             f"{state_f}='{state}' but {lifecycle_f}="
+                             f"'{lifecycle_terminal}'. Never set the terminal "
+                             f"lifecycle value without a confirmed final event.")
 
             # rumor aging
             stale_days = led.get("rumor_stale_days")
-            reported = fm.get("acquisition_reported_date")
-            if state == "rumored" and reported and stale_days:
+            reported = fm.get(reported_f) if reported_f else None
+            if state in open_states and reported and stale_days:
                 try:
                     rd = (reported if isinstance(reported, date)
                           else datetime.strptime(str(reported), "%Y-%m-%d").date())
@@ -551,6 +626,22 @@ class HealthCheck:
         bands["mean"] = round(total / count, 1) if count else None
         return bands
 
+    # ---- budget: how many cards count against MAX_ENTITIES ----
+    def budget_cards(self) -> int:
+        excluded = set(as_list(self.settings.get("budget_exclude_types")) or [])
+        return sum(n for et, n in self.stats.items()
+                   if et != "total" and et not in excluded)
+
+    def lowest_coverage(self):
+        """(etype, field, pct) for the least-covered tracked field, or None."""
+        worst = None
+        for etype, counts in self.field_coverage().items():
+            for f, (filled, total) in counts.items():
+                pct = round(100 * filled / total) if total else 0
+                if worst is None or pct < worst[2]:
+                    worst = (etype, f, pct)
+        return worst
+
     # ---- field coverage: what the next sweep should target ----
     def field_coverage(self):
         """
@@ -612,6 +703,7 @@ def render_markdown(hc: HealthCheck, issues) -> str:
     for etype in hc.entities:
         A(f"| {etype} | {hc.stats.get(etype, 0)} |")
     A(f"| **total** | **{hc.stats.get('total', 0)}** |")
+    A(f"| **counts against MAX_ENTITIES** | **{hc.budget_cards()}** |")
     A("")
 
     dist = hc.relevance_distribution()
@@ -695,13 +787,13 @@ def main():
     vault = Path(args.vault).resolve()
     cfg_path = Path(args.config) if args.config else vault / "kb.yaml"
     if not cfg_path.is_file():
-        sys.exit(f"config not found: {cfg_path}")
+        config_error(f"config not found: {cfg_path}")
     try:
         config = yaml.safe_load(cfg_path.read_text(encoding="utf-8"))
     except yaml.YAMLError as e:
-        sys.exit(f"kb.yaml is not valid YAML: {e}")
+        config_error(f"kb.yaml is not valid YAML: {e}")
     if not isinstance(config, dict) or "entities" not in config:
-        sys.exit("kb.yaml must define an 'entities' block.")
+        config_error("kb.yaml must define an 'entities' block.")
 
     hc = HealthCheck(vault, config)
 
@@ -723,6 +815,9 @@ def main():
             "date": date.today().isoformat(),
             "domain": config.get("domain"),
             "stats": hc.stats,
+            "budget_cards": hc.budget_cards(),
+            "lowest_coverage": hc.lowest_coverage(),
+            "critical": sum(1 for i in issues if i.severity == CRITICAL),
             "relevance": hc.relevance_distribution(),
             "coverage": {k: {f: list(v) for f, v in c.items()}
                          for k, c in hc.field_coverage().items()},
@@ -740,11 +835,15 @@ def main():
         counts = defaultdict(int)
         for i in issues:
             counts[i.severity] += 1
-        print(f"\n{config.get('domain', 'vault')} - {hc.stats.get('total', 0)} cards")
+        print(f"\n{config.get('domain', 'vault')} - {hc.stats.get('total', 0)} cards "
+              f"({hc.budget_cards()} count against MAX_ENTITIES)")
         print(f"  CRITICAL {counts[CRITICAL]}   MEDIUM {counts[MEDIUM]}   "
               f"LOW {counts[LOW]}")
         dist = hc.relevance_distribution()
         print(f"  mean relevance: {dist['mean']}   unscored: {dist['unscored']}")
+        low = hc.lowest_coverage()
+        if low:
+            print(f"  lowest coverage: {low[0]}.{low[1]} at {low[2]}%")
         if not args.report and issues:
             print("\nTop issues:")
             for i in issues[:15]:

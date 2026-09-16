@@ -14,9 +14,10 @@ resetting documents 1-4 when more work remains.
 
 It gates on three things, not one:
 
-1. **Work remaining** - are there entities still worth researching?
-2. **Budget** - has this run hit its ceiling?
-3. **Integrity** - is the corpus actually queryable, or is it broken?
+1. **Integrity** - is the corpus actually queryable, or is it broken?
+2. **Work remaining** - are there entities still worth researching, names still
+   dangling, categories still uncovered, columns still thin?
+3. **Budget** - has this run hit its ceiling?
 
 Gating on coverage alone lets a run exit having produced a vault that fails its
 next query, and lets a run with no natural stopping point continue until the max
@@ -24,29 +25,34 @@ loop count stops it arbitrarily.
 
 ## Instructions
 
-1. **Read the research plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
-2. **Read `{{AUTORUN_FOLDER}}/MARKET_CONFIG.md`** for `MAX_ENTITIES`
-3. **Run the validator** and record the result
-4. **Count entities and check coverage**
-5. **Decide: continue or exit**
-6. **If continuing**: reset documents 1-4
-7. **If exiting**: do NOT reset - finalize the vault
+1. **Read the agent prompt** for `[OUTPUT_FOLDER]`, `[MAX_ENTITIES]`, `[COVERAGE_TARGET]`
+2. **Run the validator** and record the result
+3. **Read `{{AUTORUN_FOLDER}}/BACKLOG.md`** and `{{AUTORUN_FOLDER}}/SWEEP_GAPS.md`
+4. **Apply the decision logic** and append a row to `PROGRESS_LOG.md`
+5. **If continuing**: check the four reset tasks
+6. **If exiting**: leave them unchecked and run the finalization tasks
 
 ## Progress Check
 
-- [ ] **Run the integrity check**: Execute
-      `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --report Resources/`
-      and record the CRITICAL count, the relevance distribution and the mean
-      relevance. If PyYAML is unavailable, note it and treat integrity as
-      unknown rather than clean.
+- [ ] **Measure**: Run
+      `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --json > /tmp/hc.json; echo exit=$?`
+      then read `critical`, `budget_cards`, `lowest_coverage`, `relevance.mean`
+      and the `0-29` band from the JSON. Also write the markdown report:
+      `python3 Tools/health_check.py --report Resources/`. If the exit code is
+      2, integrity is **unknown** (config error or missing PyYAML) - record
+      that and treat it as continue-with-repair, never as clean. Subtract any
+      CRITICAL issues whose exact text appears under `## KNOWN_ISSUES` in
+      `RESEARCH_LOG.md`. Then count in `BACKLOG.md`: entries with `Status:
+      PENDING`, entries with `Status: DISCOVERED`, whether
+      `## ALL_CATEGORIES_COVERED` is present; and in `SWEEP_GAPS.md`: unchecked
+      lines not marked `queued`. Append a row to
+      `{{AUTORUN_FOLDER}}/PROGRESS_LOG.md` (create it with the header below if
+      absent).
 
-- [ ] **Check progress and decide**: Read
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` and
-      `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`. Apply the decision
-      logic below. The loop CONTINUES (reset docs 1-4) if there is work
-      remaining AND the budget is not exhausted, OR if the corpus has CRITICAL
-      integrity issues. The loop EXITS only when the work is done or the budget
-      is spent AND the corpus is clean.
+- [ ] **Decide**: Apply the decision logic below to the numbers you just
+      recorded, write the decision and its reason in the `PROGRESS_LOG.md`
+      row, and then either check the four reset tasks (CONTINUE) or leave
+      them unchecked and work the finalization tasks (EXIT).
 
 ## Reset Tasks (only if continuing)
 
@@ -60,28 +66,41 @@ loop count stops it arbitrarily.
 ## Decision Logic
 
 ```text
-IF LOOP_{{LOOP_NUMBER}}_PLAN.md does not exist:
-    -> Do NOT reset (PIPELINE JUST STARTED - LET IT RUN)
+effective_critical = critical - (issues listed under KNOWN_ISSUES)
+budget_left        = budget_cards < [MAX_ENTITIES]
+work_waiting       = PENDING > 0  OR  DISCOVERED > 0  OR  unqueued gaps > 0
+                     OR  ALL_CATEGORIES_COVERED absent
+coverage_met       = lowest_coverage pct >= [COVERAGE_TARGET]
+                     (or the vault has no cards yet)
 
-ELSE IF health_check.py reports CRITICAL issues:
-    -> Reset documents 1-4 (FIX THE CORPUS BEFORE ADDING TO IT)
-    -> Note the issues so 4_RESEARCH addresses them next loop
+IF validator exit code == 2:
+    -> CONTINUE (REPAIR CONFIG - 4_RESEARCH fixes kb.yaml next loop)
 
-ELSE IF entities researched >= [MAX_ENTITIES]:
-    -> Do NOT reset (BUDGET EXHAUSTED - EXIT AND FINALIZE)
+ELSE IF effective_critical > 0:
+    -> CONTINUE (REPAIR - fix the corpus before adding to it)
 
-ELSE IF PENDING entities with CRITICAL or HIGH importance exist:
-    -> Reset documents 1-4 (CONTINUE RESEARCHING)
+ELSE IF budget_left AND work_waiting:
+    -> CONTINUE (RESEARCH)
 
-ELSE IF any tracked field is below 90% coverage:
-    -> Reset documents 1-4 (CONTINUE SWEEPING)
-
-ELSE IF LOOP_{{LOOP_NUMBER}}_ENTITIES.md lacks "ALL_CATEGORIES_COVERED":
-    -> Reset documents 1-4 (CONTINUE DISCOVERING)
+ELSE IF NOT coverage_met:
+    -> CONTINUE (SWEEP - budget is spent or backlog is empty; every remaining
+                 loop is a breadth sweep until columns are filled)
 
 ELSE:
-    -> Do NOT reset (DONE - FINALIZE THE VAULT)
+    -> EXIT (DONE - finalize the vault)
 ```
+
+Two guards against spinning:
+
+- **Stalled repair.** If `effective_critical` has been greater than zero for
+  three consecutive rows of `PROGRESS_LOG.md`, the repair is not converging.
+  Copy the remaining CRITICAL issue texts under `## KNOWN_ISSUES` in
+  `RESEARCH_LOG.md`, note it in the decision reason, and re-evaluate the logic
+  without them.
+- **Stalled coverage.** If `lowest_coverage` names the same field with the same
+  percentage for three consecutive rows, the field cannot be filled from
+  public sources. Add it to `coverage_exclude` for that type in `kb.yaml`, note
+  it in the decision reason, and re-run the validator.
 
 ### Why the budget clause
 
@@ -90,9 +109,10 @@ more medium-importance company, so without an explicit ceiling the priority
 ranking in `3_EVALUATE` never actually constrains anything and the run continues
 until Max Loops stops it at a place determined by nothing in particular.
 
-`MAX_ENTITIES` makes the ranking do its job: when the budget is finite, the
-matrix decides what gets researched rather than merely what gets researched
-first.
+`MAX_ENTITIES` is counted from the vault - the validator's `budget_cards`
+figure, which excludes categories - not from the plan. When the budget is
+finite, the matrix decides what gets researched rather than merely what gets
+researched first.
 
 ### Why integrity gates before budget
 
@@ -101,70 +121,45 @@ returns wrong answers. Fixing the corpus takes priority over growing it, and it
 takes priority over the budget, because a clean small vault is useful and a
 broken large one is not.
 
-## Current Status
+## PROGRESS_LOG.md Format
 
-| Metric | Value |
-|--------|-------|
-| **Total Entities Discovered** | ___ |
-| **Entities Researched** | ___ / [MAX_ENTITIES] |
-| **PENDING (CRITICAL/HIGH)** | ___ |
-| **PENDING (MEDIUM/LOW)** | ___ |
-| **SKIP** | ___ |
-| **Declined as out of scope** | ___ |
+```markdown
+# Progress Log
 
-### Corpus Integrity
+One row per loop. The mean relevance column is the drift signal: if it falls
+loop over loop, the boundary is eroding and the run is quietly broadening into
+the adjacent market.
 
-| Check | Value |
-|-------|-------|
-| CRITICAL issues | ___ |
-| MEDIUM issues | ___ |
-| Lowest field coverage | ___ % (`field name`) |
+| Loop | Date | Mode ran | Cards (budget) | PENDING | DISCOVERED | Gaps | Covered? | CRITICAL | Lowest coverage | Mean rel. | Below 30 | Decision | Reason |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2026-01-01 | DEPTH | 3 | 4 | 0 | 5 | no | 0 | company.employee_count 0% | 88.3 | 0 | CONTINUE | research |
+```
 
-### Scope Health
-
-The mean relevance is the drift signal. If it falls loop over loop, the boundary
-is eroding and the run is quietly broadening into the adjacent market. Say so
-explicitly in the exit summary rather than letting it pass unremarked.
-
-| Band | Cards |
-|------|-------|
-| 90-100 | ___ |
-| 70-89 | ___ |
-| 50-69 | ___ |
-| 30-49 | ___ |
-| 0-29 | ___ |
-| **Mean this loop** | ___ |
-| **Mean previous loop** | ___ |
-
-### Coverage by Category
-
-| Category | Target | Researched | Status |
-|----------|--------|------------|--------|
-| Companies | [X] | [Y] | [MET/BELOW] |
-| Products | [X] | [Y] | [MET/BELOW] |
-| Categories | [X] | [Y] | [MET/BELOW] |
-| People | [X] | [Y] | [MET/BELOW] |
-| Capital | [X] | [Y] | [MET/BELOW] |
-
-## Research History
-
-| Loop | Mode | Researched | Total | CRITICAL | Mean relevance | Decision |
-|------|------|-----------|-------|----------|----------------|----------|
-| 1 | ___ | ___ | ___ | ___ | ___ | [CONTINUE/EXIT] |
+`Mode ran` is read from the latest `RESEARCH_LOG.md` entry.
 
 ## Finalization Tasks (on exit only)
 
-- [ ] **Final integrity check**: `python3 Tools/health_check.py --fail-on critical`.
-      If it fails, the vault is not finished - do not proceed to the remaining
-      finalization tasks.
-- [ ] **Update INDEX.md**: every researched entity linked
-- [ ] **Write the vault summary**: statistics into `INDEX.md`
+- [ ] **Final integrity check**: `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --fail-on critical`.
+      If it exits 1 and the issues are not all under `KNOWN_ISSUES`, the vault
+      is not finished - do not proceed to the remaining finalization tasks;
+      uncheck this task's siblings and let the next loop repair.
+- [ ] **Update INDEX.md**: every card in every entity folder linked under its
+      section, counts in the statistics table, and the vault summary below
+      appended
 - [ ] **Build the event ledger**: if `kb.yaml` declares a `ledger` block,
-      generate the time-ordered rollup into `Resources/`
-- [ ] **Review the relevance queue**: list every card scoring below 30 so a
-      human can decide whether it comes up or comes out
-- [ ] **Note the gaps**: entities that could not be researched, and fields that
-      never reached coverage
+      generate `Resources/[Event Class] Ledger.md` - a time-ordered table of
+      every card carrying the ledger's state field, with state, date,
+      counterparty and amount, terminal events separated from open ones
+- [ ] **Write the market map**: `Resources/Market Map.md` - one section per
+      Category card listing its products (from `Products/*.md` where
+      `category:` matches) with their companies, so the comparison spine is
+      readable in one page
+- [ ] **Review the relevance queue**: list every card scoring below 30 in
+      `Resources/Relevance Review.md` with its notes, so a human can decide
+      whether it comes up or comes out
+- [ ] **Note the gaps**: append to the vault summary the entities in
+      `BACKLOG.md` still `PENDING` or `SKIP - MANUAL REVIEW`, the unqueued
+      lines in `SWEEP_GAPS.md`, and any field that never reached coverage
 
 ## Vault Summary Template
 
@@ -190,13 +185,19 @@ Add to `INDEX.md` on exit:
 | Categories | [X] |
 | People | [X] |
 | Capital | [X] |
+| [DomainEntity] | [X] |
 | **Total** | [X] |
 
 ### Corpus Health
-- CRITICAL issues at exit: [X]
-- Mean relevance: [X]
-- Cards below 30 (review queue): [X]
-- Lowest field coverage: [X]% ([field])
+- CRITICAL issues at exit: [X] ([N] known and documented)
+- Mean relevance: [X] (loop 1: [X])
+- Cards below 30 (review queue): [X] - see [[Relevance Review]]
+- Lowest field coverage: [X]% ([type].[field])
+
+### Where to start
+- [[Market Map]] - every category and what sits in it
+- [[SCOPE]] - the boundary this vault was built on
+- [[REJECTIONS]] - what was deliberately left out, and why
 
 ### Known Gaps
 [Entities that could not be researched, fields that stayed thin, and any
@@ -206,13 +207,13 @@ category where the target count was not met.]
 ## Manual Override
 
 - **Force exit early:** leave all reset tasks unchecked
-- **Continue past the budget:** raise `MAX_ENTITIES` in the agent prompt, or
-  check the reset tasks manually
+- **Continue past the budget:** raise `MAX_ENTITIES` in the agent prompt
 - **Pause for review:** leave unchecked, inspect the vault, restart when ready
 
 ## Notes
 
-- Breadth first, then depth. `DEPTH_SWITCH_AT` controls the changeover
+- Depth builds cards, breadth connects them; the alternation is set by
+  `SWEEP_EVERY` and becomes all-breadth once the budget is spent
 - CRITICAL/HIGH entities before MEDIUM/LOW
 - A clean small vault beats a broken large one
 - The vault should be useful and navigable, not exhaustive

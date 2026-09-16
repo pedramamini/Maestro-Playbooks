@@ -1,10 +1,14 @@
 # kb.yaml -- the schema that drives Tools/health_check.py
 #
-# 0_CONFIGURE copies this template into the vault root.
-# 1_ANALYZE fills it in once the market survey says what this market needs.
+# 0_CONFIGURE copies this template into the vault root and fills in the
+# identity block. 1_ANALYZE fills in the rest once the market survey says
+# what this market needs.
 #
 # This is the only file that knows anything about a particular market. The
 # validator has no market-specific logic; change this and the checks follow.
+# Run `python3 Tools/health_check.py` after every edit: a relation pointing at
+# a type you removed, or an enum name that does not exist, is reported as a
+# CONFIG ERROR (exit 2) with the fix spelled out.
 
 # ---------------------------------------------------------------------------
 # Identity -- written by 0_CONFIGURE from the agent prompt
@@ -29,15 +33,11 @@ settings:
   # Currency for all money fields. Amounts are stored as plain integers.
   currency: USD
 
-  # Folders that hold documents rather than entities. Excluded from
-  # validation, from the relation graph, and from orphan detection.
-  non_entity_dirs:
-    - Resources
-    - Reports
-    - Agents
-    - Commands
-    - Tools
-    - .claude
+  # Entity types whose cards do NOT count against MAX_ENTITIES. Categories
+  # are the taxonomy spine, authored up front, and should not eat the budget
+  # meant for the things that hang off them.
+  budget_exclude_types:
+    - category
 
   # Required on every card of every type. The relevance pair is what makes the
   # scope boundary auditable rather than a matter of opinion.
@@ -65,9 +65,11 @@ enums:
                  Sovereign, Accelerator]
   risk_level: [Low, Medium, High]
 
-  # The primary non-category split in this market, if it has one.
-  # 1_ANALYZE fills this in, or deletes it and the `segment` fields below.
-  segment: ["<value-a>", "<value-b>"]
+  # The primary non-category split in this market, if it has one (e.g.
+  # SMB / Mid-market / Enterprise, or Hardware / Software). Commented out so
+  # an unedited template does not flag every card. 1_ANALYZE enables it AND
+  # the matching `segment: segment` lines under company and product below.
+  # segment: [<value-a>, <value-b>]
 
 # ---------------------------------------------------------------------------
 # Entity types
@@ -79,12 +81,19 @@ enums:
 #   enums      field -> enum name above
 #   dates      fields validated as YYYY-MM-DD and not in the future
 #   money      fields validated as plain integers
-#   relations  field -> {to: <type>, kind: scalar|list, mirror: <field>}
+#   relations  field -> {to: <type>, kind: scalar|list, mirror: <field>, soft: bool}
 #   coverage_exclude
 #              fields left OUT of the field-coverage table
 #
 # `relations` is what separates a graph from a folder. A typed relation has a
 # direction and a meaning; a [[wikilink]] in the body does not.
+#
+# `soft: true` marks a relation that is allowed to name an entity with no card
+# YET. Founders, investors and category leaders are discovered on the card
+# that references them, usually before their own card exists. A dangling soft
+# relation is reported MEDIUM (a queue item for SWEEP_GAPS.md and the People /
+# Capital sweeps), not CRITICAL. Hard relations -- a product's company, a
+# person's employer, an acquirer -- must resolve or the graph is wrong.
 #
 # `coverage_exclude` matters more than it looks. 4_RESEARCH picks the next
 # column sweep by finding the lowest-coverage field, so any field that is
@@ -103,7 +112,7 @@ entities:
       employee_count: employee_count
       latest_round_type: round_type
       acquisition_status: acquisition_status
-      segment: segment
+      # segment: segment
     dates: [latest_round_date, acquisition_date, acquisition_announced,
             acquisition_reported_date, last_updated]
     money: [total_funding, latest_round_size, acquisition_amount,
@@ -127,13 +136,13 @@ entities:
       - board_members
     relations:
       products: {to: product, kind: list, mirror: company}
-      founders: {to: person, kind: list}
-      board_members: {to: person, kind: list}
-      all_investors: {to: capital, kind: list, mirror: portfolio}
-      lead_investors: {to: capital, kind: list}
-      acquired_by: {to: company, kind: scalar}
-      acquisition_suitor: {to: company, kind: scalar}
-      parent_company: {to: company, kind: scalar}
+      founders: {to: person, kind: list, soft: true}
+      board_members: {to: person, kind: list, soft: true}
+      all_investors: {to: capital, kind: list, mirror: portfolio, soft: true}
+      lead_investors: {to: capital, kind: list, soft: true}
+      acquired_by: {to: company, kind: scalar, soft: true}
+      acquisition_suitor: {to: company, kind: scalar, soft: true}
+      parent_company: {to: company, kind: scalar, soft: true}
 
   product:
     dir: Products
@@ -141,7 +150,7 @@ entities:
     required: [company, category, description]
     enums:
       pricing_model: pricing_model
-      segment: segment
+      # segment: segment
     dates: [launch_date, last_updated]
     relations:
       company: {to: company, kind: scalar, mirror: products}
@@ -155,9 +164,12 @@ entities:
       maturity: maturity
     dates: [last_updated]
     relations:
-      leaders: {to: company, kind: list}
-      emerging: {to: company, kind: list}
-      adjacent_categories: {to: category, kind: list}
+      # Categories are authored on loop 1, before any company card exists,
+      # so leaders and emerging MUST be soft or the first health check fails
+      # on every category in the vault.
+      leaders: {to: company, kind: list, soft: true}
+      emerging: {to: company, kind: list, soft: true}
+      adjacent_categories: {to: category, kind: list, soft: true}
 
   person:
     dir: People
@@ -176,7 +188,7 @@ entities:
     dates: [founded_date, last_updated]
     money: [aum]
     relations:
-      portfolio: {to: company, kind: list, mirror: all_investors}
+      portfolio: {to: company, kind: list, mirror: all_investors, soft: true}
 
   # -------------------------------------------------------------------------
   # DOMAIN_ENTITY -- 1_ANALYZE writes this block, or deletes it if the
@@ -206,18 +218,30 @@ entities:
 # The state machine matters more than it looks. Recording a reported deal as
 # closed inflates both the count and the total, and nobody notices until
 # someone checks one specific row.
+#
+# Every field name below is configurable. The shipped values model M&A. For a
+# pharma market you might write: event_class: approval, state_field:
+# approval_status, terminal_state: granted, open_states: [submitted,
+# under_review], counterparty_closed: approved_by, counterparty_open:
+# reviewing_body, status_field: status, status_terminal_value: approved.
 # ---------------------------------------------------------------------------
 ledger:
   event_class: acquisition
   entity: company
-  state_field: acquisition_status
-  terminal_state: closed
-  date_field: acquisition_date
+  state_field: acquisition_status        # the event's own state field
+  terminal_state: closed                 # value meaning "final"
+  open_states: [pending_close, rumored]  # values meaning "reported, not final"
+  date_field: acquisition_date           # set ONLY when terminal
   announced_field: acquisition_announced
   amount_field: acquisition_amount
-  counterparty_closed: acquired_by
-  counterparty_open: acquisition_suitor
-  # A reported event with no movement after this many days is flagged stale.
+  counterparty_closed: acquired_by       # set ONLY when terminal
+  counterparty_open: acquisition_suitor  # set while open
+  reported_date_field: acquisition_reported_date
+  # Optional coupling to the card's lifecycle field. Omit both lines if the
+  # event does not change the entity's status.
+  status_field: status
+  status_terminal_value: acquired
+  # An open event with no movement after this many days is flagged stale.
   # It is flagged, never deleted -- an event that did not happen is still
   # information about the market.
   rumor_stale_days: 28

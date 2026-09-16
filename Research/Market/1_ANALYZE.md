@@ -19,26 +19,38 @@ scope boundary from `0_CONFIGURE` into a working research framework.
 3. **Research the market broadly** using web search
 4. **Fill in `kb.yaml`** with the entity types and enumerations this market needs
 5. **Author Category cards** - the taxonomy spine
-6. **Output the analysis** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
+6. **Output the analysis** to `{{AUTORUN_FOLDER}}/MARKET_ANALYSIS.md`
+
+This document does its real work **once**. `MARKET_ANALYSIS.md` is a static
+file, not a per-loop one: the market does not change between loops, and
+re-surveying it thirty times would be the single largest waste in the run.
+On every loop after the first, both tasks below are two file checks and a
+completion mark.
 
 ## Analysis Checklist
 
-- [ ] **Analyze the market and fix the schema (if not already done)**: First
-      check whether `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
-      already exists with at least one entity category defined. If it does, skip
-      the analysis and mark this task complete. Otherwise: read
-      `MARKET_CONFIG.md` and `SCOPE.md`, survey the market with web search,
-      write the analysis file, fill in `kb.yaml`, and initialize the vault
-      folders with `INDEX.md` as the launch page.
+- [ ] **Analyze the market and fix the schema (once)**: If
+      `{{AUTORUN_FOLDER}}/MARKET_ANALYSIS.md` already exists with a
+      `## Schema Decisions` section, mark this task complete without changes.
+      Otherwise: read `MARKET_CONFIG.md` and `SCOPE.md`, survey the market
+      with web search, write `MARKET_ANALYSIS.md` in the format below, fill in
+      `[OUTPUT_FOLDER]/kb.yaml` as described under "Filling in kb.yaml", and
+      confirm the validator accepts it (exit 0).
 
-- [ ] **Author the Category cards**: Categories are the comparison spine and the
-      most commonly skipped entity type. Without them the vault is a list of
-      companies; with them it is a market map. Create 8-15 Category cards in
+- [ ] **Author the Category cards (once)**: If `[OUTPUT_FOLDER]/Categories/`
+      already holds 8 or more cards, mark this task complete without changes.
+      Otherwise: Categories are the comparison spine and the most commonly
+      skipped entity type. Without them the vault is a list of companies; with
+      them it is a market map. Create 8-15 Category cards in
       `[OUTPUT_FOLDER]/Categories/` following the schema below. If fewer than
       three products would sit in a proposed category, it is not a category -
-      fold it into a broader one. Expect to add two or three more during later
-      loops: when a product fits nowhere, that is a signal to author a new
-      category rather than to force-fit it.
+      fold it into a broader one. Then **seed the backlog**: every company
+      named in any card's `leaders:` or `emerging:` goes into
+      `{{AUTORUN_FOLDER}}/SWEEP_GAPS.md` as `- [ ] [Name] - Company - named by
+      [[Category]] in leaders`, unless already present. Those names are the
+      first thing `2_DISCOVER` picks up. Expect to add two or three more
+      categories during later loops: when a product fits nowhere, that is a
+      signal to author a new category rather than to force-fit it.
 
 ## Filling in kb.yaml
 
@@ -48,27 +60,35 @@ specific to this market:
 1. **Prune the enumerations** to the values this market actually uses, and add
    any it needs that are missing. An unused enum value is noise; a missing enum
    means that field goes unvalidated.
-2. **Set `enums.segment`** to the primary non-category split in this market, or
-   delete it and every `segment:` field if the market has no such split.
+2. **Decide on `segment`**: if the market has a primary non-category split
+   (SMB / Enterprise, Hardware / Software), uncomment `enums.segment` with the
+   real values and uncomment the `segment: segment` lines under `company` and
+   `product`. Otherwise leave all three commented.
 3. **Write the `DOMAIN_ENTITY` block** using the type resolved in
-   `0_CONFIGURE`, or delete the commented block if it was `none`.
+   `0_CONFIGURE`, or delete the commented block if it was `none`. Also create
+   its folder in the vault.
 4. **Set the `ledger` block** to the event class that drives this market - M&A
    for enterprise software, approvals for pharma, licenses for regulated
    finance, contract awards for public sector, certifications for industrial.
-   Delete the block if no event class matters here.
+   Every field name in the block is configurable; the comment above it shows a
+   pharma example. Delete the block if no event class matters here.
+5. **If you remove an entity type**, also remove every relation that targets
+   it (for example, dropping `capital` means dropping `company.all_investors`
+   and `company.lead_investors`). The validator refuses to run otherwise.
 
 Then confirm it parses:
 
 ```bash
-cd [OUTPUT_FOLDER] && python3 Tools/health_check.py
+cd [OUTPUT_FOLDER] && python3 Tools/health_check.py; echo "exit=$?"
 ```
 
-On an empty vault this reports missing folders and nothing else. That is the
-expected first run, and it proves the schema is loadable.
+Exit 0 and a `0 cards` summary is the expected result on an empty vault. Exit 2
+prints `CONFIG ERROR` with the exact problem - fix it before moving on. The
+schema has to be loadable before any research depends on it.
 
 ## Output Format
 
-Create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`:
+Create `{{AUTORUN_FOLDER}}/MARKET_ANALYSIS.md`:
 
 ```markdown
 # Market Analysis: [MARKET_TOPIC]
@@ -94,17 +114,21 @@ Create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`:
 
 ## Entity Categories for Research
 
+These are the buckets `2_DISCOVER` fills and `5_PROGRESS` checks. Targets
+must sum to roughly `MAX_ENTITIES`; Categories do not count against it.
+
 ### Priority Categories (research first)
-| Category | Relevance | Target Count |
-|----------|-----------|--------------|
-| Companies | [why relevant] | [15-30] |
-| Products | [why relevant] | [25-50] |
-| Categories | taxonomy spine | [8-15] |
-| ... | ... | ... |
+| Category | Why relevant | Target Count |
+|----------|--------------|--------------|
+| Companies | [why] | [20-30] |
+| Products | [why] | [15-25] |
+| People | founders and repeat operators | [8-12] |
+| Capital | funds with 2+ in-scope positions | [5-8] |
+| [DomainEntity] | [why] | [N] |
 
 ### Secondary Categories (if budget permits)
-| Category | Relevance | Target Count |
-|----------|-----------|--------------|
+| Category | Why relevant | Target Count |
+|----------|--------------|--------------|
 | ... | ... | ... |
 
 ## Schema Decisions
@@ -127,26 +151,6 @@ Vocabulary used by both sides of the scope boundary. Validate per candidate.
 ## Sources Consulted
 - [URL 1]
 - [URL 2]
-```
-
-## Vault Structure
-
-Create in `[OUTPUT_FOLDER]`:
-
-```text
-vault/
-├── INDEX.md           # Launch page
-├── SCOPE.md           # The boundary (from 0_CONFIGURE)
-├── REJECTIONS.md      # Rejection log (from 0_CONFIGURE)
-├── kb.yaml            # Schema driving the validator
-├── Tools/             # health_check.py
-├── Companies/
-├── Products/
-├── Categories/        # The taxonomy spine
-├── People/
-├── Capital/
-├── [DomainEntity]/    # If resolved
-└── Resources/         # Reports, data sources, references
 ```
 
 ## Category Card Schema
@@ -190,51 +194,12 @@ last_updated: {{DATE}}
 [Where it blurs into neighbors, and where exactly the seam is.]
 ```
 
-## INDEX.md Template
+## INDEX.md
 
-```markdown
-# [MARKET_TOPIC] Research Vault
-
-> Last updated: {{DATE}}
-> Research by: {{AGENT_NAME}}
-
-## Scope
-- **IN:**  [SCOPE_IN]
-- **OUT:** [SCOPE_OUT]
-
-See [[SCOPE]] for edge rules and [[REJECTIONS]] for clusters already declined.
-
-## Overview
-[2-3 sentence summary of the market]
-
-## Quick Navigation
-
-### Categories
-- [[Category 1]]
-
-### Companies
-- [[Company 1]]
-
-### Products
-- [[Product 1]]
-
-### People
-- [[Person 1]]
-
-### Capital
-- [[Fund 1]]
-
-## Market Stats
-| Metric | Value | Source |
-|--------|-------|--------|
-| Market Size | $X | [source] |
-
-## Recent Developments
-- [Date]: [development]
-
----
-*Built with the Maestro Market Research Playbook*
-```
+`0_INITIALIZE` created `INDEX.md`. After authoring the categories, replace the
+`_No categories defined yet._` line under `### Categories` with one
+`- [[Category Name]]` line per card, and add a two-sentence `## Overview` of
+the market beneath the scope block.
 
 ## Guidelines
 
