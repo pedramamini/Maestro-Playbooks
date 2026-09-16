@@ -1,0 +1,223 @@
+# kb.yaml -- the schema that drives Tools/health_check.py
+#
+# 0_CONFIGURE copies this template into the vault root.
+# 1_ANALYZE fills it in once the market survey says what this market needs.
+#
+# This is the only file that knows anything about a particular market. The
+# validator has no market-specific logic; change this and the checks follow.
+
+# ---------------------------------------------------------------------------
+# Identity -- written by 0_CONFIGURE from the agent prompt
+# ---------------------------------------------------------------------------
+domain: "<MARKET_TOPIC>"
+
+scope:
+  in: "<SCOPE_IN>"
+  out: "<SCOPE_OUT>"
+
+# ---------------------------------------------------------------------------
+# Global settings
+# ---------------------------------------------------------------------------
+settings:
+  # Cards not updated within this window are reported for a freshness pass.
+  staleness_days: 180
+
+  # Cards scoring below this land in the relevance review queue. They are not
+  # deleted automatically -- a low score is an agenda item, not a verdict.
+  relevance_review_below: 30
+
+  # Currency for all money fields. Amounts are stored as plain integers.
+  currency: USD
+
+  # Folders that hold documents rather than entities. Excluded from
+  # validation, from the relation graph, and from orphan detection.
+  non_entity_dirs:
+    - Resources
+    - Reports
+    - Agents
+    - Commands
+    - Tools
+    - .claude
+
+  # Required on every card of every type. The relevance pair is what makes the
+  # scope boundary auditable rather than a matter of opinion.
+  universal_required:
+    - relevance
+    - relevance_notes
+    - last_updated
+
+# ---------------------------------------------------------------------------
+# Enumerations
+# ---------------------------------------------------------------------------
+# 1_ANALYZE should prune these to what the market actually uses and add any
+# the market needs. An enum with values nobody uses is noise; a missing one
+# means that field goes unvalidated.
+# ---------------------------------------------------------------------------
+enums:
+  status: [active, acquired, inactive, rebranded]
+  acquisition_status: [closed, pending_close, rumored]
+  employee_count: ["1-10", "11-50", "51-200", "201-500", "501-1000", "1001-5000", "5000+"]
+  round_type: [Pre-seed, Seed, Series A, Series B, Series C, Series D,
+               Series E, Series F, Growth, Debt, Grant]
+  pricing_model: [Subscription, Usage, Perpetual, Free, Open source, Not disclosed]
+  maturity: [emerging, growth, mature, consolidating, declining]
+  capital_type: [Venture Capital, Corporate, Angel, Private Equity,
+                 Sovereign, Accelerator]
+  risk_level: [Low, Medium, High]
+
+  # The primary non-category split in this market, if it has one.
+  # 1_ANALYZE fills this in, or deletes it and the `segment` fields below.
+  segment: ["<value-a>", "<value-b>"]
+
+# ---------------------------------------------------------------------------
+# Entity types
+# ---------------------------------------------------------------------------
+# Per type:
+#   dir        folder holding the cards
+#   key        frontmatter field carrying the canonical name
+#   required   fields that must be present, on top of universal_required
+#   enums      field -> enum name above
+#   dates      fields validated as YYYY-MM-DD and not in the future
+#   money      fields validated as plain integers
+#   relations  field -> {to: <type>, kind: scalar|list, mirror: <field>}
+#   coverage_exclude
+#              fields left OUT of the field-coverage table
+#
+# `relations` is what separates a graph from a folder. A typed relation has a
+# direction and a meaning; a [[wikilink]] in the body does not.
+#
+# `coverage_exclude` matters more than it looks. 4_RESEARCH picks the next
+# column sweep by finding the lowest-coverage field, so any field that is
+# legitimately empty on most cards -- acquisition details on companies that
+# were never acquired, public-market figures on private ones -- would sit at
+# 0% forever and capture every sweep. List those here.
+# ---------------------------------------------------------------------------
+entities:
+
+  company:
+    dir: Companies
+    key: company
+    required: [status, founded, country]
+    enums:
+      status: status
+      employee_count: employee_count
+      latest_round_type: round_type
+      acquisition_status: acquisition_status
+      segment: segment
+    dates: [latest_round_date, acquisition_date, acquisition_announced,
+            acquisition_reported_date, last_updated]
+    money: [total_funding, latest_round_size, acquisition_amount,
+            acquisition_reported_price, market_cap, annual_revenue, revenue]
+    # Conditional by nature: only meaningful for acquired, public or
+    # corporate-owned companies. Still validated when present; just never
+    # treated as a coverage gap.
+    coverage_exclude:
+      - acquisition_amount
+      - acquisition_announced
+      - acquisition_date
+      - acquisition_reported_date
+      - acquisition_reported_price
+      - acquisition_status
+      - acquisition_suitor
+      - acquired_by
+      - parent_company
+      - market_cap
+      - annual_revenue
+      - revenue
+      - board_members
+    relations:
+      products: {to: product, kind: list, mirror: company}
+      founders: {to: person, kind: list}
+      board_members: {to: person, kind: list}
+      all_investors: {to: capital, kind: list, mirror: portfolio}
+      lead_investors: {to: capital, kind: list}
+      acquired_by: {to: company, kind: scalar}
+      acquisition_suitor: {to: company, kind: scalar}
+      parent_company: {to: company, kind: scalar}
+
+  product:
+    dir: Products
+    key: product
+    required: [company, category, description]
+    enums:
+      pricing_model: pricing_model
+      segment: segment
+    dates: [launch_date, last_updated]
+    relations:
+      company: {to: company, kind: scalar, mirror: products}
+      category: {to: category, kind: scalar}
+
+  category:
+    dir: Categories
+    key: category
+    required: [definition]
+    enums:
+      maturity: maturity
+    dates: [last_updated]
+    relations:
+      leaders: {to: company, kind: list}
+      emerging: {to: company, kind: list}
+      adjacent_categories: {to: category, kind: list}
+
+  person:
+    dir: People
+    key: name
+    required: [role]
+    dates: [last_updated]
+    relations:
+      company: {to: company, kind: scalar}
+
+  capital:
+    dir: Capital
+    key: name
+    required: [type]
+    enums:
+      type: capital_type
+    dates: [founded_date, last_updated]
+    money: [aum]
+    relations:
+      portfolio: {to: company, kind: list, mirror: all_investors}
+
+  # -------------------------------------------------------------------------
+  # DOMAIN_ENTITY -- 1_ANALYZE writes this block, or deletes it if the
+  # configured value was `none`. One or two at most; past that you are
+  # modeling a database rather than a market.
+  # -------------------------------------------------------------------------
+  # <domain_type>:
+  #   dir: <Folder>
+  #   key: <key_field>
+  #   required: [<field>]
+  #   enums:
+  #     <field>: <enum name>
+  #   dates: [<field>, last_updated]
+  #   relations:
+  #     <field>: {to: company, kind: scalar}
+
+# ---------------------------------------------------------------------------
+# Event ledger
+# ---------------------------------------------------------------------------
+# Cards hold state; a ledger holds time. Pick the event class that drives this
+# market -- M&A for enterprise software, approvals for pharma, licenses for
+# regulated finance, awards for public sector, certifications for industrial.
+#
+# Delete this block if the market has no event class worth tracking; the
+# ledger checks are skipped when it is absent.
+#
+# The state machine matters more than it looks. Recording a reported deal as
+# closed inflates both the count and the total, and nobody notices until
+# someone checks one specific row.
+# ---------------------------------------------------------------------------
+ledger:
+  event_class: acquisition
+  entity: company
+  state_field: acquisition_status
+  terminal_state: closed
+  date_field: acquisition_date
+  announced_field: acquisition_announced
+  amount_field: acquisition_amount
+  counterparty_closed: acquired_by
+  counterparty_open: acquisition_suitor
+  # A reported event with no movement after this many days is flagged stale.
+  # It is flagged, never deleted -- an event that did not happen is still
+  # information about the market.
+  rumor_stale_days: 28

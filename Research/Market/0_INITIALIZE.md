@@ -10,18 +10,20 @@
 
 This document initializes the research vault with the proper folder structure, creates entity-specific agents, and sets up Claude Code integration via `.claude/` with symlinks. **This runs once at the start before the main research loop begins.**
 
+`0_CONFIGURE.md` has already run and validated the configuration, established the scope boundary in `SCOPE.md`, and installed the validator in `Tools/`. This document builds the rest of the vault around them.
+
 ## Instructions
 
-1. **Read the Agent-Prompt.md** to get the configured MARKET_TOPIC and OUTPUT_FOLDER
+1. **Read `{{AUTORUN_FOLDER}}/MARKET_CONFIG.md`** for the resolved configuration
 2. **Create the vault folder structure** with visible Agents/ and Commands/ folders
 3. **Set up .claude/ with symlinks** so Claude Code can discover agents and commands
 4. **Generate entity-type agents** customized for the market topic
-5. **Create the research command** for easy invocation
+5. **Create the commands** for easy invocation
 6. **Initialize INDEX.md** as the vault launch page
 
 ## Initialization Checklist
 
-- [ ] **Initialize vault structure**: Read Agent-Prompt.md for MARKET_TOPIC and OUTPUT_FOLDER. Create the vault folder structure including Agents/, Commands/, .claude/ with symlinks, and entity subfolders. Generate entity-specific agents based on the market. Create initial INDEX.md and CLAUDE.md for the vault.
+- [ ] **Initialize vault structure**: Read `MARKET_CONFIG.md` for the resolved MARKET_TOPIC, OUTPUT_FOLDER and DOMAIN_ENTITY. Create the vault folder structure including Agents/, Commands/, .claude/ with symlinks, and entity subfolders (including the DOMAIN_ENTITY folder if one was resolved). Generate entity-specific agents based on the market. Create initial INDEX.md and CLAUDE.md for the vault.
 
 ## Vault Structure to Create
 
@@ -33,20 +35,32 @@ This document initializes the research vault with the proper folder structure, c
 ├── Agents/                      # Visible in Obsidian, holds agent definitions
 │   ├── company-researcher.md
 │   ├── product-researcher.md
+│   ├── category-researcher.md
 │   ├── person-researcher.md
-│   ├── technology-researcher.md
+│   ├── capital-researcher.md
+│   ├── scope-validator.md
 │   └── trend-researcher.md
 ├── Commands/                    # Visible in Obsidian, holds slash commands
-│   └── research.md
+│   ├── research.md
+│   ├── health-check.md
+│   └── scope-audit.md
+├── Tools/                       # From 0_CONFIGURE
+│   └── health_check.py          # Corpus validator
 ├── Companies/                   # Company profiles
 ├── Products/                    # Product profiles
+├── Categories/                  # Taxonomy spine - what makes comparison possible
 ├── People/                      # Key people profiles
-├── Technologies/                # Technology overviews
-├── Trends/                      # Trend analyses
+├── Capital/                     # Investor profiles
+├── [DomainEntity]/              # The market-specific type, if one was resolved
 ├── Resources/                   # Reports, data sources
+├── SCOPE.md                     # The boundary (from 0_CONFIGURE)
+├── REJECTIONS.md                # Declined clusters (from 0_CONFIGURE)
+├── kb.yaml                      # Schema driving the validator
 ├── INDEX.md                     # Launch page
 └── CLAUDE.md                    # Vault-specific Claude instructions
 ```
+
+**On Technologies/ and Trends/**: earlier versions of this playbook created these as first-class entity folders. They are better served as documents in `Resources/` - a trend is an analysis with a date, not an entity with relations and a lifecycle, and treating it as one puts untyped nodes in the graph. `Categories/` and `Capital/` take their place as entity types, because a taxonomy bucket and an investor both have stable identity, typed relations and a reason to be compared against their peers.
 
 ## Create .claude/ with Symlinks
 
@@ -184,6 +198,142 @@ model: inherit
 - Research notes in log file
 ```
 
+### category-researcher.md
+
+```markdown
+---
+name: category-researcher
+description: Defines or refreshes a market category card for the [MARKET_TOPIC] knowledge vault. Categories are the taxonomy spine.
+model: inherit
+---
+
+# Category Researcher Agent
+
+**Purpose:** Define a market category in [MARKET_TOPIC]. Categories are what make
+comparison possible - without them the vault is a list of companies rather than a
+market map.
+
+## Before authoring a new category
+
+1. Check `Categories/` for an existing card that covers it. Prefer widening an
+   existing definition over creating a near-duplicate.
+2. Check `REJECTIONS.md` - this cluster may already have been declined.
+3. Confirm at least three products would sit in it. Fewer than three is not a
+   category, it is a product with ambitions.
+4. Confirm it passes the antonym pair in `SCOPE.md`.
+
+## Process
+
+1. **Research** - how do *buyers* name this segment? Use their words, not vendor
+   marketing words. What do they actually evaluate on? Who holds the budget?
+   Who leads, who is emerging, who is exiting? Which adjacent categories does it
+   blur into, and where exactly is the seam?
+2. **Write** the card in `Categories/[Name].md` with full frontmatter:
+   `definition`, `maturity`, `buyer`, `leaders`, `emerging`,
+   `evaluation_criteria`, `adjacent_categories`, plus `relevance`,
+   `relevance_notes` and `last_updated`.
+3. **Update INDEX.md**
+
+`evaluation_criteria` is the highest-value field on the card. It is what makes
+two products in this category comparable at all.
+
+## Output
+
+    Created|Updated: [Category]
+    - Products assigned: [N]
+    - Maturity: [stage]
+    - Leaders: [names]
+    - Adjacent: [names]
+```
+
+### capital-researcher.md
+
+```markdown
+---
+name: capital-researcher
+description: Researches an investor and creates a profile for the [MARKET_TOPIC] knowledge vault, focused on the in-scope portfolio subset.
+model: inherit
+---
+
+# Capital Researcher Agent
+
+**Purpose:** Profile an investor active in [MARKET_TOPIC].
+
+## The critical constraint
+
+`portfolio:` holds the **in-scope subset only**. A generalist fund has hundreds
+of positions and almost none of them are this market. Recording them all
+destroys the co-investment signal the field exists to provide.
+
+To build it: grep `Companies/*.md` for this fund in `all_investors` and
+`lead_investors`. That set, plus any in-scope position you find that has no card
+yet (log those to `SWEEP_GAPS.md`), is the portfolio.
+
+## Process
+
+1. **Research** - fund site, portfolio page, published thesis, partner bios,
+   recent announcements, filings where fund size is disclosed. Capture stage
+   focus and check range: they predict where this fund shows up next, which is
+   the forward-looking value of the card.
+2. **Write** the card in `Capital/[Name].md` with `type`, `aum`, `stage`,
+   `check_size`, `sector_focus`, `portfolio`, plus the universal fields.
+3. **Update INDEX.md**
+
+## Output
+
+    Created|Updated: [Fund]
+    - Type: [type]   AUM: [amount or unknown]
+    - In-scope portfolio: [N] ([names])
+    - Stage: [range]   Check: [range]
+```
+
+### scope-validator.md
+
+```markdown
+---
+name: scope-validator
+description: Audits existing cards against the scope boundary and re-scores relevance. Run when a company's positioning changes, or as a periodic corpus audit.
+model: inherit
+---
+
+# Scope Validator Agent
+
+**Purpose:** Audit vault membership. You do not add entities; you decide whether
+the ones present still belong.
+
+This agent exists because companies reposition. A card scored 85 two months ago
+may describe a company that has since moved across the boundary, and nothing
+else in the pipeline would ever notice.
+
+## Process
+
+1. Read `SCOPE.md` and `REJECTIONS.md`.
+2. For each assigned card, re-apply the antonym pair against the entity's
+   **current** positioning, not the positioning recorded on the card.
+3. Re-score `relevance` and rewrite `relevance_notes`. When the score changes,
+   say so in the notes with the date and the reason:
+   "Lowered from 85 to 58 on [date]: the 2026 relaunch repositioned the platform
+   toward the out-of-scope beneficiary; one of four product lines remains in scope."
+4. For anything below 30, recommend removal or retention-as-context with a reason.
+5. Where three or more cards fall out for the same reason, propose a
+   `REJECTIONS.md` entry covering the cluster.
+
+## Guardrails
+
+- **Never delete a card.** Recommend; a human decides.
+- A score moving is information. Never silently overwrite the old value.
+- Whole-corpus drift is itself a finding. Report the distribution and the mean.
+
+## Output
+
+    Scope audit - [N] cards reviewed
+    - Unchanged: [N]   Raised: [N]   Lowered: [N]
+    - Below 30 (recommend removal): [names]
+    - Proposed rejection clusters: [names]
+    - Distribution: 90-100:[n] 70-89:[n] 50-69:[n] 30-49:[n] 0-29:[n]
+    - Mean relevance: [N] (previous audit: [N])
+```
+
 ### technology-researcher.md
 ```markdown
 ---
@@ -240,7 +390,7 @@ model: inherit
 
 ## Process
 1. **Web Search** - Gather information about the trend:
-   - Industry reports and analyses
+   - Industry reports and analyzes
    - News coverage
    - Expert commentary
    - Data and statistics
@@ -302,16 +452,43 @@ Create in `[OUTPUT_FOLDER]/CLAUDE.md`:
 
 This vault contains structured research about the [MARKET_TOPIC] market, organized as interlinked markdown files compatible with Obsidian.
 
+**YAML frontmatter is the database. The body is the argument for what the frontmatter asserts.** A fact in frontmatter can be counted, rolled up, validated and graphed; the same fact in a body table can only be re-read.
+
+## Scope
+
+- **IN:** [SCOPE_IN]
+- **OUT:** [SCOPE_OUT]
+
+Read `SCOPE.md` before creating or scoring anything, and check `REJECTIONS.md` before adding a candidate - a cluster declined once should cost nothing to decline again.
+
 ## Structure
 
 - **Companies/** - Company profiles
 - **Products/** - Product/service profiles
+- **Categories/** - The taxonomy spine
 - **People/** - Key people in the market
-- **Technologies/** - Technologies and platforms
-- **Trends/** - Market trends and analyses
-- **Resources/** - Reports, data sources, references
+- **Capital/** - Investor profiles
+- **Resources/** - Reports, trends, technologies, data sources
+- **Tools/** - `health_check.py`, the corpus validator
 - **Agents/** - Research agents for each entity type
 - **Commands/** - Slash commands for common operations
+
+## Rules that do not bend
+
+1. **Every card carries `relevance` (0-100), `relevance_notes` and `last_updated`.** Score at creation. An unscored card is an unreviewed card.
+2. **`relevance` is scope membership, not research priority.** Priority lives in the run plan and dies with the run.
+3. **Filename is the canonical name.** Every typed relation uses exactly that string.
+4. **Typed relations must resolve.** Create the target, fix the name, or remove the relation - never leave one dangling. A dangling `[[mention]]` in the body is fine.
+5. **Never stub a card to satisfy a relation.** It passes the validator while lying about coverage. Log to `SWEEP_GAPS.md` instead.
+6. **Marketing numbers are not facts.** Quarantine them in `unverified_claims:` and attribute them in prose.
+
+## Before finishing any task
+
+```bash
+python3 Tools/health_check.py
+```
+
+Work the output in order: broken relations, orphans, missing required fields, enum and format, event state, duplicates, relevance review queue.
 
 ## Agents
 
@@ -321,8 +498,10 @@ Located in `Agents/` (also accessible via `.claude/agents`):
 |-------|---------|
 | company-researcher | Research and profile companies |
 | product-researcher | Research and profile products |
+| category-researcher | Define the taxonomy spine |
 | person-researcher | Research and profile key people |
-| technology-researcher | Research and profile technologies |
+| capital-researcher | Profile investors, in-scope portfolio only |
+| scope-validator | Audit the corpus against the boundary and re-score |
 | trend-researcher | Research and analyze market trends |
 
 ## Commands
@@ -332,6 +511,8 @@ Located in `Commands/` (also accessible via `.claude/commands`):
 | Command | Purpose |
 |---------|---------|
 | /research | Research a specific entity |
+| /health-check | Validate corpus integrity and print the work queue |
+| /scope-audit | Re-score the corpus against the boundary |
 
 ## Conventions
 
@@ -364,6 +545,9 @@ This vault contains structured research about the **[MARKET_TOPIC]** market.
 
 ## Quick Navigation
 
+### Categories
+_No categories defined yet._
+
 ### Companies
 _No companies researched yet._
 
@@ -373,23 +557,31 @@ _No products researched yet._
 ### Key People
 _No people researched yet._
 
-### Technologies
-_No technologies researched yet._
+### Capital
+_No investors researched yet._
 
-### Market Trends
-_No trends researched yet._
+## Scope
+
+- **IN:** [SCOPE_IN]
+- **OUT:** [SCOPE_OUT]
+
+See [[SCOPE]] for edge rules and [[REJECTIONS]] for clusters already declined.
 
 ## Research Tools
 
 ### Agents
 - [[Agents/company-researcher|Company Researcher]]
 - [[Agents/product-researcher|Product Researcher]]
+- [[Agents/category-researcher|Category Researcher]]
 - [[Agents/person-researcher|Person Researcher]]
-- [[Agents/technology-researcher|Technology Researcher]]
+- [[Agents/capital-researcher|Capital Researcher]]
+- [[Agents/scope-validator|Scope Validator]]
 - [[Agents/trend-researcher|Trend Researcher]]
 
 ### Commands
 - `/research` - Research a specific entity
+- `/health-check` - Validate corpus integrity
+- `/scope-audit` - Re-score the corpus against the boundary
 
 ## Statistics
 
@@ -397,9 +589,9 @@ _No trends researched yet._
 |----------|-------|
 | Companies | 0 |
 | Products | 0 |
+| Categories | 0 |
 | People | 0 |
-| Technologies | 0 |
-| Trends | 0 |
+| Capital | 0 |
 | **Total Entities** | 0 |
 
 ---
@@ -409,16 +601,22 @@ _No trends researched yet._
 ## How to Know You're Done
 
 This task is complete when:
-1. All folders exist (Companies/, Products/, People/, Technologies/, Trends/, Resources/, Agents/, Commands/)
+1. All folders exist (Companies/, Products/, Categories/, People/, Capital/, Resources/, Tools/, Agents/, Commands/, plus the DomainEntity folder if one was resolved)
 2. `.claude/` folder exists with working symlinks to Agents/ and Commands/
-3. All five entity-type agents are created in Agents/
-4. The research command is created in Commands/
-5. INDEX.md exists with the market topic
+3. All seven agents are created in Agents/
+4. All three commands are created in Commands/
+5. INDEX.md exists with the market topic and the scope pair
 6. CLAUDE.md exists with vault documentation
+7. `python3 Tools/health_check.py` runs and reports on an empty vault without erroring
+
+Step 7 matters: it proves the schema in `kb.yaml` is loadable before any research
+depends on it. On an empty vault the expected output is a list of folders with
+zero cards, not a traceback.
 
 ## Notes
 
 - The symlinks allow Claude Code to discover agents/commands via `.claude/`
 - Agents/ and Commands/ folders are visible in Obsidian for easy reference
 - Entity agents are customized with the MARKET_TOPIC from configuration
+- Every research agent must read `SCOPE.md` before creating a card
 - This only runs once - subsequent loops skip to 1_ANALYZE.md

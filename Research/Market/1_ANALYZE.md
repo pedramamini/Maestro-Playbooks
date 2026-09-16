@@ -8,24 +8,63 @@
 
 ## Objective
 
-Survey the target market to understand its structure, identify relevant entity categories, and create templates for systematic research. This document establishes the research framework for subsequent discovery and research phases.
+Survey the target market, fix the schema that every later card will follow, and
+author the **Categories** that make comparison possible. This document turns the
+scope boundary from `0_CONFIGURE` into a working research framework.
 
 ## Instructions
 
-1. **Read the Agent-Prompt.md** to get the configured MARKET_TOPIC and OUTPUT_FOLDER
-2. **Research the market broadly** using web search to understand:
-   - Market size and growth trajectory
-   - Key segments and subsegments
-   - Major players and competitive dynamics
-   - Recent news and developments
-3. **Identify relevant entity categories** for this specific market
-4. **Create entity templates** tailored to the market
-5. **Output analysis** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
-6. **Initialize the vault** with INDEX.md and folder structure
+1. **Read `{{AUTORUN_FOLDER}}/MARKET_CONFIG.md`** for the resolved configuration
+2. **Read `[OUTPUT_FOLDER]/SCOPE.md`** for the boundary
+3. **Research the market broadly** using web search
+4. **Fill in `kb.yaml`** with the entity types and enumerations this market needs
+5. **Author Category cards** - the taxonomy spine
+6. **Output the analysis** to `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
 
 ## Analysis Checklist
 
-- [ ] **Analyze market and initialize vault (if needed)**: First check if `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md` already exists with at least one entity category defined in the "Entity Categories for Research" section. If it does, skip the analysis and mark this task complete—the market analysis is already in place. If it doesn't exist, read Agent-Prompt.md for MARKET_TOPIC and OUTPUT_FOLDER, use web search to understand the market landscape, identify which entity categories are most relevant, create the market analysis file with findings, and initialize the vault folder structure with INDEX.md as the launch page.
+- [ ] **Analyze the market and fix the schema (if not already done)**: First
+      check whether `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`
+      already exists with at least one entity category defined. If it does, skip
+      the analysis and mark this task complete. Otherwise: read
+      `MARKET_CONFIG.md` and `SCOPE.md`, survey the market with web search,
+      write the analysis file, fill in `kb.yaml`, and initialize the vault
+      folders with `INDEX.md` as the launch page.
+
+- [ ] **Author the Category cards**: Categories are the comparison spine and the
+      most commonly skipped entity type. Without them the vault is a list of
+      companies; with them it is a market map. Create 8-15 Category cards in
+      `[OUTPUT_FOLDER]/Categories/` following the schema below. If fewer than
+      three products would sit in a proposed category, it is not a category -
+      fold it into a broader one. Expect to add two or three more during later
+      loops: when a product fits nowhere, that is a signal to author a new
+      category rather than to force-fit it.
+
+## Filling in kb.yaml
+
+`0_CONFIGURE` copied a template to `[OUTPUT_FOLDER]/kb.yaml`. Now make it
+specific to this market:
+
+1. **Prune the enumerations** to the values this market actually uses, and add
+   any it needs that are missing. An unused enum value is noise; a missing enum
+   means that field goes unvalidated.
+2. **Set `enums.segment`** to the primary non-category split in this market, or
+   delete it and every `segment:` field if the market has no such split.
+3. **Write the `DOMAIN_ENTITY` block** using the type resolved in
+   `0_CONFIGURE`, or delete the commented block if it was `none`.
+4. **Set the `ledger` block** to the event class that drives this market - M&A
+   for enterprise software, approvals for pharma, licenses for regulated
+   finance, contract awards for public sector, certifications for industrial.
+   Delete the block if no event class matters here.
+
+Then confirm it parses:
+
+```bash
+cd [OUTPUT_FOLDER] && python3 Tools/health_check.py
+```
+
+On an empty vault this reports missing folders and nothing else. That is the
+expected first run, and it proves the schema is loadable.
 
 ## Output Format
 
@@ -34,89 +73,124 @@ Create `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_MARKET_ANALYSIS.md`:
 ```markdown
 # Market Analysis: [MARKET_TOPIC]
 
+## Scope
+- **IN:**  [from SCOPE.md]
+- **OUT:** [from SCOPE.md]
+
 ## Market Overview
-- **Market Size:** [Current size, projected growth]
+- **Market Size:** [current size, projected growth]
 - **Growth Rate:** [CAGR or annual growth]
-- **Key Drivers:** [What's driving growth]
-- **Key Challenges:** [Barriers, headwinds]
+- **Key Drivers:** [what is driving growth]
+- **Key Challenges:** [barriers, headwinds]
 
 ## Market Segments
-1. [Segment 1] - [Brief description]
-2. [Segment 2] - [Brief description]
-3. [Segment 3] - [Brief description]
+1. [Segment 1] - [brief description]
+2. [Segment 2] - [brief description]
 
 ## Competitive Landscape
-- **Market Leaders:** [Top 3-5 companies]
-- **Emerging Players:** [Notable startups/challengers]
-- **Recent M&A:** [Notable acquisitions]
+- **Market Leaders:** [top 3-5 companies]
+- **Emerging Players:** [notable challengers]
+- **Recent Consolidation:** [notable events]
 
 ## Entity Categories for Research
 
 ### Priority Categories (research first)
 | Category | Relevance | Target Count |
 |----------|-----------|--------------|
-| Companies | [Why relevant] | [5-10] |
-| Products | [Why relevant] | [5-10] |
+| Companies | [why relevant] | [15-30] |
+| Products | [why relevant] | [25-50] |
+| Categories | taxonomy spine | [8-15] |
 | ... | ... | ... |
 
-### Secondary Categories (if time permits)
+### Secondary Categories (if budget permits)
 | Category | Relevance | Target Count |
 |----------|-----------|--------------|
 | ... | ... | ... |
 
-## Entity Templates
+## Schema Decisions
+- **Domain entity type:** [resolved type, or `none` and why]
+- **Segment axis:** [the split, or `none`]
+- **Event ledger:** [event class, or `none`]
+- **Enumerations pruned:** [what was removed or added and why]
 
-### Company Template
-- Name, Founded, Headquarters, Employees
-- What they do (1-2 sentences)
-- Key products/services
-- Funding/financials
-- Key people
-- Recent news
-- Related entities (links)
-- Sources
+## Overloaded Terms
+Vocabulary used by both sides of the scope boundary. Validate per candidate.
 
-### Product Template
-- Name, Company, Launch Date
-- What it does
-- Key features
-- Pricing model
-- Target customers
-- Competitors
-- Related entities (links)
-- Sources
-
-### [Other relevant templates...]
+| Term | In-scope meaning | Out-of-scope meaning |
+|---|---|---|
+| [term] | [meaning] | [meaning] |
 
 ## Research Priorities
-1. [First priority area]
-2. [Second priority area]
-3. [Third priority area]
+1. [first priority area]
+2. [second priority area]
 
 ## Sources Consulted
 - [URL 1]
 - [URL 2]
-- ...
 ```
 
-## Initialize Vault Structure
+## Vault Structure
 
-Create the following in OUTPUT_FOLDER:
+Create in `[OUTPUT_FOLDER]`:
 
-```
+```text
 vault/
-├── INDEX.md           # Launch page with links to all entities
-├── Companies/         # Company profiles
-├── Products/          # Product profiles
-├── People/            # Key people profiles
-├── Technologies/      # Technology overviews
-├── Trends/            # Trend analyses
+├── INDEX.md           # Launch page
+├── SCOPE.md           # The boundary (from 0_CONFIGURE)
+├── REJECTIONS.md      # Rejection log (from 0_CONFIGURE)
+├── kb.yaml            # Schema driving the validator
+├── Tools/             # health_check.py
+├── Companies/
+├── Products/
+├── Categories/        # The taxonomy spine
+├── People/
+├── Capital/
+├── [DomainEntity]/    # If resolved
 └── Resources/         # Reports, data sources, references
 ```
 
-## INDEX.md Template
+## Category Card Schema
 
-Create the launch page:
+Categories get real frontmatter, not just prose. `evaluation_criteria` is the
+highest-value field on the card: it is what buyers actually compare on, and it
+is what makes two products in the same category comparable at all.
+
+```markdown
+---
+category: [Name]
+definition: "One sentence a buyer would recognize."
+maturity: emerging | growth | mature | consolidating | declining
+buyer: "Who holds the budget line."
+leaders: [Company A, Company B]
+emerging: [Company C]
+evaluation_criteria:
+  - [What buyers compare on]
+  - [Second criterion]
+adjacent_categories: [Other Category]
+relevance: 100
+relevance_notes: "Core segment of the tracked market."
+last_updated: {{DATE}}
+---
+
+# [Category Name]
+
+## Definition
+[What this category is, in buyers' words rather than vendors' words.]
+
+## What Buyers Evaluate On
+[The criteria above, explained.]
+
+## Current Shape
+[Who leads, who is emerging, who is exiting, and why.]
+
+## How It Is Shifting
+[Direction of travel.]
+
+## Adjacent Categories
+[Where it blurs into neighbors, and where exactly the seam is.]
+```
+
+## INDEX.md Template
 
 ```markdown
 # [MARKET_TOPIC] Research Vault
@@ -124,53 +198,50 @@ Create the launch page:
 > Last updated: {{DATE}}
 > Research by: {{AGENT_NAME}}
 
+## Scope
+- **IN:**  [SCOPE_IN]
+- **OUT:** [SCOPE_OUT]
+
+See [[SCOPE]] for edge rules and [[REJECTIONS]] for clusters already declined.
+
 ## Overview
 [2-3 sentence summary of the market]
 
 ## Quick Navigation
 
+### Categories
+- [[Category 1]]
+
 ### Companies
 - [[Company 1]]
-- [[Company 2]]
-- ...
 
-### Products & Services
+### Products
 - [[Product 1]]
-- [[Product 2]]
-- ...
 
-### Key People
+### People
 - [[Person 1]]
-- [[Person 2]]
-- ...
 
-### Technologies
-- [[Technology 1]]
-- ...
-
-### Market Trends
-- [[Trend 1]]
-- ...
+### Capital
+- [[Fund 1]]
 
 ## Market Stats
 | Metric | Value | Source |
 |--------|-------|--------|
 | Market Size | $X | [source] |
-| Growth Rate | X% | [source] |
-| ... | ... | ... |
 
 ## Recent Developments
-- [Date]: [Development 1]
-- [Date]: [Development 2]
+- [Date]: [development]
 
 ---
-*This vault was created using the Maestro Market Research Playbook*
+*Built with the Maestro Market Research Playbook*
 ```
 
 ## Guidelines
 
-- **Use web search extensively** - Get current market data
-- **Be market-specific** - Tailor categories and templates to the actual market
-- **Prioritize ruthlessly** - Not all entity types matter equally for every market
-- **Set realistic targets** - 5-10 entities per priority category is usually sufficient
-- **Create usable templates** - They should capture what matters for this market
+- **Use web search extensively** - get current market data
+- **Be market-specific** - tailor the schema to the actual market, do not accept
+  the template's defaults unexamined
+- **Categories before entities** - the spine has to exist before things hang off it
+- **Prioritize ruthlessly** - not every entity type matters in every market
+- **Respect the boundary** - if the survey keeps surfacing the out-of-scope side,
+  that is a signal the boundary is working, not that it is too narrow
