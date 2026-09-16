@@ -8,156 +8,212 @@
 
 ## Purpose
 
-This document is the **progress gate** for the market research pipeline. It checks whether there are still entities to research and whether coverage targets have been met. **This is the only document with Reset ON** - it controls loop continuation by resetting tasks in documents 1-4 when more work is needed.
+The **progress gate**. It decides whether the pipeline continues or exits, and
+it is the only document with Reset ON - it controls loop continuation by
+resetting documents 1-4 when more work remains.
+
+It gates on three things, not one:
+
+1. **Integrity** - is the corpus actually queryable, or is it broken?
+2. **Work remaining** - are there entities still worth researching, names still
+   dangling, categories still uncovered, columns still thin?
+3. **Budget** - has this run hit its ceiling?
+
+Gating on coverage alone lets a run exit having produced a vault that fails its
+next query, and lets a run with no natural stopping point continue until the max
+loop count stops it arbitrarily.
 
 ## Instructions
 
-1. **Read the research plan** from `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md`
-2. **Count entities by status** (PENDING vs RESEARCHED)
-3. **Check coverage** against targets from market analysis
-4. **Decide whether to continue or exit**
-5. **If continuing**: Reset all tasks in documents 1-4
-6. **If exiting**: Do NOT reset - finalize the vault
+1. **Read the agent prompt** for `[OUTPUT_FOLDER]`, `[MAX_ENTITIES]`, `[COVERAGE_TARGET]`
+2. **Run the validator** and record the result
+3. **Read `{{AUTORUN_FOLDER}}/BACKLOG.md`** and `{{AUTORUN_FOLDER}}/SWEEP_GAPS.md`
+4. **Apply the decision logic** and append a row to `PROGRESS_LOG.md`
+5. **If continuing**: check the four reset tasks
+6. **If exiting**: leave them unchecked and run the finalization tasks
 
 ## Progress Check
 
-- [ ] **Check progress and decide**: Read `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_PLAN.md` and `{{AUTORUN_FOLDER}}/LOOP_{{LOOP_NUMBER}}_ENTITIES.md`. The loop should CONTINUE (reset docs 1-4) if EITHER: (1) there are PENDING entities with CRITICAL or HIGH importance, OR (2) ENTITIES.md does NOT contain `## ALL_CATEGORIES_COVERED`. The loop should EXIT (do NOT reset) only when BOTH conditions are false: no PENDING CRITICAL/HIGH entities AND all categories are covered.
+- [ ] **Measure**: Run
+      `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --json > /tmp/hc.json; echo exit=$?`
+      then read `critical`, `budget_cards`, `lowest_coverage`, `relevance.mean`
+      and the `0-29` band from the JSON. Also write the markdown report:
+      `python3 Tools/health_check.py --report Resources/`. If the exit code is
+      2, integrity is **unknown** (config error or missing PyYAML) - record
+      that and treat it as continue-with-repair, never as clean. Subtract any
+      CRITICAL issues whose exact text appears under `## KNOWN_ISSUES` in
+      `RESEARCH_LOG.md`. Then count in `BACKLOG.md`: entries with `Status:
+      PENDING`, entries with `Status: DISCOVERED`, whether
+      `## ALL_CATEGORIES_COVERED` is present; and in `SWEEP_GAPS.md`: unchecked
+      lines not marked `queued`. Append a row to
+      `{{AUTORUN_FOLDER}}/PROGRESS_LOG.md` (create it with the header below if
+      absent).
 
-## Reset Tasks (Only if more research needed)
+- [ ] **Decide**: Apply the decision logic below to the numbers you just
+      recorded, write the decision and its reason in the `PROGRESS_LOG.md`
+      row, and then either check the four reset tasks (CONTINUE) or leave
+      them unchecked and work the finalization tasks (EXIT).
 
-If the progress check determines we need to continue, reset all tasks in the following documents:
+## Reset Tasks (only if continuing)
 
 - [ ] **Reset 1_ANALYZE.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/1_ANALYZE.md`
 - [ ] **Reset 2_DISCOVER.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/2_DISCOVER.md`
 - [ ] **Reset 3_EVALUATE.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/3_EVALUATE.md`
 - [ ] **Reset 4_RESEARCH.md**: Uncheck all tasks in `{{AUTORUN_FOLDER}}/4_RESEARCH.md`
 
-**IMPORTANT**: Only reset documents 1-4 if there is work remaining (PENDING CRITICAL/HIGH entities OR unexplored categories). If all categories are covered AND all CRITICAL/HIGH entities are RESEARCHED, leave these reset tasks unchecked to allow the pipeline to exit.
+**IMPORTANT**: Do not reset `0_CONFIGURE.md` or `0_INITIALIZE.md`. They run once.
 
 ## Decision Logic
 
-```
-IF LOOP_{{LOOP_NUMBER}}_PLAN.md doesn't exist:
-    → Do NOT reset anything (PIPELINE JUST STARTED - LET IT RUN)
+```text
+effective_critical = critical - (issues listed under KNOWN_ISSUES)
+budget_left        = budget_cards < [MAX_ENTITIES]
+work_waiting       = PENDING > 0  OR  DISCOVERED > 0  OR  unqueued gaps > 0
+                     OR  ALL_CATEGORIES_COVERED absent
+coverage_met       = lowest_coverage pct >= [COVERAGE_TARGET]
+                     (or the vault has no cards yet)
 
-ELSE IF PENDING entities with CRITICAL or HIGH importance exist:
-    → Reset documents 1-4 (CONTINUE TO RESEARCH PENDING ENTITIES)
+IF validator exit code == 2:
+    -> CONTINUE (REPAIR CONFIG - 4_RESEARCH fixes kb.yaml next loop)
 
-ELSE IF LOOP_{{LOOP_NUMBER}}_ENTITIES.md does NOT contain "ALL_CATEGORIES_COVERED":
-    → Reset documents 1-4 (CONTINUE TO DISCOVER MORE ENTITIES)
+ELSE IF effective_critical > 0:
+    -> CONTINUE (REPAIR - fix the corpus before adding to it)
+
+ELSE IF budget_left AND work_waiting:
+    -> CONTINUE (RESEARCH)
+
+ELSE IF NOT coverage_met:
+    -> CONTINUE (SWEEP - budget is spent or backlog is empty; every remaining
+                 loop is a breadth sweep until columns are filled)
 
 ELSE:
-    → Do NOT reset anything (ALL CATEGORIES COVERED AND NO PENDING CRITICAL/HIGH - EXIT)
-    → Finalize the vault (update INDEX.md, create summary)
+    -> EXIT (DONE - finalize the vault)
 ```
 
-**Key insight:** The loop should continue if EITHER:
-1. There are PENDING entities with CRITICAL/HIGH importance to research, OR
-2. There are still entity categories to discover (no `ALL_CATEGORIES_COVERED` marker)
+Two guards against spinning:
 
-## How This Works
+- **Stalled repair.** If `effective_critical` has been greater than zero for
+  three consecutive rows of `PROGRESS_LOG.md`, the repair is not converging.
+  Copy the remaining CRITICAL issue texts under `## KNOWN_ISSUES` in
+  `RESEARCH_LOG.md`, note it in the decision reason, and re-evaluate the logic
+  without them.
+- **Stalled coverage.** If `lowest_coverage` names the same field with the same
+  percentage for three consecutive rows, the field cannot be filled from
+  public sources. Add it to `coverage_exclude` for that type in `kb.yaml`, note
+  it in the decision reason, and re-run the validator.
 
-This document controls loop continuation through resets:
-- **Reset tasks checked** → Documents 1-4 get reset → Loop continues
-- **Reset tasks unchecked** → Nothing gets reset → Pipeline exits
+### Why the budget clause
 
-### Exit Conditions (Do NOT Reset)
+Market research has no natural completion state. Discovery always surfaces one
+more medium-importance company, so without an explicit ceiling the priority
+ranking in `3_EVALUATE` never actually constrains anything and the run continues
+until Max Loops stops it at a place determined by nothing in particular.
 
-Exit when ALL of these are true:
-1. **Categories covered**: `LOOP_{{LOOP_NUMBER}}_ENTITIES.md` contains `## ALL_CATEGORIES_COVERED`
-2. **No PENDING CRITICAL/HIGH**: All CRITICAL and HIGH importance entities are RESEARCHED or SKIP
+`MAX_ENTITIES` is counted from the vault - the validator's `budget_cards`
+figure, which excludes categories - not from the plan. When the budget is
+finite, the matrix decides what gets researched rather than merely what gets
+researched first.
 
-Also exit if:
-3. **Max Loops**: Hit the loop limit in Batch Runner
+### Why integrity gates before budget
 
-### Continue Conditions (Reset Documents 1-4)
+A vault with broken typed relations is not a smaller vault, it is a vault that
+returns wrong answers. Fixing the corpus takes priority over growing it, and it
+takes priority over the budget, because a clean small vault is useful and a
+broken large one is not.
 
-Continue if EITHER is true:
-1. There are PENDING entities with CRITICAL or HIGH importance in LOOP_{{LOOP_NUMBER}}_PLAN.md
-2. `LOOP_{{LOOP_NUMBER}}_ENTITIES.md` does NOT contain `## ALL_CATEGORIES_COVERED` (more categories to discover)
+## PROGRESS_LOG.md Format
 
-## Current Status
+```markdown
+# Progress Log
 
-Before making a decision, assess the vault:
+One row per loop. The mean relevance column is the drift signal: if it falls
+loop over loop, the boundary is eroding and the run is quietly broadening into
+the adjacent market.
 
-| Metric | Value |
-|--------|-------|
-| **Total Entities Discovered** | ___ |
-| **Entities Researched** | ___ |
-| **PENDING (CRITICAL/HIGH)** | ___ |
-| **PENDING (MEDIUM/LOW)** | ___ |
-| **SKIP** | ___ |
+| Loop | Date | Mode ran | Cards (budget) | PENDING | DISCOVERED | Gaps | Covered? | CRITICAL | Lowest coverage | Mean rel. | Below 30 | Decision | Reason |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2026-01-01 | DEPTH | 3 | 4 | 0 | 5 | no | 0 | company.employee_count 0% | 88.3 | 0 | CONTINUE | research |
+```
 
-### Coverage by Category
+`Mode ran` is read from the latest `RESEARCH_LOG.md` entry.
 
-| Category | Target | Researched | Status |
-|----------|--------|------------|--------|
-| Companies | [X] | [Y] | [MET/BELOW] |
-| Products | [X] | [Y] | [MET/BELOW] |
-| People | [X] | [Y] | [MET/BELOW] |
-| Technologies | [X] | [Y] | [MET/BELOW] |
-| Trends | [X] | [Y] | [MET/BELOW] |
+## Finalization Tasks (on exit only)
 
-## Research History
-
-Track progress across loops:
-
-| Loop | Entities Researched | Total in Vault | Decision |
-|------|---------------------|----------------|----------|
-| 1 | ___ | ___ | [CONTINUE / EXIT] |
-| 2 | ___ | ___ | [CONTINUE / EXIT] |
-| ... | ... | ... | ... |
-
-## Finalization Tasks (On Exit Only)
-
-If exiting, perform these finalization tasks:
-
-- [ ] **Update INDEX.md**: Ensure all researched entities are linked
-- [ ] **Create vault summary**: Add research statistics to INDEX.md
-- [ ] **Review connections**: Check that inter-page links are working
-- [ ] **Note gaps**: Document any entities that couldn't be researched
+- [ ] **Final integrity check**: `cd [OUTPUT_FOLDER] && python3 Tools/health_check.py --fail-on critical`.
+      If it exits 1 and the issues are not all under `KNOWN_ISSUES`, the vault
+      is not finished - do not proceed to the remaining finalization tasks;
+      uncheck this task's siblings and let the next loop repair.
+- [ ] **Update INDEX.md**: every card in every entity folder linked under its
+      section, counts in the statistics table, and the vault summary below
+      appended
+- [ ] **Build the event ledger**: if `kb.yaml` declares a `ledger` block,
+      generate `Resources/[Event Class] Ledger.md` - a time-ordered table of
+      every card carrying the ledger's state field, with state, date,
+      counterparty and amount, terminal events separated from open ones
+- [ ] **Write the market map**: `Resources/Market Map.md` - one section per
+      Category card listing its products (from `Products/*.md` where
+      `category:` matches) with their companies, so the comparison spine is
+      readable in one page
+- [ ] **Review the relevance queue**: list every card scoring below 30 in
+      `Resources/Relevance Review.md` with its notes, so a human can decide
+      whether it comes up or comes out
+- [ ] **Note the gaps**: append to the vault summary the entities in
+      `BACKLOG.md` still `PENDING` or `SKIP - MANUAL REVIEW`, the unqueued
+      lines in `SWEEP_GAPS.md`, and any field that never reached coverage
 
 ## Vault Summary Template
 
-Add to INDEX.md on exit:
+Add to `INDEX.md` on exit:
 
 ```markdown
 ## Research Summary
 
-**Research Period:** [Start Date] - {{DATE}}
-**Total Loops:** {{LOOP_NUMBER}}
+**Period:** [start] - {{DATE}}
+**Loops:** {{LOOP_NUMBER}}
 **Agent:** {{AGENT_NAME}}
 
-### Coverage Statistics
-| Category | Count |
-|----------|-------|
+### Scope
+- **IN:**  [SCOPE_IN]
+- **OUT:** [SCOPE_OUT]
+- Scope pair was: [user-configured | agent-proposed and unreviewed]
+
+### Coverage
+| Entity Type | Count |
+|-------------|-------|
 | Companies | [X] |
 | Products | [X] |
+| Categories | [X] |
 | People | [X] |
-| Technologies | [X] |
-| Trends | [X] |
-| **Total Entities** | [X] |
+| Capital | [X] |
+| [DomainEntity] | [X] |
+| **Total** | [X] |
 
-### Research Notes
-[Any important notes about coverage gaps or limitations]
+### Corpus Health
+- CRITICAL issues at exit: [X] ([N] known and documented)
+- Mean relevance: [X] (loop 1: [X])
+- Cards below 30 (review queue): [X] - see [[Relevance Review]]
+- Lowest field coverage: [X]% ([type].[field])
+
+### Where to start
+- [[Market Map]] - every category and what sits in it
+- [[SCOPE]] - the boundary this vault was built on
+- [[REJECTIONS]] - what was deliberately left out, and why
+
+### Known Gaps
+[Entities that could not be researched, fields that stayed thin, and any
+category where the target count was not met.]
 ```
 
 ## Manual Override
 
-**To force exit early:**
-- Leave all reset tasks unchecked regardless of PENDING items
-
-**To continue despite meeting targets:**
-- Check the reset tasks to keep researching
-
-**To pause for review:**
-- Leave unchecked
-- Review the vault contents
-- Restart when ready
+- **Force exit early:** leave all reset tasks unchecked
+- **Continue past the budget:** raise `MAX_ENTITIES` in the agent prompt
+- **Pause for review:** leave unchecked, inspect the vault, restart when ready
 
 ## Notes
 
-- This playbook focuses on building breadth first, then depth
-- CRITICAL/HIGH entities should be researched before expanding to MEDIUM/LOW
-- Quality of research matters more than hitting exact coverage numbers
+- Depth builds cards, breadth connects them; the alternation is set by
+  `SWEEP_EVERY` and becomes all-breadth once the budget is spent
+- CRITICAL/HIGH entities before MEDIUM/LOW
+- A clean small vault beats a broken large one
 - The vault should be useful and navigable, not exhaustive
